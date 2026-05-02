@@ -44,6 +44,16 @@ Marca empresarial:
 
 **Un producto Tecnotitan S.A.S**
 
+## Sistema Visual De Marca
+
+La guia oficial de marca vive en:
+
+```text
+BRAND_GUIDE.md
+```
+
+Incluye logo, paleta, tipografia, espaciado, estilos de botones, estados visuales, sombras e iconografia.
+
 ## Cliente Ideal
 
 PYMES en Latinoamerica que necesitan visibilidad diaria sobre:
