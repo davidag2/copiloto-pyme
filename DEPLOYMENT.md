@@ -1,6 +1,6 @@
 # Deployment
 
-Copiloto Pyme actualmente es un prototipo web estatico. Puede desplegarse sin proceso de build.
+Copiloto Pyme tiene una version inicial en Next.js, React y TypeScript. El prototipo HTML estatico se conserva como referencia historica.
 
 ## Opcion Recomendada: Vercel
 
@@ -8,9 +8,10 @@ Copiloto Pyme actualmente es un prototipo web estatico. Puede desplegarse sin pr
 2. Entrar a Vercel.
 3. Importar el repositorio.
 4. Usar configuracion:
-   - Framework preset: `Other`
-   - Build command: vacio
-   - Output directory: raiz del proyecto
+   - Framework preset: `Next.js`
+   - Install command: `npm install`
+   - Build command: `npm run build`
+   - Output directory: `.next`
 5. Publicar.
 
 ## Alternativas
@@ -19,16 +20,17 @@ Copiloto Pyme actualmente es un prototipo web estatico. Puede desplegarse sin pr
 - Cloudflare Pages
 - GitHub Pages
 
-## Archivos Necesarios
+## Comandos
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `plantilla-copiloto-pyme.csv`
+```bash
+npm install
+npm run build
+npm run start
+```
 
 ## Futuro SaaS
 
-Cuando el producto migre a Next.js, el deployment recomendado sera:
+Cuando el producto incorpore backend real, el deployment recomendado sera:
 
 - Frontend: Vercel
 - Backend: AWS, Render, Railway o Fly.io

@@ -15,7 +15,7 @@ Crear el panel diario que le diga a una PYME:
 
 ## Estado Actual
 
-Este repositorio contiene el primer prototipo funcional del producto en formato web estatico.
+Este repositorio contiene el primer prototipo funcional del producto y el inicio de la version de produccion en **Next.js, React y TypeScript**.
 
 Incluye:
 
@@ -233,14 +233,22 @@ El reporte incluye:
 
 ```text
 .
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
 ├── index.html
 ├── styles.css
 ├── app.js
 ├── plantilla-copiloto-pyme.csv
+├── package.json
+├── tsconfig.json
+├── next.config.mjs
+├── DEPLOYMENT.md
 └── README.md
 ```
 
-## Como Abrir El Prototipo
+## Como Abrir El Prototipo Estatico
 
 Abrir el archivo:
 
@@ -250,15 +258,39 @@ index.html
 
 No requiere servidor ni instalacion de dependencias.
 
+## Como Ejecutar La Version Next.js
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Ejecutar en desarrollo:
+
+```bash
+npm run dev
+```
+
+Crear build de produccion:
+
+```bash
+npm run build
+```
+
 ## Tecnologia Actual
 
-Este prototipo esta construido con:
+El prototipo inicial esta construido con:
 
 - HTML
 - CSS
 - JavaScript vanilla
 
-La decision fue hacerlo asi para validar rapido la experiencia del producto antes de pasar a una arquitectura SaaS completa.
+La version de produccion inicia con:
+
+- Next.js
+- React
+- TypeScript
 
 ## Stack Recomendado Para Produccion
 
@@ -321,4 +353,3 @@ Infraestructura:
 El MVP debe lograr que un dueño de PYME abra el panel y piense:
 
 > Ya se que esta pasando y que tengo que hacer hoy.
-
