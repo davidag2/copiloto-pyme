@@ -27,6 +27,7 @@ Incluye:
 - Importador real CSV.
 - KPIs configurables.
 - Resumen ejecutivo priorizado con decision recomendada, ventas, caja, pendientes y alertas criticas.
+- Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.
 - Copiloto IA simulado con contexto del negocio.
@@ -315,6 +316,7 @@ La version de produccion inicia con:
 - Next.js
 - React
 - TypeScript
+- lucide-react
 
 ## Stack Recomendado Para Produccion
 

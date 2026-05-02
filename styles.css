@@ -83,6 +83,20 @@ select {
   font: inherit;
 }
 
+button svg,
+label svg,
+.panel-heading svg,
+.priority-label svg,
+.priority-card svg,
+.nav-item svg,
+.integration-card svg,
+.metric-card svg {
+  flex: 0 0 auto;
+  height: 18px;
+  stroke-width: 2.2;
+  width: 18px;
+}
+
 button,
 a,
 input,
@@ -179,10 +193,14 @@ select:focus-visible {
 
 .secondary-button,
 .ghost-button {
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   cursor: pointer;
+  display: inline-flex;
   font-weight: 700;
+  gap: 8px;
+  justify-content: center;
   min-height: 44px;
   padding: 11px 14px;
 }
@@ -550,10 +568,12 @@ select:focus-visible {
 
 .integration-card span,
 .integration-card small {
+  align-items: center;
   color: var(--muted);
-  display: block;
+  display: flex;
   font-size: 12px;
   font-weight: 700;
+  gap: 7px;
 }
 
 .integration-card strong {
@@ -919,6 +939,9 @@ select:focus-visible {
 }
 
 .nav-item {
+  align-items: center;
+  display: flex;
+  gap: 10px;
   width: 100%;
   border: 0;
   border-radius: 8px;
@@ -927,6 +950,10 @@ select:focus-visible {
   cursor: pointer;
   padding: 12px 14px;
   text-align: left;
+}
+
+.nav-item svg {
+  color: #8fb7ff;
 }
 
 .nav-item.active,
@@ -1018,15 +1045,14 @@ h2 {
   padding: 9px 14px 9px 10px;
 }
 
+.theme-toggle svg {
+  color: currentColor;
+  height: 18px;
+  width: 18px;
+}
+
 .theme-toggle::before {
-  background:
-    linear-gradient(135deg, var(--brand-blue), var(--brand-green));
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-orb);
-  content: "";
-  display: inline-block;
-  height: 22px;
-  width: 22px;
+  content: none;
 }
 
 .theme-toggle:hover {
@@ -1044,10 +1070,14 @@ h2 {
 .upload-button,
 .primary-button,
 .prompt-box button {
+  align-items: center;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
+  display: inline-flex;
   font-weight: 700;
+  gap: 8px;
+  justify-content: center;
   min-height: 44px;
   padding: 11px 14px;
 }
@@ -1183,10 +1213,18 @@ h2 {
 }
 
 .priority-card span {
+  align-items: center;
   color: var(--muted);
+  display: flex;
   font-size: 12px;
   font-weight: 900;
+  gap: 8px;
   text-transform: uppercase;
+}
+
+.priority-card span svg,
+.priority-label svg {
+  color: var(--brand-blue);
 }
 
 .priority-card strong {
@@ -1260,10 +1298,12 @@ h2 {
 
 .metric-card span,
 .panel-heading span {
+  align-items: center;
   color: var(--muted);
-  display: block;
+  display: flex;
   font-size: 13px;
   font-weight: 600;
+  gap: 8px;
 }
 
 .metric-card strong {
@@ -1310,6 +1350,12 @@ h2 {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+.panel-heading span svg,
+.metric-card span svg,
+.integration-card span svg {
+  color: var(--brand-blue);
 }
 
 select,

@@ -1,6 +1,26 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Banknote,
+  BarChart3,
+  Boxes,
+  Bot,
+  ClipboardCheck,
+  Database,
+  FileText,
+  Link2,
+  Moon,
+  PackageCheck,
+  RefreshCw,
+  Settings2,
+  Sun,
+  Target,
+  Upload,
+  WalletCards
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type SalePoint = { day: string; value: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -27,6 +47,18 @@ type Metrics = {
   criticalStock: number;
 };
 type ThemeMode = "light" | "dark";
+type NavItem = { label: string; icon: LucideIcon };
+
+const navItems: NavItem[] = [
+  { label: "Panel diario", icon: Target },
+  { label: "Ventas", icon: BarChart3 },
+  { label: "Caja", icon: WalletCards },
+  { label: "Inventario", icon: Boxes },
+  { label: "Clientes", icon: Bot },
+  { label: "Decisiones", icon: ClipboardCheck },
+  { label: "Integraciones", icon: Link2 },
+  { label: "Reportes", icon: FileText }
+];
 
 const initialWeeklySales: SalePoint[] = [
   { day: "Lun", value: 9.8 },
@@ -392,7 +424,7 @@ ${recommendedAction()}`;
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
-          <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}><span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
+          <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
           <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
         </div>
       </header>
@@ -400,9 +432,12 @@ ${recommendedAction()}`;
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>PYME Command Center</span></div></div>
         <nav className="nav-list" aria-label="Principal">
-          {["Panel diario", "Ventas", "Caja", "Inventario", "Clientes", "Decisiones", "Integraciones", "Reportes"].map((item, index) => (
-            <button className={`nav-item ${index === 0 ? "active" : ""}`} type="button" key={item}>{item}</button>
-          ))}
+          {navItems.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <button className={`nav-item ${index === 0 ? "active" : ""}`} type="button" key={item.label}><Icon aria-hidden="true" />{item.label}</button>
+            );
+          })}
         </nav>
         <div className="tenant-card"><span>Empresa activa</span><strong>{customer.companyName}</strong><small>{customer.businessType}, {customer.country}</small></div>
       </aside>
@@ -411,10 +446,10 @@ ${recommendedAction()}`;
         <header className="topbar">
           <div><p className="eyebrow">Panel de decisiones en tiempo real</p><h1>Que debe revisar <span>{customer.companyName}</span> hoy</h1></div>
           <div className="topbar-actions">
-            <label className="upload-button"><input type="file" accept=".csv" onChange={handleCsvUpload} />Importar CSV</label>
-            <button className="secondary-button" type="button" onClick={downloadTemplate}>Plantilla CSV</button>
-            <button className="primary-button" type="button" onClick={refreshMetrics}>Actualizar datos</button>
-            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}><span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
+            <label className="upload-button"><input type="file" accept=".csv" onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
+            <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
+            <button className="primary-button" type="button" onClick={refreshMetrics}><RefreshCw aria-hidden="true" />Actualizar datos</button>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
           </div>
         </header>
@@ -422,17 +457,17 @@ ${recommendedAction()}`;
         <section id="kpiGrid" className="priority-grid" aria-label="Resumen ejecutivo prioritario">
           <article className="decision-hero">
             <div>
-              <span className="priority-label"><span className="status-dot" />Decision recomendada</span>
+              <span className="priority-label"><ClipboardCheck aria-hidden="true" />Decision recomendada</span>
               <h2>{recommendation}</h2>
               <p>Enfocate primero en esta accion antes de revisar configuraciones o reportes secundarios.</p>
             </div>
-            <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>Generar brief</button>
+            <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button>
           </article>
 
-          {visible.sales && <article className="priority-card" data-status={statusForSales(metrics.sales, customer.monthlyGoal)}><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small className={statusClass(statusForSales(metrics.sales, customer.monthlyGoal))}>{salesPercent}% de la meta</small></article>}
-          {visible.cash && <article className="priority-card" data-status={cashDays(metrics.cash) >= 14 ? "green" : "yellow"}><span>Caja</span><strong>{formatMoney(metrics.cash)}</strong><small className="warning">{cashDays(metrics.cash)} dias de cobertura</small></article>}
-          {visible.decisions && <article className="priority-card" data-status={openDecisions > 0 ? "yellow" : "green"}><span>Acciones pendientes</span><strong>{openDecisions}</strong><small className="warning">Decisiones sin cerrar</small></article>}
-          <article className="priority-card" data-status={criticalAlerts.length > 0 ? "red" : "green"}><span>Alertas criticas</span><strong>{criticalAlerts.length}</strong><small className={criticalAlerts.length > 0 ? "danger" : "positive"}>{criticalAlerts.length > 0 ? "Revisar hoy" : "Sin riesgos urgentes"}</small></article>
+          {visible.sales && <article className="priority-card" data-status={statusForSales(metrics.sales, customer.monthlyGoal)}><span><BarChart3 aria-hidden="true" />Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small className={statusClass(statusForSales(metrics.sales, customer.monthlyGoal))}>{salesPercent}% de la meta</small></article>}
+          {visible.cash && <article className="priority-card" data-status={cashDays(metrics.cash) >= 14 ? "green" : "yellow"}><span><WalletCards aria-hidden="true" />Caja</span><strong>{formatMoney(metrics.cash)}</strong><small className="warning">{cashDays(metrics.cash)} dias de cobertura</small></article>}
+          {visible.decisions && <article className="priority-card" data-status={openDecisions > 0 ? "yellow" : "green"}><span><ClipboardCheck aria-hidden="true" />Acciones pendientes</span><strong>{openDecisions}</strong><small className="warning">Decisiones sin cerrar</small></article>}
+          <article className="priority-card" data-status={criticalAlerts.length > 0 ? "red" : "green"}><span><AlertTriangle aria-hidden="true" />Alertas criticas</span><strong>{criticalAlerts.length}</strong><small className={criticalAlerts.length > 0 ? "danger" : "positive"}>{criticalAlerts.length > 0 ? "Revisar hoy" : "Sin riesgos urgentes"}</small></article>
         </section>
 
         <section className="setup-summary">
@@ -443,7 +478,7 @@ ${recommendedAction()}`;
         </section>
 
         <section className="customizer-panel">
-          <div className="panel-heading"><div><span>Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
+          <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
             <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Dueño / Gerencia</option><option value="finance">Finanzas</option><option value="sales">Ventas</option><option value="operations">Operaciones</option></select>
           </div>
           <div className="customizer-grid">
@@ -455,11 +490,11 @@ ${recommendedAction()}`;
 
         {visible.integrations && (
           <section id="mobileIntegrationsAnchor" className="integrations-panel">
-            <div className="panel-heading"><div><span>Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button" type="button" onClick={syncIntegrations}>Sincronizar</button></div>
+            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button" type="button" onClick={syncIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
             <div className="integrations-grid">
               {integrations.map((integration) => (
                 <article className="integration-card" data-status={integration.status} key={integration.id}>
-                  <div><span>{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
+                  <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
                   <button className="secondary-button" type="button" onClick={() => connectIntegration(integration.id)}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
                 </article>
               ))}
@@ -469,13 +504,13 @@ ${recommendedAction()}`;
 
         {visible.reports && (
           <section id="mobileReportsAnchor" className="reports-panel">
-            <div className="panel-heading"><div><span>Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button" type="button" onClick={generateReport}>Generar reporte</button></div>
+            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button" type="button" onClick={generateReport}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
               <form className="report-settings">
                 <label>Frecuencia<select value={reportSettings.frequency} onChange={(event) => setReportSettings({ ...reportSettings, frequency: event.target.value })}><option>Diario</option><option>Semanal</option><option>Mensual</option></select></label>
                 <label>Canal<select value={reportSettings.channel} onChange={(event) => setReportSettings({ ...reportSettings, channel: event.target.value })}><option>Email</option><option>WhatsApp</option><option>Email y WhatsApp</option></select></label>
                 <label>Destinatario<input value={reportSettings.recipient} onChange={(event) => setReportSettings({ ...reportSettings, recipient: event.target.value })} /></label>
-                <button className="secondary-button" type="button" onClick={downloadReport}>Descargar TXT</button>
+                <button className="secondary-button" type="button" onClick={downloadReport}><FileText aria-hidden="true" />Descargar TXT</button>
               </form>
               <div className="report-preview"><div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div><pre>{report || "Genera un reporte para ver el resumen ejecutivo."}</pre></div>
             </div>
@@ -483,7 +518,7 @@ ${recommendedAction()}`;
         )}
 
         <section id="mobileGoalsAnchor" className="goals-panel">
-          <div className="panel-heading"><div><span>Metas y semaforos</span><h2>Avance contra objetivos</h2></div><button className="secondary-button" type="button">Recalcular</button></div>
+          <div className="panel-heading"><div><span><Target aria-hidden="true" />Metas y semaforos</span><h2>Avance contra objetivos</h2></div><button className="secondary-button" type="button"><RefreshCw aria-hidden="true" />Recalcular</button></div>
           <div className="goals-grid">
             {[
               ["sales", "Meta mensual de ventas", `${formatMoney(metrics.sales)} de ${formatGoal(customer.monthlyGoal)}`, salesPercent],
@@ -500,7 +535,7 @@ ${recommendedAction()}`;
         </section>
 
         <section className="rules-panel">
-          <div className="panel-heading"><div><span>Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button" type="button" onClick={() => setRecommendation("Reglas de alerta actualizadas.")}>Aplicar reglas</button></div>
+          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button" type="button" onClick={() => setRecommendation("Reglas de alerta actualizadas.")}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
           <div className="rules-grid">
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
             <label><span>Caja insuficiente</span><input type="number" value={rules.cash} onChange={(event) => setRules({ ...rules, cash: Number(event.target.value) })} /><small>Dias minimos de cobertura</small></label>
@@ -511,22 +546,22 @@ ${recommendedAction()}`;
 
         {visible.importer && (
           <section className="importer-panel">
-            <div className="panel-heading"><div><span>Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
-            <div className="importer-grid"><div><p>Columnas requeridas: <strong>fecha</strong>, <strong>producto</strong>, <strong>ventas</strong>, <strong>stock</strong>.</p><div className="import-validation">{importPreview}</div></div><div className="preview-box"><div className="preview-heading"><span>Vista previa</span><button className="primary-button" type="button">Aplicar al dashboard</button></div><div className="preview-table">{importPreview}</div></div></div>
+            <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
+            <div className="importer-grid"><div><p>Columnas requeridas: <strong>fecha</strong>, <strong>producto</strong>, <strong>ventas</strong>, <strong>stock</strong>.</p><div className="import-validation">{importPreview}</div></div><div className="preview-box"><div className="preview-heading"><span>Vista previa</span><button className="primary-button" type="button"><Database aria-hidden="true" />Aplicar al dashboard</button></div><div className="preview-table">{importPreview}</div></div></div>
           </section>
         )}
 
         <section className="kpi-grid secondary-kpi-grid">
-          {visible.margin && <article className="metric-card" data-status={metrics.margin >= rules.margin ? "green" : "yellow"}><span>Margen bruto</span><strong>{metrics.margin.toFixed(1)}%</strong><small className="positive">{(metrics.margin - rules.margin).toFixed(1)} pts vs meta</small></article>}
-          {visible.stock && <article className="metric-card" data-status={metrics.criticalStock > rules.stock ? "red" : "green"}><span>Inventario critico</span><strong>{metrics.criticalStock} SKU</strong><small className="danger">Requiere atencion hoy</small></article>}
+          {visible.margin && <article className="metric-card" data-status={metrics.margin >= rules.margin ? "green" : "yellow"}><span><Banknote aria-hidden="true" />Margen bruto</span><strong>{metrics.margin.toFixed(1)}%</strong><small className="positive">{(metrics.margin - rules.margin).toFixed(1)} pts vs meta</small></article>}
+          {visible.stock && <article className="metric-card" data-status={metrics.criticalStock > rules.stock ? "red" : "green"}><span><Boxes aria-hidden="true" />Inventario critico</span><strong>{metrics.criticalStock} SKU</strong><small className="danger">Requiere atencion hoy</small></article>}
         </section>
 
         <section className="content-grid">
-          <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span>Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
-          <article className="panel chart-panel"><div className="panel-heading"><div><span>Ventas recientes</span><h2>Tendencia semanal</h2></div><select><option>Ultimos 7 dias</option></select></div><div className="bar-chart">{weeklySales.map((item) => <div className="bar-wrap" key={item.day}><div className="bar" style={{ height: `${Math.round((item.value / Math.max(...weeklySales.map((sale) => sale.value), 1)) * 100)}%` }} /><div className="bar-label">{item.day}</div></div>)}</div></article>
-          {visible.products && <article className="panel"><div className="panel-heading"><div><span>Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span>Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button" type="submit">Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
-          {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span>Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}>Preguntar</button></div><p className="answer-box">{answer}</p></article>}
+          <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
+          <article className="panel chart-panel"><div className="panel-heading"><div><span><BarChart3 aria-hidden="true" />Ventas recientes</span><h2>Tendencia semanal</h2></div><select><option>Ultimos 7 dias</option></select></div><div className="bar-chart">{weeklySales.map((item) => <div className="bar-wrap" key={item.day}><div className="bar" style={{ height: `${Math.round((item.value / Math.max(...weeklySales.map((sale) => sale.value), 1)) * 100)}%` }} /><div className="bar-label">{item.day}</div></div>)}</div></article>
+          {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
+          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button" type="submit"><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
+          {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
       </main>
 
