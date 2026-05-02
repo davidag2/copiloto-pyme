@@ -144,6 +144,7 @@ export default function Home() {
     }
     return nextAlerts.length ? nextAlerts : [{ level: "positive", title: "Reglas dentro de rango", text: "No hay alertas activas segun los umbrales configurados." }];
   }, [metrics, rules, salesPercent]);
+  const criticalAlerts = alerts.filter((alert) => alert.level === "danger" || alert.level === "warning");
 
   const bestDay = weeklySales.reduce((best, item) => (item.value > best.value ? item : best), weeklySales[0]);
 
@@ -418,7 +419,21 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <section className="decision-strip"><div><span className="status-dot" /><strong>Decision recomendada</strong></div><p>{recommendation}</p></section>
+        <section id="kpiGrid" className="priority-grid" aria-label="Resumen ejecutivo prioritario">
+          <article className="decision-hero">
+            <div>
+              <span className="priority-label"><span className="status-dot" />Decision recomendada</span>
+              <h2>{recommendation}</h2>
+              <p>Enfocate primero en esta accion antes de revisar configuraciones o reportes secundarios.</p>
+            </div>
+            <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>Generar brief</button>
+          </article>
+
+          {visible.sales && <article className="priority-card" data-status={statusForSales(metrics.sales, customer.monthlyGoal)}><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small className={statusClass(statusForSales(metrics.sales, customer.monthlyGoal))}>{salesPercent}% de la meta</small></article>}
+          {visible.cash && <article className="priority-card" data-status={cashDays(metrics.cash) >= 14 ? "green" : "yellow"}><span>Caja</span><strong>{formatMoney(metrics.cash)}</strong><small className="warning">{cashDays(metrics.cash)} dias de cobertura</small></article>}
+          {visible.decisions && <article className="priority-card" data-status={openDecisions > 0 ? "yellow" : "green"}><span>Acciones pendientes</span><strong>{openDecisions}</strong><small className="warning">Decisiones sin cerrar</small></article>}
+          <article className="priority-card" data-status={criticalAlerts.length > 0 ? "red" : "green"}><span>Alertas criticas</span><strong>{criticalAlerts.length}</strong><small className={criticalAlerts.length > 0 ? "danger" : "positive"}>{criticalAlerts.length > 0 ? "Revisar hoy" : "Sin riesgos urgentes"}</small></article>
+        </section>
 
         <section className="setup-summary">
           <div><span>Tipo de negocio</span><strong>{customer.businessType}</strong></div>
@@ -501,16 +516,14 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section id="kpiGrid" className="kpi-grid">
-          {visible.sales && <article className="metric-card" data-status={statusForSales(metrics.sales, customer.monthlyGoal)}><span>Ventas del mes</span><strong>{formatMoney(metrics.sales)}</strong><small className={statusClass(statusForSales(metrics.sales, customer.monthlyGoal))}>{salesPercent}% de la meta mensual</small></article>}
-          {visible.cash && <article className="metric-card" data-status={cashDays(metrics.cash) >= 14 ? "green" : "yellow"}><span>Caja disponible</span><strong>{formatMoney(metrics.cash)}</strong><small className="warning">Alcanza para {cashDays(metrics.cash)} dias</small></article>}
+        <section className="kpi-grid secondary-kpi-grid">
           {visible.margin && <article className="metric-card" data-status={metrics.margin >= rules.margin ? "green" : "yellow"}><span>Margen bruto</span><strong>{metrics.margin.toFixed(1)}%</strong><small className="positive">{(metrics.margin - rules.margin).toFixed(1)} pts vs meta</small></article>}
           {visible.stock && <article className="metric-card" data-status={metrics.criticalStock > rules.stock ? "red" : "green"}><span>Inventario critico</span><strong>{metrics.criticalStock} SKU</strong><small className="danger">Requiere atencion hoy</small></article>}
         </section>
 
         <section className="content-grid">
+          <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span>Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
           <article className="panel chart-panel"><div className="panel-heading"><div><span>Ventas recientes</span><h2>Tendencia semanal</h2></div><select><option>Ultimos 7 dias</option></select></div><div className="bar-chart">{weeklySales.map((item) => <div className="bar-wrap" key={item.day}><div className="bar" style={{ height: `${Math.round((item.value / Math.max(...weeklySales.map((sale) => sale.value), 1)) * 100)}%` }} /><div className="bar-label">{item.day}</div></div>)}</div></article>
-          <article id="mobileAlertsAnchor" className="panel alerts-panel"><div className="panel-heading"><div><span>Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span>Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
           {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span>Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button" type="submit">Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span>Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}>Preguntar</button></div><p className="answer-box">{answer}</p></article>}
@@ -518,8 +531,8 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav">
-        <a href="#kpiGrid">KPIs</a>
-        <a href="#mobileGoalsAnchor">Metas</a>
+        <a href="#kpiGrid">Resumen</a>
+        <a href="#mobileAlertsAnchor">Alertas</a>
         <a href="#mobileIntegrationsAnchor">Datos</a>
         <a href="#mobileReportsAnchor">Reporte</a>
       </nav>

@@ -26,6 +26,7 @@ Incluye:
 - Dashboard principal.
 - Importador real CSV.
 - KPIs configurables.
+- Resumen ejecutivo priorizado con decision recomendada, ventas, caja, pendientes y alertas criticas.
 - Metas y semaforos.
 - Alertas configurables.
 - Copiloto IA simulado con contexto del negocio.
