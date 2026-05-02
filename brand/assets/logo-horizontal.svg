@@ -1,0 +1,28 @@
+<svg width="360" height="96" viewBox="0 0 360 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Copiloto Pyme horizontal logo</title>
+  <desc id="desc">AI orb icon with Copiloto Pyme wordmark.</desc>
+  <defs>
+    <linearGradient id="orbGradient" x1="18" y1="18" x2="78" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <radialGradient id="orbHighlight" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(34 28) rotate(48) scale(48)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.72"/>
+      <stop offset="0.36" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="orbGlow" x="-18" y="-18" width="132" height="132" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.145 0 0 0 0 0.388 0 0 0 0 0.922 0 0 0 0.35 0"/>
+      <feBlend in2="SourceGraphic" mode="normal"/>
+    </filter>
+  </defs>
+  <circle cx="48" cy="48" r="34" fill="url(#orbGradient)" filter="url(#orbGlow)"/>
+  <circle cx="48" cy="48" r="34" fill="url(#orbHighlight)"/>
+  <circle cx="48" cy="48" r="11" fill="#FFFFFF" fill-opacity="0.88"/>
+  <circle cx="48" cy="48" r="5" fill="#0A2540" fill-opacity="0.16"/>
+  <path d="M25 51C32 39 47 32 62 37C69 39 74 44 77 50" stroke="#FFFFFF" stroke-opacity="0.54" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="68" cy="40" r="4" fill="#FFFFFF" fill-opacity="0.82"/>
+  <text x="104" y="47" fill="#0A2540" font-family="Poppins, Inter, system-ui, sans-serif" font-size="30" font-weight="800" letter-spacing="0">Copiloto</text>
+  <text x="104" y="72" fill="#2563EB" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="700" letter-spacing="0">Pyme</text>
+</svg>

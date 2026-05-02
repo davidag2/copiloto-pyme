@@ -1,0 +1,22 @@
+:root {
+  --shadow-soft: 0px 4px 12px rgba(0,0,0,0.08);
+  --shadow-medium: 0px 10px 25px rgba(0,0,0,0.12);
+  --shadow-strong: 0px 20px 40px rgba(0,0,0,0.18);
+  --shadow-orb: 0 0 24px rgba(37, 99, 235, 0.4);
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium);
+}
+
+.shadow-strong {
+  box-shadow: var(--shadow-strong);
+}
+
+.shadow-orb {
+  box-shadow: var(--shadow-orb);
+}

@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Copiloto Pyme Brand System</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/brand-tokens.css">
+    <link rel="stylesheet" href="./css/typography.css">
+    <link rel="stylesheet" href="./css/buttons.css">
+    <link rel="stylesheet" href="./css/shadows.css">
+    <style>
+      body {
+        background:
+          radial-gradient(circle at 16% 8%, rgba(37, 99, 235, 0.14), transparent 28%),
+          radial-gradient(circle at 88% 0%, rgba(34, 197, 94, 0.12), transparent 26%),
+          var(--color-neutral-light);
+      }
+
+      .page {
+        margin: 0 auto;
+        max-width: 1180px;
+        padding: var(--space-lg);
+      }
+
+      .brand-header {
+        display: grid;
+        gap: var(--space-xl);
+        min-height: 560px;
+        padding: var(--space-lg) 0 var(--space-2xl);
+      }
+
+      .brand-header-logo {
+        display: inline-flex;
+        width: fit-content;
+      }
+
+      .brand-header-nav {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        justify-content: flex-end;
+        margin-top: -76px;
+      }
+
+      .brand-header-nav a {
+        color: var(--color-neutral-dark);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .brand-header-copy {
+        align-self: end;
+        display: grid;
+        gap: var(--space-lg);
+        max-width: 780px;
+        padding-top: var(--space-2xl);
+      }
+
+      .section {
+        padding: var(--space-2xl) 0;
+      }
+
+      .section-heading {
+        display: grid;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-xl);
+      }
+
+      .grid {
+        display: grid;
+        gap: var(--space-lg);
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .panel,
+      .brand-card {
+        background: var(--gradient-panel);
+        border: 1px solid rgba(229, 231, 235, 0.9);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-soft);
+        padding: var(--space-lg);
+      }
+
+      .logo-stage {
+        align-items: center;
+        background: var(--color-white);
+        border-radius: var(--radius-xl);
+        display: grid;
+        justify-items: center;
+        min-height: 210px;
+        padding: var(--space-xl);
+      }
+
+      .logo-stage.dark {
+        background: var(--gradient-dark);
+      }
+
+      .logo-stage.dark img {
+        filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.22));
+      }
+
+      .swatch {
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-soft);
+        min-height: 148px;
+        overflow: hidden;
+      }
+
+      .swatch-color {
+        height: 86px;
+      }
+
+      .swatch-copy {
+        background: var(--color-white);
+        display: grid;
+        gap: var(--space-xs);
+        padding: var(--space-md);
+      }
+
+      .swatch strong,
+      .token-row strong {
+        color: var(--color-primary);
+      }
+
+      .button-row {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+      }
+
+      .brand-card {
+        display: grid;
+        gap: var(--space-md);
+      }
+
+      .brand-card-meta {
+        color: var(--color-blue);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-card-blue {
+        border-top: 4px solid var(--color-blue);
+      }
+
+      .brand-card-green {
+        border-top: 4px solid var(--color-green);
+      }
+
+      .brand-card-dark {
+        border-top: 4px solid var(--color-primary);
+      }
+
+      .orb-grid {
+        display: grid;
+        gap: var(--space-lg);
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .orb-state {
+        align-items: center;
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        display: grid;
+        gap: var(--space-md);
+        justify-items: center;
+        min-height: 180px;
+        padding: var(--space-lg);
+      }
+
+      .ai-orb {
+        height: 86px;
+        position: relative;
+        width: 86px;
+      }
+
+      .ai-orb-glow,
+      .ai-orb-shell,
+      .ai-orb-core,
+      .ai-orb-orbit {
+        border-radius: var(--radius-full);
+        position: absolute;
+      }
+
+      .ai-orb-glow {
+        background: rgba(37, 99, 235, 0.42);
+        filter: blur(18px);
+        inset: 10px;
+      }
+
+      .ai-orb-shell {
+        background:
+          radial-gradient(circle at 32% 26%, rgba(255,255,255,0.72), transparent 31%),
+          var(--gradient-orb);
+        box-shadow: var(--shadow-orb);
+        inset: 8px;
+        overflow: hidden;
+      }
+
+      .ai-orb-core {
+        background: rgba(255, 255, 255, 0.88);
+        height: 22px;
+        left: 24px;
+        top: 24px;
+        width: 22px;
+      }
+
+      .ai-orb-orbit {
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-left-color: transparent;
+        height: 46px;
+        left: 12px;
+        top: 18px;
+        transform: rotate(-18deg);
+        width: 58px;
+      }
+
+      .ai-orb-idle .ai-orb-shell {
+        animation: orbGlow 2.8s ease-in-out infinite;
+      }
+
+      .ai-orb-listening .ai-orb-glow {
+        animation: orbPulse 2.2s ease-in-out infinite;
+      }
+
+      .ai-orb-thinking .ai-orb-orbit {
+        animation: orbRotate 3.2s linear infinite;
+      }
+
+      .ai-orb-speaking .ai-orb-shell {
+        animation: orbSpeak 1.4s ease-in-out infinite;
+      }
+
+      .ai-orb-inactive {
+        filter: grayscale(1);
+        opacity: 0.45;
+      }
+
+      @keyframes orbGlow {
+        0%, 100% { box-shadow: 0 0 18px rgba(37, 99, 235, 0.28); }
+        50% { box-shadow: 0 0 32px rgba(34, 197, 94, 0.38); }
+      }
+
+      @keyframes orbPulse {
+        0%, 100% { opacity: 0.46; transform: scale(0.9); }
+        50% { opacity: 0.86; transform: scale(1.18); }
+      }
+
+      @keyframes orbRotate {
+        to { transform: rotate(342deg); }
+      }
+
+      @keyframes orbSpeak {
+        0%, 100% { transform: scale(1); }
+        35% { transform: scale(1.06); }
+        68% { transform: scale(0.98); }
+      }
+
+      .dashboard-preview {
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-medium);
+        overflow: hidden;
+      }
+
+      .dashboard-topbar {
+        align-items: center;
+        background: var(--color-primary);
+        color: var(--color-white);
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-lg);
+      }
+
+      .dashboard-topbar img {
+        filter: brightness(0) invert(1);
+      }
+
+      .dashboard-body {
+        display: grid;
+        gap: var(--space-lg);
+        grid-template-columns: 1.15fr 0.85fr;
+        padding: var(--space-lg);
+      }
+
+      .metric {
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+      }
+
+      .metric strong {
+        color: var(--color-primary);
+        display: block;
+        font-size: 32px;
+        margin-top: var(--space-sm);
+      }
+
+      .token-list {
+        display: grid;
+        gap: var(--space-sm);
+      }
+
+      .token-row {
+        align-items: center;
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-md);
+      }
+
+      @media (max-width: 860px) {
+        .brand-header-nav {
+          justify-content: flex-start;
+          margin-top: 0;
+        }
+
+        .grid-2,
+        .grid-3,
+        .orb-grid,
+        .dashboard-body {
+          grid-template-columns: 1fr;
+        }
+
+        .brand-header {
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="brand-header">
+        <a class="brand-header-logo" href="./brand-preview.html" aria-label="Copiloto Pyme">
+          <img src="./assets/logo-horizontal.svg" alt="Copiloto Pyme" width="220" height="60">
+        </a>
+        <nav class="brand-header-nav" aria-label="Navegacion de marca">
+          <a href="#logos">Logos</a>
+          <a href="#colors">Colores</a>
+          <a href="#components">Componentes</a>
+          <a class="btn btn-primary" href="#preview">Explorar marca</a>
+        </nav>
+        <div class="brand-header-copy">
+          <span class="eyebrow">Sistema visual</span>
+          <h1>Copiloto Pyme</h1>
+          <p class="text-lead">Un sistema visual moderno para un copiloto de decisiones de PYMES en Colombia y Latinoamerica.</p>
+        </div>
+      </header>
+
+      <section class="section" id="logos">
+        <div class="section-heading">
+          <span class="eyebrow">Logo system</span>
+          <h2>Orb inteligente, cercano y profesional</h2>
+          <p class="text-lead">Concepto B: un asistente IA representado por una esfera viva con gradiente azul-verde, nucleo interno y orbita sutil.</p>
+        </div>
+        <div class="grid grid-2">
+          <div class="logo-stage"><img src="./assets/logo.svg" alt="Logo principal Copiloto Pyme" width="320"></div>
+          <div class="logo-stage"><img src="./assets/logo-horizontal.svg" alt="Logo horizontal Copiloto Pyme" width="360"></div>
+          <div class="logo-stage dark"><img src="./assets/logo-icon.svg" alt="Icono orb Copiloto Pyme" width="112"></div>
+          <div class="logo-stage"><img src="./assets/favicon.svg" alt="Favicon Copiloto Pyme" width="72"></div>
+        </div>
+      </section>
+
+      <section class="section" id="colors">
+        <div class="section-heading">
+          <span class="eyebrow">Color palette</span>
+          <h2>Confianza financiera con energia SaaS</h2>
+        </div>
+        <div class="grid grid-3">
+          <div class="swatch"><div class="swatch-color" style="background:#0A2540"></div><div class="swatch-copy"><strong>Primary dark blue</strong><span>#0A2540</span></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#2563EB"></div><div class="swatch-copy"><strong>Electric blue</strong><span>#2563EB</span></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#22C55E"></div><div class="swatch-copy"><strong>Success green</strong><span>#22C55E</span></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#1F2937"></div><div class="swatch-copy"><strong>Dark neutral</strong><span>#1F2937</span></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#F3F4F6"></div><div class="swatch-copy"><strong>Light neutral</strong><span>#F3F4F6</span></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#FFFFFF"></div><div class="swatch-copy"><strong>White</strong><span>#FFFFFF</span></div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <span class="eyebrow">Typography</span>
+          <h2>Jerarquia clara para decisiones rapidas</h2>
+        </div>
+        <div class="panel grid">
+          <h1>Decisiones claras hoy</h1>
+          <h2>Panel ejecutivo para PYMES</h2>
+          <h3>Alertas, ventas, caja e inventario en un solo lugar</h3>
+          <p class="text-lead">Inter es la tipografia principal de interfaz. Poppins se reserva para titulares display cuando este disponible.</p>
+          <p>El texto operativo debe ser simple, escaneable y orientado a la accion.</p>
+        </div>
+      </section>
+
+      <section class="section" id="components">
+        <div class="section-heading">
+          <span class="eyebrow">Buttons and cards</span>
+          <h2>Componentes listos para producto</h2>
+        </div>
+        <div class="panel grid">
+          <div class="button-row">
+            <button class="btn btn-primary">Primario</button>
+            <button class="btn btn-secondary">Secundario</button>
+            <button class="btn btn-cta">CTA</button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-primary" disabled>Deshabilitado</button>
+          </div>
+        </div>
+        <div class="grid grid-3" style="margin-top: var(--space-lg);">
+          <article class="brand-card brand-card-blue">
+            <span class="brand-card-meta">Ventas</span>
+            <h3>Crecimiento diario</h3>
+            <p>Muestra cambios relevantes y recomienda una accion comercial.</p>
+          </article>
+          <article class="brand-card brand-card-green">
+            <span class="brand-card-meta">Caja</span>
+            <h3>Salud financiera</h3>
+            <p>Prioriza riesgos de liquidez y pagos proximos.</p>
+          </article>
+          <article class="brand-card brand-card-dark">
+            <span class="brand-card-meta">Operacion</span>
+            <h3>Inventario critico</h3>
+            <p>Detecta quiebres antes de afectar ventas.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <span class="eyebrow">AI Orb states</span>
+          <h2>El asistente se siente vivo, sin verse infantil</h2>
+        </div>
+        <div class="orb-grid">
+          <div class="orb-state"><div class="ai-orb ai-orb-idle" role="img" aria-label="Copiloto Pyme AI idle"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div><strong>Idle</strong></div>
+          <div class="orb-state"><div class="ai-orb ai-orb-listening" role="img" aria-label="Copiloto Pyme AI listening"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div><strong>Listening</strong></div>
+          <div class="orb-state"><div class="ai-orb ai-orb-thinking" role="img" aria-label="Copiloto Pyme AI thinking"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div><strong>Thinking</strong></div>
+          <div class="orb-state"><div class="ai-orb ai-orb-speaking" role="img" aria-label="Copiloto Pyme AI speaking"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div><strong>Speaking</strong></div>
+          <div class="orb-state"><div class="ai-orb ai-orb-inactive" role="img" aria-label="Copiloto Pyme AI inactive"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div><strong>Inactive</strong></div>
+        </div>
+      </section>
+
+      <section class="section" id="preview">
+        <div class="section-heading">
+          <span class="eyebrow">SaaS dashboard header</span>
+          <h2>Aplicacion de marca en producto</h2>
+        </div>
+        <div class="dashboard-preview">
+          <div class="dashboard-topbar">
+            <img src="./assets/logo-horizontal.svg" alt="Copiloto Pyme" width="200">
+            <button class="btn btn-cta">Nuevo reporte</button>
+          </div>
+          <div class="dashboard-body">
+            <div class="grid grid-2">
+              <div class="metric"><span class="text-small">Ventas hoy</span><strong>$ 8.4M</strong><p class="text-small">+12% frente al promedio.</p></div>
+              <div class="metric"><span class="text-small">Caja disponible</span><strong>$ 31M</strong><p class="text-small">Suficiente para 18 dias.</p></div>
+              <div class="metric"><span class="text-small">Margen</span><strong>34%</strong><p class="text-small">Dentro de meta.</p></div>
+              <div class="metric"><span class="text-small">Alertas</span><strong>3</strong><p class="text-small">Una requiere accion hoy.</p></div>
+            </div>
+            <div class="panel">
+              <div class="ai-orb ai-orb-speaking" role="img" aria-label="Copiloto Pyme AI speaking"><span class="ai-orb-glow"></span><span class="ai-orb-shell"><span class="ai-orb-core"></span><span class="ai-orb-orbit"></span></span></div>
+              <h3 style="margin-top: var(--space-lg);">Recomendacion del copiloto</h3>
+              <p class="text-small">Prioriza inventario de alta rotacion y revisa descuentos en productos de margen bajo antes de cerrar el dia.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <span class="eyebrow">Tokens</span>
+          <h2>Escalas listas para implementar</h2>
+        </div>
+        <div class="grid grid-2">
+          <div class="token-list">
+            <div class="token-row"><strong>--space-xs</strong><span>4px</span></div>
+            <div class="token-row"><strong>--space-sm</strong><span>8px</span></div>
+            <div class="token-row"><strong>--space-md</strong><span>16px</span></div>
+            <div class="token-row"><strong>--space-lg</strong><span>24px</span></div>
+            <div class="token-row"><strong>--space-xl</strong><span>32px</span></div>
+            <div class="token-row"><strong>--space-2xl</strong><span>48px</span></div>
+          </div>
+          <div class="token-list">
+            <div class="token-row"><strong>--shadow-soft</strong><span>Cards</span></div>
+            <div class="token-row"><strong>--shadow-medium</strong><span>Panels</span></div>
+            <div class="token-row"><strong>--shadow-strong</strong><span>Overlays</span></div>
+            <div class="token-row"><strong>--shadow-orb</strong><span>AI orb</span></div>
+            <div class="token-row"><strong>--radius-md</strong><span>12px</span></div>
+            <div class="token-row"><strong>--radius-xl</strong><span>24px</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -54,6 +54,14 @@ BRAND_GUIDE.md
 
 Incluye logo, paleta, tipografia, espaciado, estilos de botones, estados visuales, sombras e iconografia.
 
+El sistema visual ejecutable esta en:
+
+```text
+brand/
+```
+
+Incluye SVG oficiales, tokens CSS, componentes JS reutilizables y una preview visual en `brand/brand-preview.html`.
+
 ## Cliente Ideal
 
 PYMES en Latinoamerica que necesitan visibilidad diaria sobre:

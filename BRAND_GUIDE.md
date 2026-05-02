@@ -10,36 +10,39 @@
 
 ## Logo
 
-El logo base del MVP es un monograma **CP** dentro de un contenedor cuadrado de 8 px de radio. Representa un copiloto operativo: simple, legible y facil de reconocer dentro de dashboards, portales y mobile apps.
+El logo oficial del sistema de marca es el concepto **AI Assistant Orb**: una esfera circular con gradiente azul-verde, brillo sutil, nucleo interno y detalle orbital. Representa un copiloto inteligente, vivo y confiable sin perder sobriedad SaaS.
 
 Uso recomendado:
 
-- Usar el monograma `CP` para favicon, app icon, sidebar y encabezados compactos.
-- Usar `Copiloto Pyme` como wordmark textual junto al monograma en navegacion principal.
+- Usar `brand/assets/logo-icon.svg` para app icon, sidebar y encabezados compactos.
+- Usar `brand/assets/logo-horizontal.svg` como wordmark en navegacion principal.
+- Usar `brand/assets/favicon.svg` como icono de navegador.
 - Mantener el descriptor `Un producto Tecnotitan S.A.S` en footer, facturacion, documentos comerciales y comunicaciones formales.
 
 ## Paleta Oficial
 
 | Token | Hex | Uso |
 | --- | --- | --- |
-| `--brand-primary` | `#0f9f8f` | Acciones principales, acentos de marca, progreso positivo. |
-| `--brand-primary-dark` | `#08796e` | Hover, texto sobre fondos suaves, estados activos. |
-| `--brand-primary-soft` | `#dff7f2` | Fondos suaves, seleccion y superficies destacadas. |
-| `--brand-blue` | `#3166e0` | Enlaces, informacion, foco y elementos de analitica. |
-| `--brand-blue-soft` | `#e7efff` | Fondos informativos y estados neutros activos. |
+| `--brand-primary` | `#0A2540` | Confianza, headers, navegacion premium y texto principal. |
+| `--brand-primary-dark` | `#071A2D` | Hover oscuro y fondos de alto contraste. |
+| `--brand-primary-soft` | `#EAF1FF` | Fondos suaves de marca. |
+| `--brand-blue` | `#2563EB` | Acciones principales, enlaces, foco y analitica activa. |
+| `--brand-blue-soft` | `#DBEAFE` | Fondos informativos y estados activos. |
+| `--brand-green` | `#22C55E` | CTA, exito, progreso y componente vivo del orb. |
+| `--brand-green-soft` | `#DCFCE7` | Fondos positivos suaves. |
 | `--brand-gold` | `#bd7b10` | Advertencias y oportunidades comerciales. |
-| `--brand-navy` | `#101827` | Sidebar, cabeceras oscuras, contraste premium. |
-| `--brand-ink` | `#17212f` | Texto principal. |
-| `--brand-muted` | `#66758a` | Texto secundario. |
+| `--brand-navy` | `#0A2540` | Sidebar, cabeceras oscuras, contraste premium. |
+| `--brand-ink` | `#1F2937` | Texto principal. |
+| `--brand-muted` | `#667085` | Texto secundario. |
 
 ## Estados Semanticos
 
 | Estado | Token | Hex |
 | --- | --- | --- |
-| Exito / controlado | `--semantic-success` | `#14945e` |
+| Exito / controlado | `--semantic-success` | `#22C55E` |
 | Advertencia / atencion | `--semantic-warning` | `#bd7b10` |
 | Riesgo / error | `--semantic-danger` | `#d94b4b` |
-| Informacion | `--semantic-info` | `#3166e0` |
+| Informacion | `--semantic-info` | `#2563EB` |
 
 ## Tipografia
 
@@ -86,9 +89,11 @@ Escala oficial:
 
 ## Botones
 
-**Primario:** fondo verde marca con hover oscuro, texto blanco, peso 700 y altura minima de 44 px.
+**Primario:** fondo azul electrico con hover oscuro, texto blanco, peso 700 y altura minima de 44 px.
 
-**Secundario:** fondo blanco, borde neutral, texto principal. En hover usa fondo verde suave.
+**Secundario:** fondo blanco, borde neutral, texto principal. En hover usa fondo azul suave.
+
+**CTA:** fondo verde exito, texto blanco, reservado para conversion, pago, activacion o acciones de alto valor.
 
 **Ghost:** fondo transparente, borde neutral, ideal para acciones de menor prioridad.
 
@@ -102,6 +107,8 @@ Escala oficial:
 ## Iconografia
 
 La direccion visual recomendada es lineal, simple y funcional. Para la version React se recomienda usar `lucide-react` cuando se instale el sistema de componentes.
+
+El paquete completo de marca vive en `brand/` e incluye SVG, tokens CSS, botones, sombras, tipografia, componentes JS y preview visual.
 
 Reglas:
 

@@ -1,0 +1,50 @@
+h1,
+h2,
+h3,
+.brand-display {
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(38px, 6vw, 72px);
+  line-height: 0.98;
+}
+
+h2 {
+  font-size: clamp(26px, 3vw, 40px);
+  line-height: 1.08;
+}
+
+h3 {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.7;
+  margin: 0;
+}
+
+.text-lead {
+  color: var(--color-ink-muted);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.65;
+}
+
+.text-small {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.eyebrow {
+  color: var(--color-blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
