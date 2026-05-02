@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 
 type SalePoint = { day: string; value: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -26,6 +26,7 @@ type Metrics = {
   margin: number;
   criticalStock: number;
 };
+type ThemeMode = "light" | "dark";
 
 const initialWeeklySales: SalePoint[] = [
   { day: "Lun", value: 9.8 },
@@ -68,6 +69,7 @@ function statusClass(status: string) {
 
 export default function Home() {
   const [view, setView] = useState<"portal" | "app">("portal");
+  const [theme, setTheme] = useState<ThemeMode>("light");
   const [customer, setCustomer] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -110,6 +112,17 @@ export default function Home() {
   const [importPreview, setImportPreview] = useState("Aun no hay datos para mostrar.");
   const [report, setReport] = useState("");
   const [reportSettings, setReportSettings] = useState({ frequency: "Semanal", channel: "Email", recipient: "gerencia@empresa.com" });
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("copiloto-pyme-theme", theme);
+  }, [theme]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
@@ -250,6 +263,10 @@ ${recommendedAction()}`;
     URL.revokeObjectURL(url);
   }
 
+  function toggleTheme() {
+    setTheme((currentTheme) => currentTheme === "light" ? "dark" : "light");
+  }
+
   function answerQuestion() {
     const normalized = question.toLowerCase();
     if (!normalized) {
@@ -370,10 +387,13 @@ ${recommendedAction()}`;
   }
 
   return (
-    <div id="appView" className="app-shell">
+    <div id="appView" className={`app-shell theme-${theme}`}>
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
-        <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
+        <div className="mobile-app-actions">
+          <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}><span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
+          <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
+        </div>
       </header>
 
       <aside className="sidebar">
@@ -393,6 +413,7 @@ ${recommendedAction()}`;
             <label className="upload-button"><input type="file" accept=".csv" onChange={handleCsvUpload} />Importar CSV</label>
             <button className="secondary-button" type="button" onClick={downloadTemplate}>Plantilla CSV</button>
             <button className="primary-button" type="button" onClick={refreshMetrics}>Actualizar datos</button>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}><span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
           </div>
         </header>

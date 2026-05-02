@@ -30,6 +30,7 @@ Incluye:
 - Alertas configurables.
 - Copiloto IA simulado con contexto del negocio.
 - Vista movil optimizada.
+- Modo claro/oscuro persistente para el dashboard.
 - Historial de decisiones.
 - Integraciones latinoamericanas simuladas.
 - Reportes automaticos simulados con descarga `.txt`.
@@ -202,7 +203,11 @@ El prototipo incluye:
 - Tablas con scroll.
 - Controles tactiles.
 
-### 9. Historial De Decisiones
+### 9. Modo Claro/Oscuro
+
+El dashboard permite cambiar entre modo claro y oscuro. La preferencia se guarda en el navegador para que cada usuario mantenga su configuracion al volver al panel.
+
+### 10. Historial De Decisiones
 
 Permite registrar decisiones con:
 
@@ -217,7 +222,7 @@ Estados:
 - En curso.
 - Completada.
 
-### 10. Integraciones Latinoamericanas
+### 11. Integraciones Latinoamericanas
 
 Integraciones simuladas:
 
@@ -228,7 +233,7 @@ Integraciones simuladas:
 - Shopify
 - WooCommerce
 
-### 11. Reportes Automaticos
+### 12. Reportes Automaticos
 
 Permite configurar reportes por:
 
