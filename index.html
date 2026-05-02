@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Copiloto Pyme | Panel de decisiones para PYMES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="portalView" class="portal-view">
+      <header class="marketing-nav">
+        <div class="brand dark-brand">
+            <div class="brand-mark">CP</div>
+            <div>
+            <strong>Copiloto Pyme</strong>
+            <span>Decisiones para PYMES</span>
+          </div>
+        </div>
+        <nav aria-label="Producto">
+          <a href="#beneficios">Beneficios</a>
+          <a href="#planes">Planes</a>
+          <a href="#registro">Registro</a>
+        </nav>
+        <button class="ghost-button" type="button" data-show-app>Ver demo</button>
+      </header>
+
+      <main>
+        <section class="hero-section">
+          <div class="hero-copy">
+            <p class="eyebrow">SaaS para PYMES en Latinoamerica</p>
+            <h1>Tu negocio claro cada mañana: ventas, caja, inventario y alertas en un solo panel.</h1>
+            <p>
+              Copiloto Pyme ayuda a dueños y gerentes a dejar de perseguir reportes en Excel, WhatsApp y sistemas separados. Conecta tus datos, paga tu plan y empieza el onboarding en minutos.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-button" href="#registro">Crear cuenta</a>
+              <button class="secondary-button" type="button" data-show-app>Entrar al dashboard</button>
+            </div>
+          </div>
+          <div class="hero-product" aria-label="Vista previa del producto">
+            <div class="mini-dashboard">
+              <div class="mini-header">
+                <span>Distribuidora Andina</span>
+                <strong>Decision de hoy</strong>
+              </div>
+              <div class="mini-kpis">
+                <div><span>Ventas</span><strong>$84.2M</strong></div>
+                <div><span>Caja</span><strong>18 dias</strong></div>
+                <div><span>Stock critico</span><strong>7 SKU</strong></div>
+              </div>
+              <div class="mini-alert">
+                <strong>Reponer inventario</strong>
+                <span>Cafe Premium y Panela Organica tienen riesgo de quiebre esta semana.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="beneficios" class="benefits-section">
+          <article>
+            <span>1</span>
+            <strong>Conecta datos simples</strong>
+            <p>Empieza con Excel o Google Sheets y evoluciona hacia integraciones con Siigo, Alegra, Mercado Pago y ecommerce.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <strong>Recibe alertas accionables</strong>
+            <p>El sistema prioriza inventario, caja, gastos y ventas para decirte que revisar hoy.</p>
+          </article>
+          <article>
+            <span>3</span>
+            <strong>Decide con contexto</strong>
+            <p>El copiloto resume cambios importantes y propone siguientes acciones en lenguaje claro.</p>
+          </article>
+        </section>
+
+        <section id="planes" class="pricing-section">
+          <div class="section-heading">
+            <p class="eyebrow">Planes iniciales</p>
+            <h2>Precios pensados para PYMES</h2>
+          </div>
+          <div class="pricing-grid">
+            <article class="price-card" data-plan-card="starter">
+              <span>Inicial</span>
+              <strong>$29 USD/mes</strong>
+              <p>Para negocios que quieren centralizar ventas, caja e inventario.</p>
+              <button class="secondary-button" type="button" data-plan="Inicial">Elegir Inicial</button>
+            </article>
+            <article class="price-card featured" data-plan-card="growth">
+              <span>Crecimiento</span>
+              <strong>$79 USD/mes</strong>
+              <p>Para PYMES con equipo, metas, alertas y reportes semanales.</p>
+              <button class="primary-button" type="button" data-plan="Crecimiento">Elegir Crecimiento</button>
+            </article>
+            <article class="price-card" data-plan-card="pro">
+              <span>Pro</span>
+              <strong>$149 USD/mes</strong>
+              <p>Para empresas con varias sedes, integraciones y copiloto avanzado.</p>
+              <button class="secondary-button" type="button" data-plan="Pro">Elegir Pro</button>
+            </article>
+          </div>
+        </section>
+
+        <section id="registro" class="signup-section">
+          <div class="section-heading">
+            <p class="eyebrow">Inicio del cliente</p>
+            <h2>Registro, pago y onboarding</h2>
+          </div>
+
+          <div class="signup-layout">
+            <form id="signupForm" class="signup-form">
+              <div class="step-label">Paso 1 de 4</div>
+              <label>
+                Nombre completo
+                <input id="ownerName" type="text" required placeholder="Ej. Ana Martinez" />
+              </label>
+              <label>
+                Email empresarial
+                <input id="ownerEmail" type="email" required placeholder="ana@empresa.com" />
+              </label>
+              <label>
+                Nombre de la empresa
+                <input id="companyName" type="text" required placeholder="Distribuidora Andina" />
+              </label>
+              <label>
+                Pais
+                <select id="countrySelect" required>
+                  <option value="">Selecciona un pais</option>
+                  <option>Colombia</option>
+                  <option>Mexico</option>
+                  <option>Peru</option>
+                  <option>Chile</option>
+                  <option>Ecuador</option>
+                </select>
+              </label>
+              <label>
+                Plan elegido
+                <select id="planSelect">
+                  <option>Inicial</option>
+                  <option selected>Crecimiento</option>
+                  <option>Pro</option>
+                </select>
+              </label>
+              <button class="primary-button" type="submit">Crear usuario y continuar</button>
+            </form>
+
+            <div class="checkout-card">
+              <div class="step-label">Paso 2 de 4</div>
+              <strong>Pago de suscripcion</strong>
+              <p id="checkoutSummary">Plan Crecimiento, cobro mensual. Pago simulado para el prototipo.</p>
+              <div class="payment-methods">
+                <span>Tarjeta</span>
+                <span>Mercado Pago</span>
+                <span>Transferencia</span>
+              </div>
+              <button id="payButton" class="primary-button" type="button" disabled>Pagar suscripcion</button>
+              <small id="paymentStatus">Completa el registro para activar el pago.</small>
+            </div>
+
+            <form id="onboardingForm" class="onboarding-card">
+              <div class="step-label">Paso 3 de 4</div>
+              <strong>Configura tu primera vista</strong>
+              <div class="onboarding-fields">
+                <label>
+                  Tipo de negocio
+                  <select id="businessType" required disabled>
+                    <option>Comercio minorista</option>
+                    <option>Distribuidora</option>
+                    <option>Restaurante</option>
+                    <option>Ecommerce</option>
+                    <option>Servicios profesionales</option>
+                  </select>
+                </label>
+                <label>
+                  Moneda principal
+                  <select id="currencySelect" required disabled>
+                    <option>COP - Peso colombiano</option>
+                    <option>MXN - Peso mexicano</option>
+                    <option>PEN - Sol peruano</option>
+                    <option>CLP - Peso chileno</option>
+                    <option>USD - Dolar</option>
+                  </select>
+                </label>
+                <label>
+                  Meta mensual de ventas
+                  <input id="monthlyGoal" type="number" min="1" value="100000000" disabled />
+                </label>
+                <label>
+                  Inventario minimo por producto
+                  <input id="minimumStock" type="number" min="1" value="10" disabled />
+                </label>
+                <label>
+                  Primera fuente de datos
+                  <select id="dataSource" required disabled>
+                    <option>Excel/CSV</option>
+                    <option>Google Sheets</option>
+                    <option>Siigo</option>
+                    <option>Alegra</option>
+                    <option>Mercado Pago</option>
+                  </select>
+                </label>
+              </div>
+              <button id="startOnboardingButton" class="secondary-button" type="submit" disabled>Completar onboarding</button>
+            </form>
+          </div>
+        </section>
+      </main>
+      <footer class="site-footer">
+        <span>Copiloto Pyme</span>
+        <strong>Un producto Tecnotitan S.A.S</strong>
+      </footer>
+    </div>
+
+    <div id="appView" class="app-shell is-hidden">
+      <header class="mobile-app-bar">
+        <div class="brand">
+          <div class="brand-mark">CP</div>
+          <div>
+            <strong>Copiloto Pyme</strong>
+            <span id="mobileCompanyText">Distribuidora Andina</span>
+          </div>
+        </div>
+        <button class="secondary-button" type="button" data-show-portal>Portal</button>
+      </header>
+
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">CP</div>
+          <div>
+            <strong>Copiloto Pyme</strong>
+            <span>PYME Command Center</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Principal">
+          <button class="nav-item active" type="button">
+            <span>Panel diario</span>
+          </button>
+          <button class="nav-item" type="button">
+            <span>Ventas</span>
+          </button>
+          <button class="nav-item" type="button">
+            <span>Caja</span>
+          </button>
+          <button class="nav-item" type="button">
+            <span>Inventario</span>
+          </button>
+            <button class="nav-item" type="button">
+              <span>Clientes</span>
+            </button>
+            <button class="nav-item" type="button">
+              <span>Decisiones</span>
+            </button>
+            <button class="nav-item" type="button">
+              <span>Integraciones</span>
+            </button>
+            <button class="nav-item" type="button">
+              <span>Reportes</span>
+            </button>
+        </nav>
+
+        <div class="tenant-card">
+          <span>Empresa activa</span>
+          <strong id="tenantCompany">Distribuidora Andina</strong>
+          <small id="tenantMeta">Bogota, Colombia</small>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Panel de decisiones en tiempo real</p>
+            <h1>Que debe revisar <span id="activeCompanyText">tu PYME</span> hoy</h1>
+          </div>
+          <div class="topbar-actions">
+            <label class="upload-button">
+              <input id="csvInput" type="file" accept=".csv" />
+              Importar CSV
+            </label>
+            <button id="downloadTemplateButton" class="secondary-button" type="button">Plantilla CSV</button>
+            <button id="refreshButton" class="primary-button" type="button">Actualizar datos</button>
+            <button class="secondary-button" type="button" data-show-portal>Portal</button>
+          </div>
+        </header>
+
+        <section class="decision-strip" aria-label="Recomendaciones principales">
+          <div>
+            <span class="status-dot"></span>
+            <strong>Decision recomendada</strong>
+          </div>
+          <p id="mainRecommendation">Reponer inventario de Cafe Premium antes del viernes y revisar el gasto de transporte.</p>
+        </section>
+
+        <section class="setup-summary" aria-label="Configuracion del negocio">
+          <div>
+            <span>Tipo de negocio</span>
+            <strong id="summaryBusinessType">Distribuidora</strong>
+          </div>
+          <div>
+            <span>Moneda</span>
+            <strong id="summaryCurrency">COP</strong>
+          </div>
+          <div>
+            <span>Meta mensual</span>
+            <strong id="summaryGoal">$100.0M</strong>
+          </div>
+          <div>
+            <span>Fuente inicial</span>
+            <strong id="summarySource">Excel/CSV</strong>
+          </div>
+        </section>
+
+        <section class="customizer-panel" aria-label="Personalizacion del dashboard">
+          <div class="panel-heading">
+            <div>
+              <span>Dashboard personalizable</span>
+              <h2>Elige que ve cada usuario</h2>
+            </div>
+            <select id="dashboardFocus" aria-label="Enfoque del dashboard">
+              <option value="owner">Dueño / Gerencia</option>
+              <option value="finance">Finanzas</option>
+              <option value="sales">Ventas</option>
+              <option value="operations">Operaciones</option>
+            </select>
+          </div>
+          <div class="customizer-grid">
+            <label><input type="checkbox" data-kpi-toggle="sales" checked /> Ventas</label>
+            <label><input type="checkbox" data-kpi-toggle="cash" checked /> Caja</label>
+            <label><input type="checkbox" data-kpi-toggle="margin" checked /> Margen</label>
+            <label><input type="checkbox" data-kpi-toggle="stock" checked /> Inventario</label>
+            <label><input type="checkbox" data-panel-toggle="importer" checked /> Importador</label>
+            <label><input type="checkbox" data-panel-toggle="products" checked /> Productos</label>
+            <label><input type="checkbox" data-panel-toggle="copilot" checked /> Copiloto IA</label>
+            <label><input type="checkbox" data-panel-toggle="decisions" checked /> Decisiones</label>
+            <label><input type="checkbox" data-panel-toggle="integrations" checked /> Integraciones</label>
+            <label><input type="checkbox" data-panel-toggle="reports" checked /> Reportes</label>
+          </div>
+        </section>
+
+        <section id="mobileIntegrationsAnchor" class="integrations-panel" data-panel-card="integrations" aria-label="Integraciones latinoamericanas">
+          <div class="panel-heading">
+            <div>
+              <span>Integraciones latinoamericanas</span>
+              <h2>Conecta tus fuentes de datos</h2>
+            </div>
+            <button id="syncIntegrationsButton" class="primary-button" type="button">Sincronizar</button>
+          </div>
+          <div id="integrationsGrid" class="integrations-grid"></div>
+        </section>
+
+        <section id="mobileReportsAnchor" class="reports-panel" data-panel-card="reports" aria-label="Reportes automaticos">
+          <div class="panel-heading">
+            <div>
+              <span>Reportes automaticos</span>
+              <h2>Envios para gerencia</h2>
+            </div>
+            <button id="generateReportButton" class="primary-button" type="button">Generar reporte</button>
+          </div>
+          <div class="reports-layout">
+            <form id="reportSettingsForm" class="report-settings">
+              <label>
+                Frecuencia
+                <select id="reportFrequency">
+                  <option>Diario</option>
+                  <option selected>Semanal</option>
+                  <option>Mensual</option>
+                </select>
+              </label>
+              <label>
+                Canal
+                <select id="reportChannel">
+                  <option>Email</option>
+                  <option>WhatsApp</option>
+                  <option>Email y WhatsApp</option>
+                </select>
+              </label>
+              <label>
+                Destinatario
+                <input id="reportRecipient" type="text" value="gerencia@empresa.com" />
+              </label>
+              <button id="downloadReportButton" class="secondary-button" type="button">Descargar TXT</button>
+            </form>
+            <div class="report-preview">
+              <div class="preview-heading">
+                <span>Vista previa</span>
+                <strong id="reportStatus">Programado semanal</strong>
+              </div>
+              <pre id="reportPreview">Genera un reporte para ver el resumen ejecutivo.</pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="mobileGoalsAnchor" class="goals-panel" aria-label="Metas y semaforos">
+          <div class="panel-heading">
+            <div>
+              <span>Metas y semaforos</span>
+              <h2>Avance contra objetivos</h2>
+            </div>
+            <button id="recalculateGoalsButton" class="secondary-button" type="button">Recalcular</button>
+          </div>
+          <div class="goals-grid">
+            <article class="goal-card" data-goal-card="sales">
+              <div class="goal-topline">
+                <span class="traffic-light" id="salesGoalLight"></span>
+                <strong>Meta mensual de ventas</strong>
+              </div>
+              <p id="salesGoalText">$84.2M de $100.0M</p>
+              <div class="progress-track"><span id="salesGoalProgress"></span></div>
+            </article>
+            <article class="goal-card" data-goal-card="cash">
+              <div class="goal-topline">
+                <span class="traffic-light" id="cashGoalLight"></span>
+                <strong>Caja disponible</strong>
+              </div>
+              <p id="cashGoalText">18 dias de cobertura</p>
+              <div class="progress-track"><span id="cashGoalProgress"></span></div>
+            </article>
+            <article class="goal-card" data-goal-card="margin">
+              <div class="goal-topline">
+                <span class="traffic-light" id="marginGoalLight"></span>
+                <strong>Margen minimo</strong>
+              </div>
+              <p id="marginGoalText">31.8% contra meta de 30%</p>
+              <div class="progress-track"><span id="marginGoalProgress"></span></div>
+            </article>
+            <article class="goal-card" data-goal-card="stock">
+              <div class="goal-topline">
+                <span class="traffic-light" id="stockGoalLight"></span>
+                <strong>Inventario critico</strong>
+              </div>
+              <p id="stockGoalText">7 SKU requieren atencion</p>
+              <div class="progress-track"><span id="stockGoalProgress"></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="rules-panel" aria-label="Alertas configurables">
+          <div class="panel-heading">
+            <div>
+              <span>Alertas configurables</span>
+              <h2>Reglas de riesgo del negocio</h2>
+            </div>
+            <button id="applyAlertRulesButton" class="primary-button" type="button">Aplicar reglas</button>
+          </div>
+          <div class="rules-grid">
+            <label>
+              <span><input type="checkbox" id="ruleSalesEnabled" checked /> Ventas bajo meta</span>
+              <input id="ruleSalesThreshold" type="number" min="1" max="100" value="70" />
+              <small>% minimo de avance mensual</small>
+            </label>
+            <label>
+              <span><input type="checkbox" id="ruleCashEnabled" checked /> Caja insuficiente</span>
+              <input id="ruleCashThreshold" type="number" min="1" value="14" />
+              <small>Dias minimos de cobertura</small>
+            </label>
+            <label>
+              <span><input type="checkbox" id="ruleMarginEnabled" checked /> Margen bajo</span>
+              <input id="ruleMarginThreshold" type="number" min="1" max="100" value="30" />
+              <small>% minimo de margen bruto</small>
+            </label>
+            <label>
+              <span><input type="checkbox" id="ruleStockEnabled" checked /> Inventario critico</span>
+              <input id="ruleStockThreshold" type="number" min="0" value="3" />
+              <small>SKU maximos en riesgo</small>
+            </label>
+          </div>
+        </section>
+
+        <section class="importer-panel" data-panel-card="importer" aria-label="Importador de datos">
+          <div class="panel-heading">
+            <div>
+              <span>Importador real CSV</span>
+              <h2>Ventas, caja, gastos e inventario</h2>
+            </div>
+            <strong id="importStatus">Sin archivo cargado</strong>
+          </div>
+          <div class="importer-grid">
+            <div>
+              <p>
+                Columnas requeridas: <strong>fecha</strong>, <strong>producto</strong>, <strong>ventas</strong>, <strong>stock</strong>.
+                Opcionales: <strong>caja</strong>, <strong>gastos</strong>, <strong>margen</strong>.
+              </p>
+              <div id="importValidation" class="import-validation">Carga un CSV para validar estructura y datos.</div>
+            </div>
+            <div class="preview-box">
+              <div class="preview-heading">
+                <span>Vista previa</span>
+                <button id="applyImportButton" class="primary-button" type="button" disabled>Aplicar al dashboard</button>
+              </div>
+              <div id="importPreview" class="preview-table">Aun no hay datos para mostrar.</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="kpiGrid" class="kpi-grid" aria-label="Indicadores clave">
+          <article class="metric-card" data-kpi-card="sales" data-status="green">
+            <span>Ventas del mes</span>
+            <strong id="salesMetric">$84.2M</strong>
+            <small id="salesStatusText" class="positive">84% de la meta mensual</small>
+          </article>
+          <article class="metric-card" data-kpi-card="cash" data-status="yellow">
+            <span>Caja disponible</span>
+            <strong id="cashMetric">$27.6M</strong>
+            <small id="cashStatusText" class="warning">Alcanza para 18 dias</small>
+          </article>
+          <article class="metric-card" data-kpi-card="margin" data-status="green">
+            <span>Margen bruto</span>
+            <strong id="marginMetric">31.8%</strong>
+            <small id="marginStatusText" class="positive">+1.8 pts vs meta</small>
+          </article>
+          <article class="metric-card" data-kpi-card="stock" data-status="red">
+            <span>Inventario critico</span>
+            <strong id="stockMetric">7 SKU</strong>
+            <small id="stockStatusText" class="danger">Requiere atencion hoy</small>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel chart-panel">
+            <div class="panel-heading">
+              <div>
+                <span>Ventas recientes</span>
+                <h2>Tendencia semanal</h2>
+              </div>
+              <select id="periodSelect" aria-label="Periodo">
+                <option>Ultimos 7 dias</option>
+                <option>Ultimos 30 dias</option>
+                <option>Este trimestre</option>
+              </select>
+            </div>
+            <div id="barChart" class="bar-chart" aria-label="Grafico de ventas"></div>
+          </article>
+
+          <article id="mobileAlertsAnchor" class="panel alerts-panel">
+            <div class="panel-heading">
+              <div>
+                <span>Atencion requerida</span>
+                <h2>Alertas inteligentes</h2>
+              </div>
+            </div>
+            <div id="alertsList" class="alerts-list"></div>
+          </article>
+
+          <article class="panel" data-panel-card="products">
+            <div class="panel-heading">
+              <div>
+                <span>Productos</span>
+                <h2>Mas vendidos</h2>
+              </div>
+            </div>
+            <div id="productsTable" class="table-list"></div>
+          </article>
+
+          <article id="mobileDecisionsAnchor" class="panel decisions-panel" data-panel-card="decisions">
+            <div class="panel-heading">
+              <div>
+                <span>Historial</span>
+                <h2>Decisiones tomadas</h2>
+              </div>
+            </div>
+            <form id="decisionForm" class="decision-form">
+              <input id="decisionText" type="text" required placeholder="Ej. Reponer Panela Organica esta semana" />
+              <select id="decisionOwner" aria-label="Responsable">
+                <option>Dueño</option>
+                <option>Administrador</option>
+                <option>Contador</option>
+                <option>Ventas</option>
+                <option>Operaciones</option>
+              </select>
+              <select id="decisionImpact" aria-label="Impacto">
+                <option>Inventario</option>
+                <option>Caja</option>
+                <option>Ventas</option>
+                <option>Margen</option>
+                <option>Clientes</option>
+              </select>
+              <button class="primary-button" type="submit">Registrar</button>
+            </form>
+            <div id="decisionsList" class="decisions-list"></div>
+          </article>
+
+          <article id="mobileCopilotAnchor" class="panel copilot-panel" data-panel-card="copilot">
+            <div class="panel-heading">
+              <div>
+                <span>Copiloto IA</span>
+                <h2>Resumen ejecutivo</h2>
+              </div>
+              <button id="generateBriefButton" class="secondary-button" type="button">Generar brief</button>
+            </div>
+            <div id="aiSummary" class="ai-summary"></div>
+            <div class="quick-prompts" aria-label="Preguntas sugeridas">
+              <button type="button" data-question="Que debo revisar hoy?">Revisar hoy</button>
+              <button type="button" data-question="Como va la meta mensual?">Meta mensual</button>
+              <button type="button" data-question="Que productos necesitan atencion?">Productos</button>
+              <button type="button" data-question="Que riesgo tiene la caja?">Caja</button>
+            </div>
+            <div class="prompt-box">
+              <input id="questionInput" type="text" placeholder="Pregunta: que debo revisar hoy?" />
+              <button id="askButton" type="button">Preguntar</button>
+            </div>
+            <p id="answerBox" class="answer-box"></p>
+          </article>
+        </section>
+      </main>
+      <nav class="mobile-quick-nav" aria-label="Accesos rapidos moviles">
+        <a href="#kpiGrid">KPIs</a>
+        <a href="#mobileGoalsAnchor">Metas</a>
+        <a href="#mobileIntegrationsAnchor">Datos</a>
+        <a href="#mobileReportsAnchor">Reporte</a>
+      </nav>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
