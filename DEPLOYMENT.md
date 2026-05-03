@@ -12,7 +12,17 @@ Copiloto Pyme tiene una version inicial en Next.js, React y TypeScript. El proto
    - Install command: `npm install`
    - Build command: `npm run build`
    - Output directory: `.next`
-5. Publicar.
+5. Crear una base PostgreSQL administrada.
+6. Configurar variables de entorno:
+   - `DATABASE_URL`
+   - `DATABASE_SSL=true` si el proveedor exige SSL.
+7. Aplicar el esquema:
+
+```bash
+psql "$DATABASE_URL" -f database/schema.sql
+```
+
+8. Publicar.
 
 ## Alternativas
 
@@ -28,12 +38,33 @@ npm run build
 npm run start
 ```
 
+## Base De Datos
+
+El esquema productivo vive en:
+
+```text
+database/schema.sql
+```
+
+El modelo Prisma de referencia vive en:
+
+```text
+prisma/schema.prisma
+```
+
+Proveedores recomendados para el MVP:
+
+- Vercel Postgres / Neon.
+- Supabase.
+- Railway PostgreSQL.
+- Render PostgreSQL.
+
 ## Futuro SaaS
 
-Cuando el producto incorpore backend real, el deployment recomendado sera:
+Con backend real, el deployment recomendado sera:
 
 - Frontend: Vercel
-- Backend: AWS, Render, Railway o Fly.io
-- Base de datos: PostgreSQL
+- Backend/API: Next.js Route Handlers en Vercel al inicio; NestJS separado cuando escale.
+- Base de datos: PostgreSQL administrado.
 - Autenticacion: Clerk, Auth0 o WorkOS
 - Pagos: Mercado Pago o Stripe

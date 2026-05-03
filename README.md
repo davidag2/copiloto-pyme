@@ -36,6 +36,7 @@ Incluye:
 - Historial de decisiones.
 - Integraciones latinoamericanas simuladas.
 - Reportes automaticos simulados con descarga `.txt`.
+- API inicial con PostgreSQL para guardar empresas, usuarios, importaciones, alertas, integraciones, decisiones y reportes.
 
 ## Producto
 
@@ -254,14 +255,69 @@ El reporte incluye:
 - Integraciones.
 - Accion recomendada.
 
+### 13. Base De Datos Real
+
+El proyecto ya incluye una primera capa backend para PostgreSQL.
+
+Archivos principales:
+
+- `DATABASE.md`
+- `database/schema.sql`
+- `prisma/schema.prisma`
+- `lib/db.ts`
+- `lib/api.ts`
+- `app/api`
+
+Entidades soportadas:
+
+- Empresas.
+- Usuarios.
+- Lotes y filas de datos importados.
+- Reglas de alerta.
+- Alertas generadas.
+- Integraciones.
+- Decisiones.
+- Reportes.
+
+Configurar la variable:
+
+```text
+DATABASE_URL
+```
+
+Puedes partir de `.env.example`.
+
+Endpoints iniciales:
+
+- `GET /api/companies`
+- `POST /api/companies`
+- `GET /api/companies/:companyId/dashboard`
+- `POST /api/imports`
+- `GET /api/alerts?companyId=...`
+- `POST /api/alerts`
+- `GET /api/integrations?companyId=...`
+- `POST /api/integrations`
+- `GET /api/decisions?companyId=...`
+- `POST /api/decisions`
+- `GET /api/reports?companyId=...`
+- `POST /api/reports`
+
 ## Estructura Del Proyecto
 
 ```text
 .
 ├── app/
+│   ├── api/
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
+├── database/
+│   └── schema.sql
+├── lib/
+│   ├── api.ts
+│   └── db.ts
+├── prisma/
+│   └── schema.prisma
 ├── index.html
 ├── styles.css
 ├── app.js
@@ -317,6 +373,9 @@ La version de produccion inicia con:
 - React
 - TypeScript
 - lucide-react
+- PostgreSQL
+- pg
+- Prisma
 
 ## Stack Recomendado Para Produccion
 

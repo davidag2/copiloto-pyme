@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id            String              @id @default(uuid()) @db.Uuid
+  name          String
+  country       String              @default("Colombia")
+  businessType  String              @map("business_type")
+  currency      String              @default("COP")
+  plan          String              @default("Crecimiento")
+  monthlyGoal   Decimal             @default(0) @map("monthly_goal") @db.Decimal(14, 2)
+  minimumStock  Int                 @default(0) @map("minimum_stock")
+  dataSource    String              @default("Excel/CSV") @map("data_source")
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  users         User[]
+  importBatches ImportedDataBatch[]
+  importedRows  ImportedDataRow[]
+  alertRules    AlertRule[]
+  alerts        Alert[]
+  integrations  Integration[]
+  decisions     Decision[]
+  reports       Report[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String  @map("company_id") @db.Uuid
+  name      String
+  email     String   @unique
+  role      String   @default("owner")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model ImportedDataBatch {
+  id        String            @id @default(uuid()) @db.Uuid
+  companyId String           @map("company_id") @db.Uuid
+  source    String           @default("CSV")
+  fileName  String?          @map("file_name")
+  rowCount  Int              @default(0) @map("row_count")
+  status    String           @default("processed")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rows      ImportedDataRow[]
+
+  @@map("imported_data_batches")
+}
+
+model ImportedDataRow {
+  id          String            @id @default(uuid()) @db.Uuid
+  batchId     String            @map("batch_id") @db.Uuid
+  companyId   String            @map("company_id") @db.Uuid
+  saleDate    DateTime?         @map("sale_date") @db.Date
+  productName String            @map("product_name")
+  sales       Decimal           @default(0) @db.Decimal(14, 2)
+  stock       Int               @default(0)
+  cash        Decimal?          @db.Decimal(14, 2)
+  expenses    Decimal?          @db.Decimal(14, 2)
+  margin      Decimal?          @db.Decimal(8, 2)
+  rawData     Json              @default("{}") @map("raw_data")
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  batch       ImportedDataBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  company     Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, saleDate(sort: Desc)])
+  @@map("imported_data_rows")
+}
+
+model AlertRule {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String  @map("company_id") @db.Uuid
+  metric     String
+  threshold  Decimal @db.Decimal(14, 2)
+  comparator String  @default("below")
+  enabled    Boolean @default(true)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  alerts     Alert[]
+
+  @@unique([companyId, metric])
+  @@map("alert_rules")
+}
+
+model Alert {
+  id         String     @id @default(uuid()) @db.Uuid
+  companyId  String    @map("company_id") @db.Uuid
+  ruleId     String?   @map("rule_id") @db.Uuid
+  level      String
+  title      String
+  text       String
+  status     String    @default("open")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rule       AlertRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, status, createdAt(sort: Desc)])
+  @@map("alerts")
+}
+
+model Integration {
+  id             String    @id @default(uuid()) @db.Uuid
+  companyId      String   @map("company_id") @db.Uuid
+  provider       String
+  category       String
+  status         String   @default("Disponible")
+  syncLabel      String   @default("Manual") @map("sync_label")
+  lastSyncAt     DateTime? @map("last_sync_at") @db.Timestamptz(6)
+  credentialsRef String?  @map("credentials_ref")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, provider])
+  @@map("integrations")
+}
+
+model Decision {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String  @map("company_id") @db.Uuid
+  text         String
+  owner        String
+  impact       String
+  status       String  @default("Pendiente")
+  decisionDate DateTime @default(now()) @map("decision_date") @db.Date
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status, decisionDate(sort: Desc)])
+  @@map("decisions")
+}
+
+model Report {
+  id        String    @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  frequency String
+  channel   String
+  recipient String
+  content   String
+  status    String   @default("draft")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  sentAt    DateTime? @map("sent_at") @db.Timestamptz(6)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@map("reports")
+}
