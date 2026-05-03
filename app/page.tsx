@@ -65,6 +65,23 @@ type NavItem = { label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
 type EntityResponse<T> = { [key: string]: T };
+type AuthUser = { id: string; companyId: string; name: string; email: string; role: string; status: string };
+type AuthCompany = {
+  id: string;
+  name: string;
+  country: string;
+  businessType: string;
+  currency: string;
+  plan: string;
+  monthlyGoal: number;
+  minimumStock: number;
+  dataSource: string;
+};
+type AuthResponse = { user: AuthUser; company: AuthCompany; session: { token: string; tokenHash: string; expiresIn: string } };
+type RecoveryResponse = { message: string; resetToken: string | null; expiresIn: string };
+type Invitation = { id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string };
+type TeamMember = { id: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
+type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -171,6 +188,14 @@ export default function Home() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
   const [persistenceStatus, setPersistenceStatus] = useState("Modo demo: aun no hay empresa guardada en PostgreSQL.");
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authForm, setAuthForm] = useState({ password: "", loginEmail: "", loginPassword: "", recoverEmail: "" });
+  const [authStatus, setAuthStatus] = useState("Crea tu cuenta o entra con tu usuario empresarial.");
+  const [resetToken, setResetToken] = useState("");
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [inviteForm, setInviteForm] = useState({ email: "", role: "viewer" });
+  const [inviteLink, setInviteLink] = useState("");
   const [customer, setCustomer] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -221,12 +246,21 @@ export default function Home() {
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
     const savedCompanyId = window.localStorage.getItem("copiloto-pyme-company-id");
+    const savedAuthUser = window.localStorage.getItem("copiloto-pyme-user");
     if (savedTheme === "dark" || savedTheme === "light") {
       setTheme(savedTheme);
     }
     if (savedCompanyId) {
       setCompanyId(savedCompanyId);
       setPersistenceStatus("Empresa conectada a PostgreSQL.");
+    }
+    if (savedAuthUser) {
+      try {
+        setAuthUser(JSON.parse(savedAuthUser) as AuthUser);
+        setAuthStatus("Sesion local restaurada.");
+      } catch {
+        window.localStorage.removeItem("copiloto-pyme-user");
+      }
     }
   }, []);
 
@@ -241,6 +275,12 @@ export default function Home() {
   }, [companyId]);
 
   useEffect(() => {
+    if (authUser) {
+      window.localStorage.setItem("copiloto-pyme-user", JSON.stringify(authUser));
+    }
+  }, [authUser]);
+
+  useEffect(() => {
     if (!microAction) return;
     const timer = window.setTimeout(() => {
       setMicroAction(null);
@@ -250,6 +290,12 @@ export default function Home() {
     }, 1700);
     return () => window.clearTimeout(timer);
   }, [microAction, microFeedback]);
+
+  useEffect(() => {
+    if (companyId && authUser) {
+      void loadTeam(companyId);
+    }
+  }, [companyId, authUser]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
@@ -313,6 +359,33 @@ export default function Home() {
     setMicroFeedback(message);
   }
 
+  function applyAuthSession(data: AuthResponse) {
+    setAuthUser(data.user);
+    setCompanyId(data.company.id);
+    setCustomer((current) => ({
+      ...current,
+      ownerName: data.user.name,
+      ownerEmail: data.user.email,
+      companyName: data.company.name,
+      country: data.company.country,
+      plan: data.company.plan,
+      businessType: data.company.businessType,
+      currency: data.company.currency.includes(" - ") ? data.company.currency : `${data.company.currency} - Peso colombiano`,
+      monthlyGoal: data.company.monthlyGoal,
+      minimumStock: data.company.minimumStock,
+      dataSource: data.company.dataSource
+    }));
+    setPersistenceStatus("Sesion autenticada y empresa conectada a PostgreSQL.");
+  }
+
+  async function loadTeam(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const teamResult = await apiJson<{ users: TeamMember[] }>(`/api/auth/team?companyId=${activeCompanyId}`, { method: "GET" });
+    if (teamResult.ok) setTeamMembers(teamResult.data.users);
+    const invitationResult = await apiJson<{ invitations: Invitation[] }>(`/api/auth/invite?companyId=${activeCompanyId}`, { method: "GET" });
+    if (invitationResult.ok) setInvitations(invitationResult.data.invitations);
+  }
+
   function refreshMetrics() {
     const multiplier = 0.94 + Math.random() * 0.14;
     updateMetrics({
@@ -355,9 +428,101 @@ export default function Home() {
 
   async function completeSignup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await ensureCompany();
+    const result = await apiJson<AuthResponse>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        companyName: customer.companyName,
+        ownerName: customer.ownerName,
+        ownerEmail: customer.ownerEmail,
+        password: authForm.password,
+        country: customer.country,
+        businessType: customer.businessType,
+        currency: customer.currency.split(" - ")[0],
+        plan: customer.plan,
+        monthlyGoal: customer.monthlyGoal,
+        minimumStock: customer.minimumStock,
+        dataSource: customer.dataSource
+      })
+    });
+    if (!result.ok) {
+      setAuthStatus(`No se pudo crear la cuenta: ${result.error}`);
+      return;
+    }
+    applyAuthSession(result.data);
+    await loadTeam(result.data.company.id);
     setPaid(false);
+    setAuthStatus(`Cuenta creada. Rol: ${result.data.user.role}.`);
     setRecommendation("Usuario creado. Ya puedes pagar la suscripcion y continuar el onboarding.");
+  }
+
+  async function login(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = await apiJson<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: authForm.loginEmail,
+        password: authForm.loginPassword
+      })
+    });
+    if (!result.ok) {
+      setAuthStatus(`Login fallido: ${result.error}`);
+      return;
+    }
+    applyAuthSession(result.data);
+    await loadTeam(result.data.company.id);
+    setAuthStatus(`Bienvenido ${result.data.user.name}. Rol: ${result.data.user.role}.`);
+    setView("app");
+  }
+
+  async function recoverPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = await apiJson<RecoveryResponse>("/api/auth/recover", {
+      method: "POST",
+      body: JSON.stringify({ email: authForm.recoverEmail })
+    });
+    if (!result.ok) {
+      setAuthStatus(`No se pudo iniciar recuperacion: ${result.error}`);
+      return;
+    }
+    setResetToken(result.data.resetToken || "");
+    setAuthStatus(`${result.data.message} Token demo vigente por ${result.data.expiresIn}.`);
+  }
+
+  async function inviteTeamMember(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!companyId) {
+      setAuthStatus("Primero inicia sesion o crea una empresa para invitar equipo.");
+      return;
+    }
+    const result = await apiJson<InviteResponse>("/api/auth/invite", {
+      method: "POST",
+      body: JSON.stringify({
+        companyId,
+        email: inviteForm.email,
+        role: inviteForm.role,
+        invitedBy: authUser?.id
+      })
+    });
+    if (!result.ok) {
+      setAuthStatus(`No se pudo enviar invitacion: ${result.error}`);
+      return;
+    }
+    setInviteLink(result.data.inviteUrl);
+    setInviteForm({ email: "", role: "viewer" });
+    setAuthStatus(`Invitacion creada para ${result.data.invitation.email}.`);
+    await loadTeam(companyId);
+  }
+
+  function logout() {
+    setAuthUser(null);
+    setCompanyId("");
+    setTeamMembers([]);
+    setInvitations([]);
+    setInviteLink("");
+    window.localStorage.removeItem("copiloto-pyme-user");
+    window.localStorage.removeItem("copiloto-pyme-company-id");
+    setAuthStatus("Sesion cerrada.");
+    setView("portal");
   }
 
   async function completeOnboarding(event: FormEvent<HTMLFormElement>) {
@@ -627,6 +792,7 @@ ${recommendedAction()}`;
             <a href="#beneficios">Beneficios</a>
             <a href="#planes">Planes</a>
             <a href="#registro">Registro</a>
+            <a href="#login">Login</a>
           </nav>
           <button className="ghost-button" type="button" onClick={() => setView("app")}>Ver demo</button>
         </header>
@@ -681,9 +847,11 @@ ${recommendedAction()}`;
                 <div className="step-label">Paso 1 de 4</div>
                 <label>Nombre completo<input value={customer.ownerName} onChange={(event) => setCustomer({ ...customer, ownerName: event.target.value })} required /></label>
                 <label>Email empresarial<input type="email" value={customer.ownerEmail} onChange={(event) => setCustomer({ ...customer, ownerEmail: event.target.value })} required /></label>
+                <label>Contrasena<input minLength={8} type="password" value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} required /></label>
                 <label>Nombre de la empresa<input value={customer.companyName} onChange={(event) => setCustomer({ ...customer, companyName: event.target.value })} required /></label>
                 <label>Pais<select value={customer.country} onChange={(event) => setCustomer({ ...customer, country: event.target.value })}><option>Colombia</option><option>Mexico</option><option>Peru</option><option>Chile</option></select></label>
                 <button className="primary-button" type="submit">Crear usuario y continuar</button>
+                <small>{authStatus}</small>
               </form>
               <div className="checkout-card">
                 <div className="step-label">Paso 2 de 4</div><strong>Pago de suscripcion</strong>
@@ -701,6 +869,29 @@ ${recommendedAction()}`;
                 </div>
                 <button className="secondary-button" type="submit" disabled={!paid}>Completar onboarding</button>
               </form>
+            </div>
+          </section>
+
+          <section id="login" className="auth-section">
+            <div className="section-heading"><p className="eyebrow">Acceso seguro</p><h2>Login y recuperacion</h2></div>
+            <div className="auth-layout">
+              <form className="auth-card" onSubmit={login}>
+                <strong>Entrar a Copiloto Pyme</strong>
+                <label>Email empresarial<input type="email" value={authForm.loginEmail} onChange={(event) => setAuthForm({ ...authForm, loginEmail: event.target.value })} required /></label>
+                <label>Contrasena<input type="password" value={authForm.loginPassword} onChange={(event) => setAuthForm({ ...authForm, loginPassword: event.target.value })} required /></label>
+                <button className="primary-button" type="submit">Entrar al dashboard</button>
+              </form>
+              <form className="auth-card" onSubmit={recoverPassword}>
+                <strong>Recuperar contrasena</strong>
+                <label>Email empresarial<input type="email" value={authForm.recoverEmail} onChange={(event) => setAuthForm({ ...authForm, recoverEmail: event.target.value })} required /></label>
+                <button className="secondary-button" type="submit">Enviar recuperacion</button>
+                <small>{resetToken ? `Token demo: ${resetToken}` : "En produccion este flujo se envia por email."}</small>
+              </form>
+              <div className="auth-card">
+                <strong>Sesion actual</strong>
+                <p>{authUser ? `${authUser.name} · ${authUser.role} · ${authUser.email}` : "Sin sesion activa."}</p>
+                <button className="ghost-button" type="button" onClick={logout}>Cerrar sesion</button>
+              </div>
             </div>
           </section>
         </main>
@@ -777,6 +968,43 @@ ${recommendedAction()}`;
             <span>{microFeedback}</span>
           </div>
         )}
+
+        <section className="team-panel">
+          <div className="panel-heading">
+            <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
+            <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
+          </div>
+          <div className="team-layout">
+            <div className="session-card">
+              <span>Sesion activa</span>
+              <strong>{authUser ? authUser.name : "Demo sin login"}</strong>
+              <small>{authUser ? `${authUser.email} · ${authUser.role}` : "Crea una cuenta o inicia sesion para activar roles reales."}</small>
+              <button className="ghost-button" type="button" onClick={logout}>Cerrar sesion</button>
+            </div>
+            <form className="invite-form" onSubmit={inviteTeamMember}>
+              <label>Email del invitado<input type="email" value={inviteForm.email} onChange={(event) => setInviteForm({ ...inviteForm, email: event.target.value })} required /></label>
+              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}><option value="admin">Admin</option><option value="finance">Finanzas</option><option value="operations">Operaciones</option><option value="sales">Ventas</option><option value="viewer">Lectura</option></select></label>
+              <button className="primary-button" type="submit">Invitar</button>
+              {inviteLink && <small>Link demo: {inviteLink}</small>}
+            </form>
+          </div>
+          <div className="team-grid">
+            {teamMembers.map((member) => (
+              <article className="team-member-card" data-status={member.status} key={member.id}>
+                <strong>{member.name}</strong>
+                <span>{member.email}</span>
+                <small>{member.role} · {member.status}</small>
+              </article>
+            ))}
+            {invitations.map((invitation) => (
+              <article className="team-member-card" data-status={invitation.status} key={invitation.id}>
+                <strong>Invitacion pendiente</strong>
+                <span>{invitation.email}</span>
+                <small>{invitation.role} · expira {new Date(invitation.expiresAt).toLocaleDateString("es-CO")}</small>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="customizer-panel">
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>

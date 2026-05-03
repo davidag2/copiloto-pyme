@@ -29,6 +29,7 @@ Incluye:
 - Resumen del dia compacto para lectura ejecutiva en menos de 10 segundos.
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
 - Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
+- Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.
@@ -390,6 +391,7 @@ La version de produccion inicia con:
 - PostgreSQL
 - pg
 - Prisma
+- Crypto nativo de Node.js para hash de credenciales y tokens
 
 ## Stack Recomendado Para Produccion
 
