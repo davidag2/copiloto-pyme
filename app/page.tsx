@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Banknote,
@@ -167,6 +167,17 @@ function SalesTooltip({ active, payload, label }: ChartTooltipProps) {
         <span key={item.name} style={{ color: item.color }}>{item.name}: {formatMoney(Number(item.value ?? 0))}</span>
       ))}
       {typeof variation === "number" && <em>Variacion diaria: {variation >= 0 ? "+" : ""}{variation}%</em>}
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: string; action?: ReactNode }) {
+  return (
+    <div className="empty-state">
+      <div className="empty-icon"><Icon aria-hidden="true" /></div>
+      <strong>{title}</strong>
+      <p>{text}</p>
+      {action ? <div className="empty-action">{action}</div> : null}
     </div>
   );
 }
@@ -1128,6 +1139,14 @@ ${recommendedAction()}`;
         {visible.integrations && (
           <section id="mobileIntegrationsAnchor" className="integrations-panel">
             <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations} disabled={!permissions.canManageIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
+            {connectedIntegrations === 0 && (
+              <EmptyState
+                icon={Link2}
+                title="Aun no hay integraciones conectadas"
+                text="Conecta tu primera fuente para que ventas, caja e inventario empiecen a actualizarse con menos trabajo manual."
+                action={<button className="primary-button" type="button" onClick={() => connectIntegration("sheets")} disabled={!permissions.canManageIntegrations}>Conectar Google Sheets</button>}
+              />
+            )}
             <div className="integrations-grid">
               {integrations.map((integration) => (
                 <article className="integration-card" data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
@@ -1149,7 +1168,17 @@ ${recommendedAction()}`;
                 <label>Destinatario<input value={reportSettings.recipient} onChange={(event) => setReportSettings({ ...reportSettings, recipient: event.target.value })} /></label>
                 <button className="secondary-button" type="button" onClick={downloadReport}><FileText aria-hidden="true" />Descargar TXT</button>
               </form>
-              <div className="report-preview" data-motion={microAction === "report" ? "active" : undefined}><div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div><pre>{report || "Genera un reporte para ver el resumen ejecutivo."}</pre></div>
+              <div className="report-preview" data-motion={microAction === "report" ? "active" : undefined}>
+                <div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div>
+                {report ? <pre>{report}</pre> : (
+                  <EmptyState
+                    icon={FileText}
+                    title="Todavia no hay reportes"
+                    text="Genera el primer resumen ejecutivo para revisar ventas, caja, alertas y decisiones abiertas en un solo documento."
+                    action={<button className="primary-button" type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}>Generar primer reporte</button>}
+                  />
+                )}
+              </div>
             </div>
           </section>
         )}
@@ -1199,7 +1228,14 @@ ${recommendedAction()}`;
                 <div className="preview-table">
                   {csvRows.length ? (
                     <table><thead><tr>{csvHeaders.slice(0, 5).map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{csvRows.slice(0, 4).map((row, index) => <tr key={`${row[csvHeaders[0]]}-${index}`}>{csvHeaders.slice(0, 5).map((header) => <td key={header}>{row[header]}</td>)}</tr>)}</tbody></table>
-                  ) : importPreview}
+                  ) : (
+                    <EmptyState
+                      icon={Upload}
+                      title="Carga tu primer archivo"
+                      text="Importa un CSV para mapear columnas, detectar errores por fila y guardar datos reales en esta empresa."
+                      action={<button className="secondary-button" type="button" onClick={downloadTemplate}>Descargar plantilla CSV</button>}
+                    />
+                  )}
                 </div>
                 {importValidation?.errors.length ? <div className="row-errors">{importValidation.errors.slice(0, 5).map((error) => <span key={error.rowNumber}>Fila {error.rowNumber}: {error.errors.join(", ")}</span>)}</div> : null}
               </div>
@@ -1213,7 +1249,13 @@ ${recommendedAction()}`;
                     <small>{new Date(batch.createdAt).toLocaleString("es-CO")} · {batch.status}</small>
                     <button className="secondary-button" type="button" disabled={batch.status === "reversed"} onClick={() => { void reverseImport(batch.id); }}>Reversar</button>
                   </article>
-                )) : <p>No hay cargas guardadas para esta empresa.</p>}
+                )) : (
+                  <EmptyState
+                    icon={Database}
+                    title="Sin historial de cargas"
+                    text="Cuando apliques una importacion, aqui veras filas validas, errores, duplicados y la opcion de reversar."
+                  />
+                )}
               </div>
             </div>
           </section>
@@ -1253,7 +1295,31 @@ ${recommendedAction()}`;
             </div>
           </article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}><input name="decision" required disabled={!permissions.canRegisterDecisions} placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner" disabled={!permissions.canRegisterDecisions}><option>Propietario</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact" disabled={!permissions.canRegisterDecisions}><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit" disabled={!permissions.canRegisterDecisions}><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
+          {visible.decisions && (
+            <article id="mobileDecisionsAnchor" className="panel decisions-panel">
+              <div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div>
+              <form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}>
+                <input name="decision" required disabled={!permissions.canRegisterDecisions} placeholder="Ej. Reponer Panela Organica esta semana" />
+                <select name="owner" disabled={!permissions.canRegisterDecisions}><option>Propietario</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select>
+                <select name="impact" disabled={!permissions.canRegisterDecisions}><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select>
+                <button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit" disabled={!permissions.canRegisterDecisions}><ClipboardCheck aria-hidden="true" />Registrar</button>
+              </form>
+              <div className="decisions-list">
+                {decisions.length ? decisions.map((decision) => (
+                  <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}>
+                    <div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div>
+                    <select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select>
+                  </div>
+                )) : (
+                  <EmptyState
+                    icon={ClipboardCheck}
+                    title="No hay decisiones registradas"
+                    text="Registra la primera accion para que el equipo tenga seguimiento, responsable e impacto esperado."
+                  />
+                )}
+              </div>
+            </article>
+          )}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
       </main>

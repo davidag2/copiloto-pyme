@@ -1018,6 +1018,53 @@ select:focus-visible {
   color: var(--red);
 }
 
+.empty-state {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.08)),
+    var(--surface-strong);
+  border: 1px dashed rgba(37, 99, 235, 0.28);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  gap: 9px;
+  justify-items: center;
+  min-height: 172px;
+  padding: 22px;
+  text-align: center;
+}
+
+.empty-icon {
+  background: var(--surface);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: var(--radius-pill);
+  color: var(--brand-blue);
+  display: grid;
+  height: 42px;
+  place-items: center;
+  width: 42px;
+}
+
+.empty-icon svg {
+  height: 21px;
+  width: 21px;
+}
+
+.empty-state strong {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.empty-state p {
+  line-height: 1.5;
+  margin: 0;
+  max-width: 440px;
+}
+
+.empty-action {
+  margin-top: 4px;
+}
+
 .preview-box {
   min-width: 0;
 }
@@ -2482,8 +2529,13 @@ select,
   .summary-card,
   .alert-item,
   .table-row,
-  .decision-item {
+  .decision-item,
+  .empty-state {
     padding: 10px;
+  }
+
+  .empty-state {
+    min-height: 138px;
   }
 
   .priority-card {

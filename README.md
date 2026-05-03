@@ -33,6 +33,7 @@ Incluye:
 - Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
 - Multiempresa con separacion por `company_id`, permisos visibles y roles para propietario, administrador, contador, ventas y operaciones.
 - Diseño mobile first con tarjetas compactas, navegacion inferior con iconos y gestos de scroll mas naturales.
+- Estados vacios elegantes para datos, integraciones, decisiones y reportes, con llamados claros a la accion.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.
