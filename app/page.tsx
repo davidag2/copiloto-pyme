@@ -8,6 +8,7 @@ import {
   Boxes,
   Bot,
   ClipboardCheck,
+  Clock3,
   Database,
   FileText,
   Link2,
@@ -224,6 +225,13 @@ export default function Home() {
     return nextAlerts.length ? nextAlerts : [{ level: "positive", title: "Reglas dentro de rango", text: "No hay alertas activas segun los umbrales configurados." }];
   }, [metrics, rules, salesPercent]);
   const criticalAlerts = alerts.filter((alert) => alert.level === "danger" || alert.level === "warning");
+  const overallStatus = criticalAlerts.some((alert) => alert.level === "danger")
+    ? "Riesgo alto"
+    : criticalAlerts.length
+      ? "Atencion"
+      : "Controlado";
+  const overallStatusTone = overallStatus === "Riesgo alto" ? "red" : overallStatus === "Atencion" ? "yellow" : "green";
+  const topAlert = criticalAlerts[0] ?? alerts[0];
 
   const bestDay = weeklySales.reduce((best, item) => (item.value > best.value ? item : best), weeklySales[0]);
 
@@ -653,20 +661,24 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <section id="kpiGrid" className="priority-grid" aria-label="Resumen ejecutivo prioritario">
-          <article className="decision-hero">
-            <div>
-              <span className="priority-label"><ClipboardCheck aria-hidden="true" />Decision recomendada</span>
-              <h2>{recommendation}</h2>
-              <p>Enfocate primero en esta accion antes de revisar configuraciones o reportes secundarios.</p>
-            </div>
-            <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button>
-          </article>
-
-          {visible.sales && <article className="priority-card" data-status={statusForSales(metrics.sales, customer.monthlyGoal)}><span><BarChart3 aria-hidden="true" />Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small className={statusClass(statusForSales(metrics.sales, customer.monthlyGoal))}>{salesPercent}% de la meta</small></article>}
-          {visible.cash && <article className="priority-card" data-status={cashDays(metrics.cash) >= 14 ? "green" : "yellow"}><span><WalletCards aria-hidden="true" />Caja</span><strong>{formatMoney(metrics.cash)}</strong><small className="warning">{cashDays(metrics.cash)} dias de cobertura</small></article>}
-          {visible.decisions && <article className="priority-card" data-status={openDecisions > 0 ? "yellow" : "green"}><span><ClipboardCheck aria-hidden="true" />Acciones pendientes</span><strong>{openDecisions}</strong><small className="warning">Decisiones sin cerrar</small></article>}
-          <article className="priority-card" data-status={criticalAlerts.length > 0 ? "red" : "green"}><span><AlertTriangle aria-hidden="true" />Alertas criticas</span><strong>{criticalAlerts.length}</strong><small className={criticalAlerts.length > 0 ? "danger" : "positive"}>{criticalAlerts.length > 0 ? "Revisar hoy" : "Sin riesgos urgentes"}</small></article>
+        <section id="kpiGrid" className="daily-summary" data-status={overallStatusTone} aria-label="Resumen ejecutivo del dia">
+          <div className="summary-status">
+            <span><Clock3 aria-hidden="true" />Resumen del dia</span>
+            <strong>{overallStatus}</strong>
+            <small>{new Date().toLocaleDateString("es-CO", { weekday: "long", month: "short", day: "numeric" })}</small>
+          </div>
+          <div className="summary-main">
+            <span><ClipboardCheck aria-hidden="true" />Decision en 10 segundos</span>
+            <h2>{recommendation}</h2>
+            <p>{topAlert ? topAlert.text : "No hay bloqueos criticos para revisar ahora."}</p>
+          </div>
+          <div className="summary-metrics">
+            {visible.sales && <div><span><BarChart3 aria-hidden="true" />Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small>{salesPercent}% meta</small></div>}
+            {visible.cash && <div><span><WalletCards aria-hidden="true" />Caja</span><strong>{cashDays(metrics.cash)} dias</strong><small>{formatMoney(metrics.cash)}</small></div>}
+            <div><span><AlertTriangle aria-hidden="true" />Alertas</span><strong>{criticalAlerts.length}</strong><small>{criticalAlerts.length ? "revisar" : "ok"}</small></div>
+            {visible.decisions && <div><span><ClipboardCheck aria-hidden="true" />Pendientes</span><strong>{openDecisions}</strong><small>acciones</small></div>}
+          </div>
+          <button className="primary-button summary-action" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Brief</button>
         </section>
 
         <section className="setup-summary">
