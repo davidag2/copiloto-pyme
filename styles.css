@@ -1462,6 +1462,11 @@ h2 {
   min-height: 340px;
 }
 
+.chart-panel {
+  display: grid;
+  gap: 14px;
+}
+
 .panel-heading {
   align-items: center;
   display: flex;
@@ -1485,33 +1490,82 @@ select,
   padding: 10px 12px;
 }
 
-.bar-chart {
+.chart-summary {
   align-items: end;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 12px;
-  height: 238px;
-  padding-top: 18px;
+  gap: 3px;
+  justify-items: end;
 }
 
-.bar-wrap {
+.chart-summary strong {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.chart-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trend-metrics {
   display: grid;
-  gap: 8px;
-  grid-template-rows: 1fr auto;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trend-metrics div {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.trend-metrics span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.trend-metrics strong {
+  color: var(--ink);
+  display: block;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.trend-chart {
+  height: 280px;
   min-width: 0;
 }
 
-.bar {
-  align-self: end;
-  background: linear-gradient(180deg, var(--brand-blue), var(--brand-green));
-  border-radius: 8px 8px 4px 4px;
-  min-height: 18px;
+.chart-tooltip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
 }
 
-.bar-label {
+.chart-tooltip strong {
+  color: var(--ink);
+}
+
+.chart-tooltip span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.chart-tooltip em {
   color: var(--muted);
   font-size: 12px;
-  text-align: center;
+  font-style: normal;
+  font-weight: 900;
 }
 
 .alerts-list,
@@ -1925,13 +1979,12 @@ select,
     width: 100%;
   }
 
-  .bar-chart {
-    gap: 7px;
-    height: 190px;
+  .trend-metrics {
+    grid-template-columns: 1fr;
   }
 
-  .bar-label {
-    font-size: 11px;
+  .trend-chart {
+    height: 240px;
   }
 
   .rules-grid label,

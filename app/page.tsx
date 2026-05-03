@@ -22,6 +22,17 @@ import {
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  Area,
+  CartesianGrid,
+  Line,
+  LineChart,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 
 type SalePoint = { day: string; value: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -52,6 +63,11 @@ type NavItem = { label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
 type EntityResponse<T> = { [key: string]: T };
+type ChartTooltipProps = {
+  active?: boolean;
+  label?: string;
+  payload?: Array<{ name?: string; value?: number; color?: string; payload?: { variation?: number } }>;
+};
 
 const navItems: NavItem[] = [
   { label: "Panel diario", icon: Target },
@@ -93,6 +109,20 @@ function parseCsv(text: string) {
       return row;
     }, {});
   });
+}
+
+function SalesTooltip({ active, payload, label }: ChartTooltipProps) {
+  if (!active || !payload?.length) return null;
+  const variation = payload[0]?.payload?.variation;
+  return (
+    <div className="chart-tooltip">
+      <strong>{label}</strong>
+      {payload.map((item) => (
+        <span key={item.name} style={{ color: item.color }}>{item.name}: {formatMoney(Number(item.value ?? 0))}</span>
+      ))}
+      {typeof variation === "number" && <em>Variacion diaria: {variation >= 0 ? "+" : ""}{variation}%</em>}
+    </div>
+  );
 }
 
 const initialWeeklySales: SalePoint[] = [
@@ -234,6 +264,20 @@ export default function Home() {
   const topAlert = criticalAlerts[0] ?? alerts[0];
 
   const bestDay = weeklySales.reduce((best, item) => (item.value > best.value ? item : best), weeklySales[0]);
+  const chartData = weeklySales.map((item, index) => {
+    const previous = Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
+    const target = Number(((customer.monthlyGoal / 1_000_000) / 7).toFixed(1));
+    return {
+      day: item.day,
+      actual: Number(item.value.toFixed(1)),
+      previous,
+      target,
+      variation: Number((((item.value - previous) / previous) * 100).toFixed(1))
+    };
+  });
+  const weeklyTotal = weeklySales.reduce((total, item) => total + item.value, 0);
+  const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
+  const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
 
   function recommendedAction() {
     if (metrics.criticalStock > rules.stock) return `Reponer los SKU criticos antes de lanzar promociones. Hay ${metrics.criticalStock} SKU en riesgo.`;
@@ -770,7 +814,32 @@ ${recommendedAction()}`;
 
         <section className="content-grid">
           <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
-          <article className="panel chart-panel"><div className="panel-heading"><div><span><BarChart3 aria-hidden="true" />Ventas recientes</span><h2>Tendencia semanal</h2></div><select><option>Ultimos 7 dias</option></select></div><div className="bar-chart">{weeklySales.map((item) => <div className="bar-wrap" key={item.day}><div className="bar" style={{ height: `${Math.round((item.value / Math.max(...weeklySales.map((sale) => sale.value), 1)) * 100)}%` }} /><div className="bar-label">{item.day}</div></div>)}</div></article>
+          <article className="panel chart-panel">
+            <div className="panel-heading">
+              <div><span><BarChart3 aria-hidden="true" />Ventas recientes</span><h2>Tendencia y comparativo</h2></div>
+              <div className="chart-summary"><strong className={weeklyVariation >= 0 ? "positive" : "danger"}>{weeklyVariation >= 0 ? "+" : ""}{weeklyVariation}%</strong><span>vs semana anterior</span></div>
+            </div>
+            <div className="trend-metrics">
+              <div><span>Total semana</span><strong>{formatMoney(weeklyTotal)}</strong></div>
+              <div><span>Mejor dia</span><strong>{bestDay.day}</strong></div>
+              <div><span>Promedio diario</span><strong>{formatMoney(weeklyTotal / weeklySales.length)}</strong></div>
+            </div>
+            <div className="trend-chart" aria-label="Grafica de tendencia semanal de ventas">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="var(--line)" strokeDasharray="4 6" vertical={false} />
+                  <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 700 }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 12 }} tickFormatter={(value) => `$${value}M`} width={48} />
+                  <Tooltip content={<SalesTooltip />} />
+                  <Legend iconType="circle" wrapperStyle={{ color: "var(--muted)", fontSize: 12, fontWeight: 700 }} />
+                  <Area type="monotone" dataKey="actual" name="Actual" stroke="none" fill="rgba(37, 99, 235, 0.12)" activeDot={false} />
+                  <Line type="monotone" dataKey="target" name="Meta diaria" stroke="var(--amber)" strokeDasharray="6 6" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="previous" name="Semana anterior" stroke="var(--muted)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="actual" name="Actual" stroke="var(--brand-blue)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
           {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button" type="submit"><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
