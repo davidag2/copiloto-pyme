@@ -247,6 +247,7 @@ export default function Home() {
     dataSource: "Excel/CSV"
   });
   const [paid, setPaid] = useState(false);
+  const [onboardingReady, setOnboardingReady] = useState(false);
   const [metrics, setMetrics] = useState<Metrics>({ sales: 84.2, cash: 27.6, margin: 31.8, criticalStock: 7 });
   const [weeklySales, setWeeklySales] = useState(initialWeeklySales);
   const [products, setProducts] = useState(initialProducts);
@@ -348,6 +349,13 @@ export default function Home() {
   const activeRoleLabel = roleLabel(authUser?.role);
   const permissions = roleCapabilities(authUser?.role);
   const tenantShortId = companyId ? companyId.slice(0, 8) : "demo";
+  const onboardingProgress = onboardingReady ? 100 : paid ? 75 : authUser ? 50 : 25;
+  const onboardingSteps: Array<{ title: string; status: string; icon: LucideIcon; text: string }> = [
+    { title: "Cuenta", status: authUser ? "completed" : "active", icon: Bot, text: "Crea el usuario principal de la empresa." },
+    { title: "Pago", status: paid ? "completed" : authUser ? "active" : "locked", icon: WalletCards, text: "Activa la suscripcion antes de configurar datos." },
+    { title: "Configuracion", status: onboardingReady ? "completed" : paid ? "active" : "locked", icon: Settings2, text: "Define negocio, meta, inventario y fuente inicial." },
+    { title: "Confirmacion", status: onboardingReady ? "active" : "locked", icon: CheckCircle2, text: "Revisa el resumen antes de entrar al dashboard." }
+  ];
 
   const alerts = useMemo<Alert[]>(() => {
     const nextAlerts: Alert[] = [];
@@ -604,6 +612,11 @@ export default function Home() {
       setPersistenceStatus(result.ok ? "Onboarding guardado en PostgreSQL." : `Modo demo local: ${result.error}`);
     }
     setRecommendation(`Bienvenido ${customer.ownerName || "equipo"}. Siguiente paso: cargar datos desde ${customer.dataSource}.`);
+    setOnboardingReady(true);
+  }
+
+  function enterDashboardAfterOnboarding() {
+    setRecommendation(`Bienvenido ${customer.ownerName || "equipo"}. Tu panel inicial esta listo para ${customer.companyName}.`);
     setView("app");
   }
 
@@ -932,24 +945,39 @@ ${recommendedAction()}`;
 
           <section id="registro" className="signup-section">
             <div className="section-heading"><p className="eyebrow">Inicio del cliente</p><h2>Registro, pago y onboarding</h2></div>
+            <div className="onboarding-progress">
+              <div><span>Progreso de activacion</span><strong>{onboardingProgress}%</strong></div>
+              <div className="progress-track"><span style={{ width: `${onboardingProgress}%` }} /></div>
+            </div>
+            <div className="onboarding-steps">
+              {onboardingSteps.map((step) => {
+                const StepIcon = step.icon;
+                return <article data-status={step.status} key={step.title}><StepIcon aria-hidden="true" /><strong>{step.title}</strong><span>{step.text}</span></article>;
+              })}
+            </div>
             <div className="signup-layout">
               <form className="signup-form" onSubmit={completeSignup}>
+                <div className="onboarding-visual"><Bot aria-hidden="true" /><span>Usuario seguro</span></div>
                 <div className="step-label">Paso 1 de 4</div>
                 <label>Nombre completo<input value={customer.ownerName} onChange={(event) => setCustomer({ ...customer, ownerName: event.target.value })} required /></label>
                 <label>Email empresarial<input type="email" value={customer.ownerEmail} onChange={(event) => setCustomer({ ...customer, ownerEmail: event.target.value })} required /></label>
                 <label>Contrasena<input minLength={8} type="password" value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} required /></label>
                 <label>Nombre de la empresa<input value={customer.companyName} onChange={(event) => setCustomer({ ...customer, companyName: event.target.value })} required /></label>
                 <label>Pais<select value={customer.country} onChange={(event) => setCustomer({ ...customer, country: event.target.value })}><option>Colombia</option><option>Mexico</option><option>Peru</option><option>Chile</option></select></label>
+                <div className="context-help"><strong>Ayuda</strong><span>Usa un correo empresarial; sera el propietario inicial y podra invitar equipo despues.</span></div>
                 <button className="primary-button" type="submit">Crear usuario y continuar</button>
                 <small>{authStatus}</small>
               </form>
               <div className="checkout-card">
+                <div className="onboarding-visual"><WalletCards aria-hidden="true" /><span>Suscripcion activa</span></div>
                 <div className="step-label">Paso 2 de 4</div><strong>Pago de suscripcion</strong>
                 <p>{customer.companyName} quedara en el plan {customer.plan}.</p>
                 <button className="primary-button" type="button" onClick={() => setPaid(true)}>Pagar suscripcion</button>
+                <div className="context-help"><strong>Ayuda</strong><span>En esta version se simula pago aprobado para dejar listo el flujo de producto.</span></div>
                 <small>{paid ? "Pago aprobado. Onboarding disponible." : "Completa el registro para activar el pago."}</small>
               </div>
               <form className="onboarding-card" onSubmit={completeOnboarding}>
+                <div className="onboarding-visual"><Settings2 aria-hidden="true" /><span>Panel inicial</span></div>
                 <div className="step-label">Paso 3 de 4</div><strong>Configura tu primera vista</strong>
                 <div className="onboarding-fields">
                   <label>Tipo de negocio<select disabled={!paid} value={customer.businessType} onChange={(event) => setCustomer({ ...customer, businessType: event.target.value })}><option>Comercio minorista</option><option>Distribuidora</option><option>Restaurante</option><option>Ecommerce</option></select></label>
@@ -957,8 +985,17 @@ ${recommendedAction()}`;
                   <label>Inventario minimo<input disabled={!paid} type="number" value={customer.minimumStock} onChange={(event) => setCustomer({ ...customer, minimumStock: Number(event.target.value) })} /></label>
                   <label>Primera fuente<select disabled={!paid} value={customer.dataSource} onChange={(event) => setCustomer({ ...customer, dataSource: event.target.value })}><option>Excel/CSV</option><option>Google Sheets</option><option>Siigo</option><option>Alegra</option><option>Mercado Pago</option></select></label>
                 </div>
-                <button className="secondary-button" type="submit" disabled={!paid}>Completar onboarding</button>
+                <div className="context-help"><strong>Ayuda</strong><span>Estos datos definen metas, alertas iniciales y recomendaciones del resumen del dia.</span></div>
+                <button className="secondary-button" type="submit" disabled={!paid}>Guardar configuracion</button>
               </form>
+            </div>
+            <div className="onboarding-confirmation" data-ready={onboardingReady}>
+              <div className="onboarding-visual"><CheckCircle2 aria-hidden="true" /><span>Confirmacion final</span></div>
+              <div>
+                <strong>{onboardingReady ? "Todo listo para entrar al dashboard" : "Completa los pasos para activar tu panel"}</strong>
+                <p>{customer.companyName} · {customer.plan} · {customer.businessType} · fuente inicial {customer.dataSource} · meta {formatGoal(customer.monthlyGoal)}.</p>
+              </div>
+              <button className="primary-button" type="button" disabled={!onboardingReady} onClick={enterDashboardAfterOnboarding}>Entrar al dashboard</button>
             </div>
           </section>
 
