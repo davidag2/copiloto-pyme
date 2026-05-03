@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT,
-  role TEXT NOT NULL DEFAULT 'owner',
+  role TEXT NOT NULL DEFAULT 'propietario',
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'invited', 'disabled')),
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -31,7 +31,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active'
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
 UPDATE users SET role = CASE role
-  WHEN 'owner' THEN 'dueno'
+  WHEN 'dueno' THEN 'propietario'
+  WHEN 'owner' THEN 'propietario'
   WHEN 'admin' THEN 'administrador'
   WHEN 'finance' THEN 'contador'
   WHEN 'sales' THEN 'ventas'
@@ -64,7 +65,8 @@ CREATE TABLE IF NOT EXISTS team_invitations (
 );
 
 UPDATE team_invitations SET role = CASE role
-  WHEN 'owner' THEN 'dueno'
+  WHEN 'dueno' THEN 'propietario'
+  WHEN 'owner' THEN 'propietario'
   WHEN 'admin' THEN 'administrador'
   WHEN 'finance' THEN 'contador'
   WHEN 'sales' THEN 'ventas'

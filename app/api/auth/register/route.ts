@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         `INSERT INTO users (company_id, name, email, password_hash, role, status, last_login_at)
          VALUES ($1, $2, $3, $4, $5, 'active', NOW())
          RETURNING id, company_id AS "companyId", name, email, role, status, created_at AS "createdAt"`,
-        [companyId, ownerName, ownerEmail, hashPassword(password), normalizeRole("dueno")]
+        [companyId, ownerName, ownerEmail, hashPassword(password), normalizeRole("propietario")]
       );
 
       for (const rule of defaultRules) {

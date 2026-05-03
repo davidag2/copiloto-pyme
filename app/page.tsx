@@ -1121,7 +1121,7 @@ ${recommendedAction()}`;
             </div>
             <form className="invite-form" onSubmit={inviteTeamMember}>
               <label>Email del invitado<input type="email" value={inviteForm.email} onChange={(event) => setInviteForm({ ...inviteForm, email: event.target.value })} required /></label>
-              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}>{companyRoles.filter((role) => role.value !== "dueno").map((role) => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
+              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}>{companyRoles.filter((role) => role.value !== "propietario").map((role) => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
               <button className="primary-button" type="submit" disabled={!permissions.canManageTeam}>Invitar</button>
               {inviteLink && <small>Link demo: {inviteLink}</small>}
             </form>

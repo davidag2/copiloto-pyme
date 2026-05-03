@@ -11,6 +11,7 @@ export async function GET(request: Request) {
        WHERE company_id = $1
        ORDER BY
          CASE role
+           WHEN 'propietario' THEN 1
            WHEN 'dueno' THEN 1
            WHEN 'owner' THEN 1
            WHEN 'administrador' THEN 2

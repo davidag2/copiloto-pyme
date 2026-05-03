@@ -1,7 +1,7 @@
-export type CompanyRole = "dueno" | "administrador" | "contador" | "ventas" | "operaciones";
+export type CompanyRole = "propietario" | "administrador" | "contador" | "ventas" | "operaciones";
 
 export const companyRoles: Array<{ value: CompanyRole; label: string; description: string }> = [
-  { value: "dueno", label: "Propietario", description: "Control total de empresa, equipo, datos y facturacion." },
+  { value: "propietario", label: "Propietario", description: "Control total de empresa, equipo, datos y facturacion." },
   { value: "administrador", label: "Administrador", description: "Gestiona operacion, reglas, integraciones y equipo." },
   { value: "contador", label: "Contador", description: "Acceso a caja, reportes, margen y datos financieros." },
   { value: "ventas", label: "Ventas", description: "Consulta ventas, clientes, metas y registra acciones comerciales." },
@@ -9,7 +9,8 @@ export const companyRoles: Array<{ value: CompanyRole; label: string; descriptio
 ];
 
 const legacyRoleMap: Record<string, CompanyRole> = {
-  owner: "dueno",
+  dueno: "propietario",
+  owner: "propietario",
   admin: "administrador",
   finance: "contador",
   sales: "ventas",
@@ -30,18 +31,18 @@ export function roleLabel(role: string | null | undefined) {
 
 export function canManageTeam(role: string | null | undefined) {
   const normalized = normalizeRole(role);
-  return normalized === "dueno" || normalized === "administrador";
+  return normalized === "propietario" || normalized === "administrador";
 }
 
 export function roleCapabilities(role: string | null | undefined) {
   const normalized = normalizeRole(role);
   return {
     canManageTeam: canManageTeam(normalized),
-    canManageBilling: normalized === "dueno",
-    canManageIntegrations: normalized === "dueno" || normalized === "administrador" || normalized === "operaciones",
-    canManageRules: normalized === "dueno" || normalized === "administrador",
-    canImportData: normalized === "dueno" || normalized === "administrador" || normalized === "contador" || normalized === "operaciones",
-    canGenerateReports: normalized === "dueno" || normalized === "administrador" || normalized === "contador",
+    canManageBilling: normalized === "propietario",
+    canManageIntegrations: normalized === "propietario" || normalized === "administrador" || normalized === "operaciones",
+    canManageRules: normalized === "propietario" || normalized === "administrador",
+    canImportData: normalized === "propietario" || normalized === "administrador" || normalized === "contador" || normalized === "operaciones",
+    canGenerateReports: normalized === "propietario" || normalized === "administrador" || normalized === "contador",
     canRegisterDecisions: normalized !== "contador"
   };
 }
