@@ -28,6 +28,7 @@ Incluye:
 - KPIs configurables.
 - Resumen del dia compacto para lectura ejecutiva en menos de 10 segundos.
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
+- Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.

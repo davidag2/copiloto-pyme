@@ -479,6 +479,39 @@ select:focus-visible {
   margin: -8px 0 18px;
 }
 
+.micro-feedback {
+  align-items: center;
+  animation: feedbackIn 260ms ease both;
+  background: var(--surface);
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  border-radius: var(--radius-md);
+  box-shadow: 0 14px 36px rgba(34, 197, 94, 0.12);
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+  margin: -6px 0 18px;
+  max-width: 100%;
+  padding: 10px 12px;
+}
+
+.micro-feedback svg {
+  color: var(--green);
+  height: 18px;
+  width: 18px;
+}
+
+.micro-feedback[data-action="report"] {
+  border-color: rgba(37, 99, 235, 0.34);
+  box-shadow: 0 14px 36px rgba(37, 99, 235, 0.12);
+}
+
+.micro-feedback[data-action="rules"] {
+  border-color: rgba(189, 123, 16, 0.34);
+  box-shadow: 0 14px 36px rgba(189, 123, 16, 0.12);
+}
+
 .importer-panel {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -536,6 +569,13 @@ select:focus-visible {
 
 .report-preview {
   min-width: 0;
+  transition:
+    filter 220ms ease,
+    transform 220ms ease;
+}
+
+.report-preview[data-motion="active"] {
+  animation: softPulse 760ms ease both;
 }
 
 .report-preview pre {
@@ -568,10 +608,20 @@ select:focus-visible {
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
   padding: 14px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
 }
 
 .integration-card[data-status="Conectado"] {
   border-left-color: var(--green);
+}
+
+.integration-card[data-motion="active"] {
+  animation: softPulse 760ms ease both;
+  border-color: rgba(34, 197, 94, 0.42);
+  box-shadow: 0 18px 42px rgba(34, 197, 94, 0.13);
 }
 
 .integration-card span,
@@ -598,6 +648,10 @@ select:focus-visible {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rules-grid[data-motion="active"] label {
+  animation: softPulse 760ms ease both;
 }
 
 .rules-grid label {
@@ -1138,6 +1192,32 @@ h2 {
   opacity: 0.55;
 }
 
+.micro-button {
+  overflow: hidden;
+  position: relative;
+}
+
+.micro-button::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.44), transparent);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-120%);
+}
+
+.secondary-button.micro-button::after {
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.18), transparent);
+}
+
+.micro-button[data-motion="active"] {
+  animation: buttonConfirm 520ms ease both;
+}
+
+.micro-button[data-motion="active"]::after {
+  animation: shimmerPass 680ms ease;
+}
+
 .theme-dark .secondary-button,
 .theme-dark .ghost-button,
 .theme-dark .upload-button,
@@ -1635,6 +1715,10 @@ select,
   margin-bottom: 14px;
 }
 
+.decision-form[data-motion="active"] input {
+  animation: inputConfirm 620ms ease both;
+}
+
 .decision-form input,
 .decision-form select,
 .decision-item select {
@@ -1661,6 +1745,10 @@ select,
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) 140px;
   padding: 13px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
 }
 
 .decision-item[data-status="En curso"] {
@@ -1669,6 +1757,12 @@ select,
 
 .decision-item[data-status="Completada"] {
   border-left-color: var(--green);
+}
+
+.decision-item[data-motion="active"] {
+  animation: softPulse 760ms ease both;
+  border-color: rgba(37, 99, 235, 0.38);
+  box-shadow: 0 18px 42px rgba(37, 99, 235, 0.12);
 }
 
 .decision-item strong,
@@ -1716,6 +1810,77 @@ select,
 .answer-box {
   margin-top: 12px;
   min-height: 44px;
+}
+
+@keyframes feedbackIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes softPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.015);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes buttonConfirm {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-1px) scale(1.025);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmerPass {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes inputConfirm {
+  0% {
+    border-color: var(--line);
+  }
+
+  50% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: var(--focus-ring);
+  }
+
+  100% {
+    border-color: var(--line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 @media (max-width: 1020px) {

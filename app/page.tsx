@@ -7,6 +7,7 @@ import {
   BarChart3,
   Boxes,
   Bot,
+  CheckCircle2,
   ClipboardCheck,
   Clock3,
   Database,
@@ -59,6 +60,7 @@ type Metrics = {
   criticalStock: number;
 };
 type ThemeMode = "light" | "dark";
+type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
 type NavItem = { label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
@@ -211,6 +213,10 @@ export default function Home() {
   const [importPreview, setImportPreview] = useState("Aun no hay datos para mostrar.");
   const [report, setReport] = useState("");
   const [reportSettings, setReportSettings] = useState({ frequency: "Semanal", channel: "Email", recipient: "gerencia@empresa.com" });
+  const [microAction, setMicroAction] = useState<MicroAction>(null);
+  const [microFeedback, setMicroFeedback] = useState("");
+  const [activeIntegrationId, setActiveIntegrationId] = useState("");
+  const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
@@ -233,6 +239,17 @@ export default function Home() {
       window.localStorage.setItem("copiloto-pyme-company-id", companyId);
     }
   }, [companyId]);
+
+  useEffect(() => {
+    if (!microAction) return;
+    const timer = window.setTimeout(() => {
+      setMicroAction(null);
+      setMicroFeedback("");
+      setActiveIntegrationId("");
+      setActiveDecisionId("");
+    }, 1700);
+    return () => window.clearTimeout(timer);
+  }, [microAction, microFeedback]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
@@ -289,6 +306,11 @@ export default function Home() {
 
   function updateMetrics(next: Metrics) {
     setMetrics(next);
+  }
+
+  function triggerMicroInteraction(action: Exclude<MicroAction, null>, message: string) {
+    setMicroAction(action);
+    setMicroFeedback(message);
   }
 
   function refreshMetrics() {
@@ -365,6 +387,8 @@ export default function Home() {
   async function connectIntegration(id: string) {
     const selected = integrations.find((integration) => integration.id === id);
     if (!selected) return;
+    setActiveIntegrationId(id);
+    triggerMicroInteraction("integration", `Conectando ${selected.name}...`);
     setIntegrations((current) => current.map((integration) => (integration.id === id ? { ...integration, status: "Conectado", sync: "Sincronizado ahora" } : integration)));
     setCustomer((current) => ({ ...current, dataSource: selected.name }));
     updateMetrics({ sales: metrics.sales * 1.04, cash: metrics.cash * 1.02, margin: metrics.margin + 0.4, criticalStock: Math.max(0, metrics.criticalStock - 1) });
@@ -381,6 +405,7 @@ export default function Home() {
       });
       setPersistenceStatus(result.ok ? `${selected.name} guardado en PostgreSQL.` : `Modo demo local: ${result.error}`);
     }
+    triggerMicroInteraction("integration", `${selected.name} conectado y sincronizado.`);
     setRecommendation(`${selected.name} conectado. Datos sincronizados y panel actualizado con una muestra demo.`);
   }
 
@@ -390,6 +415,7 @@ export default function Home() {
       setRecommendation("Conecta al menos una fuente antes de sincronizar integraciones.");
       return;
     }
+    triggerMicroInteraction("sync", "Sincronizando fuentes conectadas...");
     setIntegrations((current) => current.map((integration) => (integration.status === "Conectado" ? { ...integration, sync: "Sincronizado ahora" } : integration)));
     updateMetrics({ ...metrics, sales: metrics.sales * 1.02, cash: metrics.cash * 1.01 });
     if (companyId) {
@@ -405,6 +431,7 @@ export default function Home() {
       })));
       setPersistenceStatus("Integraciones sincronizadas en PostgreSQL.");
     }
+    triggerMicroInteraction("sync", `${connected.length} fuente(s) actualizadas.`);
     setRecommendation(`${connected.length} integracion(es) sincronizadas. Revisa alertas y decisiones sugeridas.`);
   }
 
@@ -421,6 +448,8 @@ export default function Home() {
       status: "Pendiente",
       date: new Date().toISOString().slice(0, 10)
     };
+    setActiveDecisionId(nextDecision.id);
+    triggerMicroInteraction("decision", "Registrando decision...");
     setDecisions((current) => [
       nextDecision,
       ...current
@@ -445,10 +474,12 @@ export default function Home() {
       }
     }
     event.currentTarget.reset();
+    triggerMicroInteraction("decision", "Decision registrada en el historial.");
     setRecommendation("Decision registrada. Dale seguimiento desde el historial para medir si genera resultado.");
   }
 
   async function generateReport() {
+    triggerMicroInteraction("report", `Generando reporte ${reportSettings.frequency.toLowerCase()}...`);
     const text = `Reporte ${reportSettings.frequency} - ${customer.companyName}
 Canal: ${reportSettings.channel}
 Destinatario: ${reportSettings.recipient}
@@ -481,7 +512,15 @@ ${recommendedAction()}`;
       });
       setPersistenceStatus(result.ok ? "Reporte guardado en PostgreSQL." : `Modo demo local: ${result.error}`);
     }
+    triggerMicroInteraction("report", `Reporte listo para ${reportSettings.recipient}.`);
     setRecommendation(`Reporte ${reportSettings.frequency.toLowerCase()} listo para ${reportSettings.recipient}.`);
+  }
+
+  async function applyRules() {
+    triggerMicroInteraction("rules", "Aplicando reglas de riesgo...");
+    setRecommendation("Reglas de alerta actualizadas.");
+    await persistCurrentAlerts();
+    triggerMicroInteraction("rules", "Reglas aplicadas y alertas recalculadas.");
   }
 
   async function persistCurrentAlerts() {
@@ -732,6 +771,12 @@ ${recommendedAction()}`;
           <div><span>Meta mensual</span><strong>{formatGoal(customer.monthlyGoal)}</strong></div>
         </section>
         <p className="persistence-note">{persistenceStatus}</p>
+        {microFeedback && (
+          <div className="micro-feedback" data-action={microAction ?? undefined}>
+            <CheckCircle2 aria-hidden="true" />
+            <span>{microFeedback}</span>
+          </div>
+        )}
 
         <section className="customizer-panel">
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
@@ -746,12 +791,12 @@ ${recommendedAction()}`;
 
         {visible.integrations && (
           <section id="mobileIntegrationsAnchor" className="integrations-panel">
-            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button" type="button" onClick={syncIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
+            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
             <div className="integrations-grid">
               {integrations.map((integration) => (
-                <article className="integration-card" data-status={integration.status} key={integration.id}>
+                <article className="integration-card" data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
                   <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
-                  <button className="secondary-button" type="button" onClick={() => connectIntegration(integration.id)}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
+                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
                 </article>
               ))}
             </div>
@@ -760,7 +805,7 @@ ${recommendedAction()}`;
 
         {visible.reports && (
           <section id="mobileReportsAnchor" className="reports-panel">
-            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button" type="button" onClick={generateReport}><FileText aria-hidden="true" />Generar reporte</button></div>
+            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
               <form className="report-settings">
                 <label>Frecuencia<select value={reportSettings.frequency} onChange={(event) => setReportSettings({ ...reportSettings, frequency: event.target.value })}><option>Diario</option><option>Semanal</option><option>Mensual</option></select></label>
@@ -768,7 +813,7 @@ ${recommendedAction()}`;
                 <label>Destinatario<input value={reportSettings.recipient} onChange={(event) => setReportSettings({ ...reportSettings, recipient: event.target.value })} /></label>
                 <button className="secondary-button" type="button" onClick={downloadReport}><FileText aria-hidden="true" />Descargar TXT</button>
               </form>
-              <div className="report-preview"><div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div><pre>{report || "Genera un reporte para ver el resumen ejecutivo."}</pre></div>
+              <div className="report-preview" data-motion={microAction === "report" ? "active" : undefined}><div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div><pre>{report || "Genera un reporte para ver el resumen ejecutivo."}</pre></div>
             </div>
           </section>
         )}
@@ -791,8 +836,8 @@ ${recommendedAction()}`;
         </section>
 
         <section className="rules-panel">
-          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button" type="button" onClick={() => { setRecommendation("Reglas de alerta actualizadas."); void persistCurrentAlerts(); }}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
-          <div className="rules-grid">
+          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
+          <div className="rules-grid" data-motion={microAction === "rules" ? "active" : undefined}>
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
             <label><span>Caja insuficiente</span><input type="number" value={rules.cash} onChange={(event) => setRules({ ...rules, cash: Number(event.target.value) })} /><small>Dias minimos de cobertura</small></label>
             <label><span>Margen bajo</span><input type="number" value={rules.margin} onChange={(event) => setRules({ ...rules, margin: Number(event.target.value) })} /><small>% minimo de margen bruto</small></label>
@@ -841,7 +886,7 @@ ${recommendedAction()}`;
             </div>
           </article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button" type="submit"><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
+          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit"><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
       </main>
