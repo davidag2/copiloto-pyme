@@ -1259,10 +1259,10 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav">
-        <a href="#kpiGrid">Resumen</a>
-        <a href="#mobileAlertsAnchor">Alertas</a>
-        <a href="#mobileIntegrationsAnchor">Datos</a>
-        <a href="#mobileReportsAnchor">Reporte</a>
+        <a href="#kpiGrid"><Target aria-hidden="true" /><span>Resumen</span></a>
+        <a href="#mobileAlertsAnchor"><AlertTriangle aria-hidden="true" /><span>Alertas</span></a>
+        <a href="#mobileIntegrationsAnchor"><Database aria-hidden="true" /><span>Datos</span></a>
+        <a href="#mobileReportsAnchor"><FileText aria-hidden="true" /><span>Reporte</span></a>
       </nav>
     </div>
   );

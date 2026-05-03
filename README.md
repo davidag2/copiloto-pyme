@@ -32,6 +32,7 @@ Incluye:
 - Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
 - Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
 - Multiempresa con separacion por `company_id`, permisos visibles y roles para propietario, administrador, contador, ventas y operaciones.
+- Diseño mobile first con tarjetas compactas, navegacion inferior con iconos y gestos de scroll mas naturales.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.
