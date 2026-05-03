@@ -34,6 +34,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
 type SalePoint = { day: string; value: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -80,7 +81,7 @@ type AuthCompany = {
 type AuthResponse = { user: AuthUser; company: AuthCompany; session: { token: string; tokenHash: string; expiresIn: string } };
 type RecoveryResponse = { message: string; resetToken: string | null; expiresIn: string };
 type Invitation = { id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string };
-type TeamMember = { id: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
+type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type ChartTooltipProps = {
   active?: boolean;
@@ -300,6 +301,9 @@ export default function Home() {
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
   const openDecisions = decisions.filter((decision) => decision.status !== "Completada").length;
+  const activeRoleLabel = roleLabel(authUser?.role);
+  const permissions = roleCapabilities(authUser?.role);
+  const tenantShortId = companyId ? companyId.slice(0, 8) : "demo";
 
   const alerts = useMemo<Alert[]>(() => {
     const nextAlerts: Alert[] = [];
@@ -451,7 +455,7 @@ export default function Home() {
     applyAuthSession(result.data);
     await loadTeam(result.data.company.id);
     setPaid(false);
-    setAuthStatus(`Cuenta creada. Rol: ${result.data.user.role}.`);
+    setAuthStatus(`Cuenta creada. Rol: ${roleLabel(result.data.user.role)}.`);
     setRecommendation("Usuario creado. Ya puedes pagar la suscripcion y continuar el onboarding.");
   }
 
@@ -470,7 +474,7 @@ export default function Home() {
     }
     applyAuthSession(result.data);
     await loadTeam(result.data.company.id);
-    setAuthStatus(`Bienvenido ${result.data.user.name}. Rol: ${result.data.user.role}.`);
+    setAuthStatus(`Bienvenido ${result.data.user.name}. Rol: ${roleLabel(result.data.user.role)}.`);
     setView("app");
   }
 
@@ -492,6 +496,10 @@ export default function Home() {
     event.preventDefault();
     if (!companyId) {
       setAuthStatus("Primero inicia sesion o crea una empresa para invitar equipo.");
+      return;
+    }
+    if (!canManageTeam(authUser?.role)) {
+      setAuthStatus("Tu rol no permite invitar usuarios. Pide acceso al dueño o administrador.");
       return;
     }
     const result = await apiJson<InviteResponse>("/api/auth/invite", {
@@ -889,7 +897,7 @@ ${recommendedAction()}`;
               </form>
               <div className="auth-card">
                 <strong>Sesion actual</strong>
-                <p>{authUser ? `${authUser.name} · ${authUser.role} · ${authUser.email}` : "Sin sesion activa."}</p>
+                <p>{authUser ? `${authUser.name} · ${roleLabel(authUser.role)} · ${authUser.email}` : "Sin sesion activa."}</p>
                 <button className="ghost-button" type="button" onClick={logout}>Cerrar sesion</button>
               </div>
             </div>
@@ -920,16 +928,16 @@ ${recommendedAction()}`;
             );
           })}
         </nav>
-        <div className="tenant-card"><span>Empresa activa</span><strong>{customer.companyName}</strong><small>{customer.businessType}, {customer.country}</small></div>
+        <div className="tenant-card"><span>Empresa activa</span><strong>{customer.companyName}</strong><small>{customer.businessType}, {customer.country}</small><small>Tenant {tenantShortId} · {activeRoleLabel}</small></div>
       </aside>
 
       <main className="main-panel">
         <header className="topbar">
           <div><p className="eyebrow">Panel de decisiones en tiempo real</p><h1>Que debe revisar <span>{customer.companyName}</span> hoy</h1></div>
           <div className="topbar-actions">
-            <label className="upload-button"><input type="file" accept=".csv" onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
+            <label className="upload-button" aria-disabled={!permissions.canImportData}><input type="file" accept=".csv" disabled={!permissions.canImportData} onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
             <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
-            <button className="primary-button" type="button" onClick={refreshMetrics}><RefreshCw aria-hidden="true" />Actualizar datos</button>
+            <button className="primary-button" type="button" onClick={refreshMetrics} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
           </div>
@@ -956,8 +964,8 @@ ${recommendedAction()}`;
         </section>
 
         <section className="setup-summary">
-          <div><span>Persistencia</span><strong>{companyId ? "PostgreSQL activo" : "Demo local"}</strong></div>
-          <div><span>Tipo de negocio</span><strong>{customer.businessType}</strong></div>
+          <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
+          <div><span>Rol activo</span><strong>{activeRoleLabel}</strong></div>
           <div><span>Moneda</span><strong>{customer.currency.split(" - ")[0]}</strong></div>
           <div><span>Meta mensual</span><strong>{formatGoal(customer.monthlyGoal)}</strong></div>
         </section>
@@ -970,37 +978,66 @@ ${recommendedAction()}`;
         )}
 
         <section className="team-panel">
-          <div className="panel-heading">
-            <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
-            <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
+            <div className="panel-heading">
+              <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
+              <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
+            </div>
+          <div className="tenant-scope-banner">
+            <strong>{customer.companyName}</strong>
+            <span>Todos los usuarios, invitaciones, reportes, decisiones, integraciones y datos importados quedan filtrados por <b>company_id</b>: {tenantShortId}.</span>
           </div>
           <div className="team-layout">
             <div className="session-card">
               <span>Sesion activa</span>
               <strong>{authUser ? authUser.name : "Demo sin login"}</strong>
-              <small>{authUser ? `${authUser.email} · ${authUser.role}` : "Crea una cuenta o inicia sesion para activar roles reales."}</small>
+              <small>{authUser ? `${authUser.email} · ${activeRoleLabel}` : "Crea una cuenta o inicia sesion para activar roles reales."}</small>
+              <div className="permission-list">
+                <span data-enabled={permissions.canManageTeam}>Equipo</span>
+                <span data-enabled={permissions.canImportData}>Importar</span>
+                <span data-enabled={permissions.canManageIntegrations}>Integraciones</span>
+                <span data-enabled={permissions.canGenerateReports}>Reportes</span>
+                <span data-enabled={permissions.canManageRules}>Reglas</span>
+              </div>
               <button className="ghost-button" type="button" onClick={logout}>Cerrar sesion</button>
             </div>
             <form className="invite-form" onSubmit={inviteTeamMember}>
               <label>Email del invitado<input type="email" value={inviteForm.email} onChange={(event) => setInviteForm({ ...inviteForm, email: event.target.value })} required /></label>
-              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}><option value="admin">Admin</option><option value="finance">Finanzas</option><option value="operations">Operaciones</option><option value="sales">Ventas</option><option value="viewer">Lectura</option></select></label>
-              <button className="primary-button" type="submit">Invitar</button>
+              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}>{companyRoles.filter((role) => role.value !== "dueno").map((role) => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
+              <button className="primary-button" type="submit" disabled={!permissions.canManageTeam}>Invitar</button>
               {inviteLink && <small>Link demo: {inviteLink}</small>}
             </form>
+          </div>
+          <div className="role-matrix" aria-label="Permisos por rol">
+            {companyRoles.map((role) => {
+              const capability = roleCapabilities(role.value);
+              return (
+                <article key={role.value}>
+                  <strong>{role.label}</strong>
+                  <span>{role.description}</span>
+                  <small>{[
+                    capability.canManageTeam && "equipo",
+                    capability.canImportData && "datos",
+                    capability.canManageIntegrations && "integraciones",
+                    capability.canGenerateReports && "reportes",
+                    capability.canRegisterDecisions && "decisiones"
+                  ].filter(Boolean).join(" · ")}</small>
+                </article>
+              );
+            })}
           </div>
           <div className="team-grid">
             {teamMembers.map((member) => (
               <article className="team-member-card" data-status={member.status} key={member.id}>
                 <strong>{member.name}</strong>
                 <span>{member.email}</span>
-                <small>{member.role} · {member.status}</small>
+                <small>{roleLabel(member.role)} · {member.status}</small>
               </article>
             ))}
             {invitations.map((invitation) => (
               <article className="team-member-card" data-status={invitation.status} key={invitation.id}>
                 <strong>Invitacion pendiente</strong>
                 <span>{invitation.email}</span>
-                <small>{invitation.role} · expira {new Date(invitation.expiresAt).toLocaleDateString("es-CO")}</small>
+                <small>{roleLabel(invitation.role)} · expira {new Date(invitation.expiresAt).toLocaleDateString("es-CO")}</small>
               </article>
             ))}
           </div>
@@ -1019,12 +1056,12 @@ ${recommendedAction()}`;
 
         {visible.integrations && (
           <section id="mobileIntegrationsAnchor" className="integrations-panel">
-            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
+            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations} disabled={!permissions.canManageIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
             <div className="integrations-grid">
               {integrations.map((integration) => (
                 <article className="integration-card" data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
                   <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
-                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
+                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)} disabled={!permissions.canManageIntegrations}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
                 </article>
               ))}
             </div>
@@ -1033,7 +1070,7 @@ ${recommendedAction()}`;
 
         {visible.reports && (
           <section id="mobileReportsAnchor" className="reports-panel">
-            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport}><FileText aria-hidden="true" />Generar reporte</button></div>
+            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
               <form className="report-settings">
                 <label>Frecuencia<select value={reportSettings.frequency} onChange={(event) => setReportSettings({ ...reportSettings, frequency: event.target.value })}><option>Diario</option><option>Semanal</option><option>Mensual</option></select></label>
@@ -1064,7 +1101,7 @@ ${recommendedAction()}`;
         </section>
 
         <section className="rules-panel">
-          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
+          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }} disabled={!permissions.canManageRules}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
           <div className="rules-grid" data-motion={microAction === "rules" ? "active" : undefined}>
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
             <label><span>Caja insuficiente</span><input type="number" value={rules.cash} onChange={(event) => setRules({ ...rules, cash: Number(event.target.value) })} /><small>Dias minimos de cobertura</small></label>
@@ -1114,7 +1151,7 @@ ${recommendedAction()}`;
             </div>
           </article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}><input name="decision" required placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner"><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact"><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit"><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
+          {visible.decisions && <article id="mobileDecisionsAnchor" className="panel decisions-panel"><div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div><form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}><input name="decision" required disabled={!permissions.canRegisterDecisions} placeholder="Ej. Reponer Panela Organica esta semana" /><select name="owner" disabled={!permissions.canRegisterDecisions}><option>Dueño</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select><select name="impact" disabled={!permissions.canRegisterDecisions}><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select><button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit" disabled={!permissions.canRegisterDecisions}><ClipboardCheck aria-hidden="true" />Registrar</button></form><div className="decisions-list">{decisions.map((decision) => <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}><div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div><select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select></div>)}</div></article>}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
       </main>

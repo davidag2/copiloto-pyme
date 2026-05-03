@@ -1,6 +1,7 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassword } from "@/lib/auth";
 import { transaction } from "@/lib/db";
+import { normalizeRole } from "@/lib/roles";
 
 const defaultRules = [
   ["sales", 70, "below"],
@@ -46,9 +47,9 @@ export async function POST(request: Request) {
 
       const user = await client.query(
         `INSERT INTO users (company_id, name, email, password_hash, role, status, last_login_at)
-         VALUES ($1, $2, $3, $4, 'owner', 'active', NOW())
+         VALUES ($1, $2, $3, $4, $5, 'active', NOW())
          RETURNING id, company_id AS "companyId", name, email, role, status, created_at AS "createdAt"`,
-        [companyId, ownerName, ownerEmail, hashPassword(password)]
+        [companyId, ownerName, ownerEmail, hashPassword(password), normalizeRole("dueno")]
       );
 
       for (const rule of defaultRules) {

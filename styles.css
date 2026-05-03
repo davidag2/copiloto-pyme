@@ -556,6 +556,23 @@ select:focus-visible {
   grid-template-columns: minmax(240px, 0.6fr) minmax(0, 1.4fr);
 }
 
+.tenant-scope-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(34, 197, 94, 0.1));
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+}
+
+.tenant-scope-banner span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .session-card,
 .invite-form,
 .team-member-card {
@@ -568,6 +585,26 @@ select:focus-visible {
 .session-card {
   display: grid;
   gap: 8px;
+}
+
+.permission-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.permission-list span {
+  background: rgba(217, 75, 75, 0.09);
+  border: 1px solid rgba(217, 75, 75, 0.18);
+  border-radius: var(--radius-pill);
+  color: var(--red);
+  padding: 6px 8px;
+}
+
+.permission-list span[data-enabled="true"] {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.24);
+  color: var(--green);
 }
 
 .session-card span,
@@ -621,6 +658,30 @@ select:focus-visible {
   gap: 10px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 14px;
+}
+
+.role-matrix {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.role-matrix article {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.role-matrix span,
+.role-matrix small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .team-member-card {
@@ -1251,6 +1312,11 @@ h2 {
   background: var(--surface);
   border-color: var(--line);
   box-shadow: var(--shadow);
+}
+
+.upload-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .upload-button input {
@@ -2017,6 +2083,7 @@ select,
   .reports-layout,
   .team-layout,
   .team-grid,
+  .role-matrix,
   .customizer-grid,
   .importer-grid,
   .content-grid {
@@ -2172,6 +2239,7 @@ select,
   .reports-layout,
   .team-layout,
   .team-grid,
+  .role-matrix,
   .customizer-grid,
   .importer-grid,
   .content-grid,

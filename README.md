@@ -30,6 +30,7 @@ Incluye:
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
 - Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
 - Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
+- Multiempresa con separacion por `company_id`, permisos visibles y roles para dueño, administrador, contador, ventas y operaciones.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.

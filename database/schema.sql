@@ -30,6 +30,16 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
+UPDATE users SET role = CASE role
+  WHEN 'owner' THEN 'dueno'
+  WHEN 'admin' THEN 'administrador'
+  WHEN 'finance' THEN 'contador'
+  WHEN 'sales' THEN 'ventas'
+  WHEN 'operations' THEN 'operaciones'
+  WHEN 'viewer' THEN 'ventas'
+  ELSE role
+END;
+
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -44,7 +54,7 @@ CREATE TABLE IF NOT EXISTS team_invitations (
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
   invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
   email TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'viewer',
+  role TEXT NOT NULL DEFAULT 'ventas',
   token_hash TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'expired', 'revoked')),
   expires_at TIMESTAMPTZ NOT NULL,
@@ -52,6 +62,16 @@ CREATE TABLE IF NOT EXISTS team_invitations (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(company_id, email)
 );
+
+UPDATE team_invitations SET role = CASE role
+  WHEN 'owner' THEN 'dueno'
+  WHEN 'admin' THEN 'administrador'
+  WHEN 'finance' THEN 'contador'
+  WHEN 'sales' THEN 'ventas'
+  WHEN 'operations' THEN 'operaciones'
+  WHEN 'viewer' THEN 'ventas'
+  ELSE role
+END;
 
 CREATE TABLE IF NOT EXISTS imported_data_batches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

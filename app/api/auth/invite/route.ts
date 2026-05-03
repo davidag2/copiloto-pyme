@@ -1,17 +1,28 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { createPlainToken, hashToken, normalizeEmail } from "@/lib/auth";
 import { query, transaction } from "@/lib/db";
+import { canManageTeam, companyRoles, normalizeRole } from "@/lib/roles";
 
-const allowedRoles = new Set(["owner", "admin", "finance", "operations", "sales", "viewer"]);
+const allowedRoles = new Set(companyRoles.map((role) => role.value));
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
     const email = normalizeEmail(requiredString(body.email, "email"));
-    const role = allowedRoles.has(body.role) ? body.role : "viewer";
+    const role = allowedRoles.has(body.role) ? normalizeRole(body.role) : "ventas";
     const invitedBy = typeof body.invitedBy === "string" && body.invitedBy ? body.invitedBy : null;
     const token = createPlainToken();
+
+    if (invitedBy) {
+      const actor = await query<{ role: string }>(
+        "SELECT role FROM users WHERE id = $1 AND company_id = $2 AND status = 'active' LIMIT 1",
+        [invitedBy, companyId]
+      );
+      if (!actor.rows[0] || !canManageTeam(actor.rows[0].role)) {
+        return fail(new Error("Tu rol no permite invitar usuarios a esta empresa."), 403);
+      }
+    }
 
     const invitation = await transaction(async (client) => {
       const result = await client.query(
