@@ -83,6 +83,19 @@ type RecoveryResponse = { message: string; resetToken: string | null; expiresIn:
 type Invitation = { id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string };
 type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
+type CsvColumnMapping = { fecha: string; producto: string; ventas: string; stock: string; caja: string; gastos: string; margen: string };
+type ImportBatch = {
+  id: string;
+  fileName: string | null;
+  rowCount: number;
+  validCount: number;
+  errorCount: number;
+  duplicateCount: number;
+  status: string;
+  createdAt: string;
+  reversedAt?: string | null;
+};
+type ImportValidation = { errors: Array<{ rowNumber: number; errors: string[]; raw: Record<string, string> }>; sample: Array<Record<string, unknown>> };
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -129,6 +142,19 @@ function parseCsv(text: string) {
       return row;
     }, {});
   });
+}
+
+function inferCsvMapping(headers: string[]): CsvColumnMapping {
+  const findColumn = (...candidates: string[]) => headers.find((header) => candidates.some((candidate) => header.includes(candidate))) || "";
+  return {
+    fecha: findColumn("fecha", "date", "dia"),
+    producto: findColumn("producto", "product", "item", "sku"),
+    ventas: findColumn("ventas", "venta", "sales", "ingreso"),
+    stock: findColumn("stock", "inventario", "existencia"),
+    caja: findColumn("caja", "cash"),
+    gastos: findColumn("gastos", "expenses", "egresos"),
+    margen: findColumn("margen", "margin")
+  };
 }
 
 function SalesTooltip({ active, payload, label }: ChartTooltipProps) {
@@ -237,6 +263,12 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [importStatus, setImportStatus] = useState("Sin archivo cargado");
   const [importPreview, setImportPreview] = useState("Aun no hay datos para mostrar.");
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvRows, setCsvRows] = useState<Array<Record<string, string>>>([]);
+  const [csvFileName, setCsvFileName] = useState("");
+  const [csvMapping, setCsvMapping] = useState<CsvColumnMapping>({ fecha: "", producto: "", ventas: "", stock: "", caja: "", gastos: "", margen: "" });
+  const [importValidation, setImportValidation] = useState<ImportValidation | null>(null);
+  const [importHistory, setImportHistory] = useState<ImportBatch[]>([]);
   const [report, setReport] = useState("");
   const [reportSettings, setReportSettings] = useState({ frequency: "Semanal", channel: "Email", recipient: "gerencia@empresa.com" });
   const [microAction, setMicroAction] = useState<MicroAction>(null);
@@ -295,6 +327,7 @@ export default function Home() {
   useEffect(() => {
     if (companyId && authUser) {
       void loadTeam(companyId);
+      void loadImportHistory(companyId);
     }
   }, [companyId, authUser]);
 
@@ -388,6 +421,12 @@ export default function Home() {
     if (teamResult.ok) setTeamMembers(teamResult.data.users);
     const invitationResult = await apiJson<{ invitations: Invitation[] }>(`/api/auth/invite?companyId=${activeCompanyId}`, { method: "GET" });
     if (invitationResult.ok) setInvitations(invitationResult.data.invitations);
+  }
+
+  async function loadImportHistory(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<{ batches: ImportBatch[] }>(`/api/imports?companyId=${activeCompanyId}`, { method: "GET" });
+    if (result.ok) setImportHistory(result.data.batches);
   }
 
   function refreshMetrics() {
@@ -763,26 +802,58 @@ ${recommendedAction()}`;
   async function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    setImportStatus(`${file.name} listo para validar`);
+    setImportStatus(`${file.name} listo para mapear`);
     const text = await file.text();
+    const headerLine = text.trim().split(/\r?\n/)[0] || "";
+    const headers = headerLine.split(",").map((header) => header.trim().toLowerCase()).filter(Boolean);
     const rows = parseCsv(text);
-    const validRows = rows.filter((row) => row.fecha && row.producto && row.ventas && row.stock);
-    setImportPreview(`${validRows.length} fila(s) validas detectadas. ${validRows.slice(0, 3).map((row) => `${row.fecha} - ${row.producto}: ${row.ventas}`).join(" | ")}`);
-    if (companyId && validRows.length) {
-      const result = await apiJson<EntityResponse<unknown>>("/api/imports", {
-        method: "POST",
-        body: JSON.stringify({
-          companyId,
-          source: "CSV",
-          fileName: file.name,
-          rows: validRows
-        })
-      });
-      setPersistenceStatus(result.ok ? "Importacion CSV guardada en PostgreSQL." : `Modo demo local: ${result.error}`);
-    } else if (!companyId) {
-      setPersistenceStatus("CSV validado localmente. Crea una empresa para guardarlo en PostgreSQL.");
+    setCsvHeaders(headers);
+    setCsvRows(rows);
+    setCsvFileName(file.name);
+    setCsvMapping(inferCsvMapping(headers));
+    setImportValidation(null);
+    setImportPreview(`${rows.length} fila(s) detectadas. Revisa el mapeo antes de aplicar la importacion.`);
+    setRecommendation(`Archivo ${file.name} cargado. Confirma el mapeo de columnas para validar duplicados y errores.`);
+  }
+
+  async function applyCsvImport() {
+    if (!companyId) {
+      setPersistenceStatus("Crea o inicia sesion en una empresa para guardar importaciones en PostgreSQL.");
+      return;
     }
-    setRecommendation(`Archivo ${file.name} validado para el flujo de importacion.`);
+    if (!csvRows.length) {
+      setImportStatus("Sin archivo listo para importar");
+      return;
+    }
+    const result = await apiJson<{ batch: ImportBatch; validation: ImportValidation }>("/api/imports", {
+      method: "POST",
+      body: JSON.stringify({
+        companyId,
+        source: "CSV",
+        fileName: csvFileName,
+        columnMapping: csvMapping,
+        rows: csvRows
+      })
+    });
+    if (!result.ok) {
+      setPersistenceStatus(`Modo demo local: ${result.error}`);
+      return;
+    }
+    setImportValidation(result.data.validation);
+    setImportStatus(`${result.data.batch.validCount}/${result.data.batch.rowCount} fila(s) importadas`);
+    setImportPreview(`${result.data.batch.errorCount} error(es), ${result.data.batch.duplicateCount} duplicado(s).`);
+    setPersistenceStatus("Importacion avanzada guardada en PostgreSQL.");
+    await loadImportHistory(companyId);
+  }
+
+  async function reverseImport(batchId: string) {
+    if (!companyId) return;
+    const result = await apiJson<{ batch: ImportBatch }>("/api/imports", {
+      method: "DELETE",
+      body: JSON.stringify({ companyId, batchId })
+    });
+    setPersistenceStatus(result.ok ? "Importacion reversada y filas eliminadas." : `No se pudo reversar: ${result.error}`);
+    await loadImportHistory(companyId);
   }
 
   if (view === "portal") {
@@ -1113,7 +1184,38 @@ ${recommendedAction()}`;
         {visible.importer && (
           <section className="importer-panel">
             <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
-            <div className="importer-grid"><div><p>Columnas requeridas: <strong>fecha</strong>, <strong>producto</strong>, <strong>ventas</strong>, <strong>stock</strong>.</p><div className="import-validation">{importPreview}</div></div><div className="preview-box"><div className="preview-heading"><span>Vista previa</span><button className="primary-button" type="button"><Database aria-hidden="true" />Aplicar al dashboard</button></div><div className="preview-table">{importPreview}</div></div></div>
+            <div className="importer-grid">
+              <div>
+                <p>Mapea las columnas del archivo para detectar errores, duplicados y guardar solo filas validas.</p>
+                <div className="mapping-grid">
+                  {(Object.keys(csvMapping) as Array<keyof CsvColumnMapping>).map((field) => (
+                    <label key={field}>{field}<select value={csvMapping[field]} onChange={(event) => setCsvMapping({ ...csvMapping, [field]: event.target.value })}><option value="">No mapear</option>{csvHeaders.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>
+                  ))}
+                </div>
+                <div className={`import-validation ${importValidation?.errors.length ? "has-errors" : ""}`}>{importPreview}</div>
+              </div>
+              <div className="preview-box">
+                <div className="preview-heading"><span>Vista previa y validacion</span><button className="primary-button" type="button" onClick={applyCsvImport} disabled={!permissions.canImportData || !csvRows.length}><Database aria-hidden="true" />Aplicar importacion</button></div>
+                <div className="preview-table">
+                  {csvRows.length ? (
+                    <table><thead><tr>{csvHeaders.slice(0, 5).map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{csvRows.slice(0, 4).map((row, index) => <tr key={`${row[csvHeaders[0]]}-${index}`}>{csvHeaders.slice(0, 5).map((header) => <td key={header}>{row[header]}</td>)}</tr>)}</tbody></table>
+                  ) : importPreview}
+                </div>
+                {importValidation?.errors.length ? <div className="row-errors">{importValidation.errors.slice(0, 5).map((error) => <span key={error.rowNumber}>Fila {error.rowNumber}: {error.errors.join(", ")}</span>)}</div> : null}
+              </div>
+            </div>
+            <div className="import-history">
+              <div className="preview-heading"><span>Historial de cargas</span><button className="secondary-button" type="button" onClick={() => { void loadImportHistory(); }}>Actualizar historial</button></div>
+              <div className="history-list">
+                {importHistory.length ? importHistory.map((batch) => (
+                  <article key={batch.id} data-status={batch.status}>
+                    <div><strong>{batch.fileName || "CSV sin nombre"}</strong><span>{batch.validCount}/{batch.rowCount} validas · {batch.errorCount} errores · {batch.duplicateCount} duplicados</span></div>
+                    <small>{new Date(batch.createdAt).toLocaleString("es-CO")} · {batch.status}</small>
+                    <button className="secondary-button" type="button" disabled={batch.status === "reversed"} onClick={() => { void reverseImport(batch.id); }}>Reversar</button>
+                  </article>
+                )) : <p>No hay cargas guardadas para esta empresa.</p>}
+              </div>
+            </div>
           </section>
         )}
 

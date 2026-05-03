@@ -977,6 +977,32 @@ select:focus-visible {
   line-height: 1.55;
 }
 
+.mapping-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.mapping-grid label {
+  color: var(--muted);
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.mapping-grid select {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-width: 0;
+  padding: 10px;
+  text-transform: none;
+}
+
 .import-validation {
   background: var(--surface-strong);
   border: 1px solid var(--line);
@@ -1037,6 +1063,64 @@ select:focus-visible {
   color: var(--ink);
   font-size: 12px;
   text-transform: uppercase;
+}
+
+.row-errors {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.row-errors span {
+  background: rgba(217, 75, 75, 0.08);
+  border: 1px solid rgba(217, 75, 75, 0.18);
+  border-radius: 8px;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 9px 10px;
+}
+
+.import-history {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 16px;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.history-list article {
+  align-items: center;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--blue);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 12px;
+}
+
+.history-list article[data-status="reversed"] {
+  border-left-color: var(--red);
+  opacity: 0.72;
+}
+
+.history-list strong,
+.history-list span,
+.history-list small {
+  display: block;
+}
+
+.history-list span,
+.history-list small,
+.history-list p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .site-footer {
@@ -2342,6 +2426,8 @@ select,
 
   .decision-form,
   .invite-form,
+  .mapping-grid,
+  .history-list article,
   .integration-card,
   .decision-item {
     grid-template-columns: 1fr;

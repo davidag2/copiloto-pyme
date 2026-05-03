@@ -79,14 +79,28 @@ CREATE TABLE IF NOT EXISTS imported_data_batches (
   source TEXT NOT NULL DEFAULT 'CSV',
   file_name TEXT,
   row_count INTEGER NOT NULL DEFAULT 0,
+  valid_count INTEGER NOT NULL DEFAULT 0,
+  error_count INTEGER NOT NULL DEFAULT 0,
+  duplicate_count INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'processed',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  column_mapping JSONB NOT NULL DEFAULT '{}'::jsonb,
+  validation_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reversed_at TIMESTAMPTZ
 );
+
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS valid_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS error_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS duplicate_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS column_mapping JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS validation_summary JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE imported_data_batches ADD COLUMN IF NOT EXISTS reversed_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS imported_data_rows (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   batch_id UUID NOT NULL REFERENCES imported_data_batches(id) ON DELETE CASCADE,
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  row_number INTEGER NOT NULL DEFAULT 0,
   sale_date DATE,
   product_name TEXT NOT NULL,
   sales NUMERIC(14, 2) NOT NULL DEFAULT 0,
@@ -94,9 +108,15 @@ CREATE TABLE IF NOT EXISTS imported_data_rows (
   cash NUMERIC(14, 2),
   expenses NUMERIC(14, 2),
   margin NUMERIC(8, 2),
+  duplicate_key TEXT,
+  validation_errors JSONB NOT NULL DEFAULT '[]'::jsonb,
   raw_data JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE imported_data_rows ADD COLUMN IF NOT EXISTS row_number INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE imported_data_rows ADD COLUMN IF NOT EXISTS duplicate_key TEXT;
+ALTER TABLE imported_data_rows ADD COLUMN IF NOT EXISTS validation_errors JSONB NOT NULL DEFAULT '[]'::jsonb;
 
 CREATE TABLE IF NOT EXISTS alert_rules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

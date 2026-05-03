@@ -25,6 +25,7 @@ Incluye:
 - Onboarding guiado.
 - Dashboard principal.
 - Importador real CSV.
+- Importador CSV avanzado con mapeo de columnas, historial, duplicados, errores por fila y reversa.
 - KPIs configurables.
 - Resumen del dia compacto para lectura ejecutiva en menos de 10 segundos.
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
