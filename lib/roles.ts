@@ -1,7 +1,7 @@
 export type CompanyRole = "dueno" | "administrador" | "contador" | "ventas" | "operaciones";
 
 export const companyRoles: Array<{ value: CompanyRole; label: string; description: string }> = [
-  { value: "dueno", label: "Dueño", description: "Control total de empresa, equipo, datos y facturacion." },
+  { value: "dueno", label: "Propietario", description: "Control total de empresa, equipo, datos y facturacion." },
   { value: "administrador", label: "Administrador", description: "Gestiona operacion, reglas, integraciones y equipo." },
   { value: "contador", label: "Contador", description: "Acceso a caja, reportes, margen y datos financieros." },
   { value: "ventas", label: "Ventas", description: "Consulta ventas, clientes, metas y registra acciones comerciales." },

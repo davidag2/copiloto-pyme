@@ -2,7 +2,7 @@
 
 **Copiloto Pyme** es una plataforma SaaS moderna para ayudar a PYMES en Latinoamerica a tomar mejores decisiones con datos de ventas, caja, inventario, margen, alertas, integraciones y reportes ejecutivos.
 
-El producto esta pensado para dueños, gerentes y equipos pequeños que hoy dependen de Excel, WhatsApp, sistemas contables separados y reportes atrasados para entender que esta pasando en su negocio.
+El producto esta pensado para propietarios, gerentes y equipos pequeños que hoy dependen de Excel, WhatsApp, sistemas contables separados y reportes atrasados para entender que esta pasando en su negocio.
 
 ## Vision
 
@@ -30,7 +30,7 @@ Incluye:
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
 - Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
 - Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
-- Multiempresa con separacion por `company_id`, permisos visibles y roles para dueño, administrador, contador, ventas y operaciones.
+- Multiempresa con separacion por `company_id`, permisos visibles y roles para propietario, administrador, contador, ventas y operaciones.
 - Iconografia profesional consistente con `lucide-react`.
 - Metas y semaforos.
 - Alertas configurables.
@@ -155,7 +155,7 @@ El usuario puede mostrar u ocultar:
 
 Tambien puede elegir enfoque:
 
-- Dueño / Gerencia
+- Propietario / Gerencia
 - Finanzas
 - Ventas
 - Operaciones
@@ -452,6 +452,6 @@ Infraestructura:
 
 ## Objetivo Del MVP
 
-El MVP debe lograr que un dueño de PYME abra el panel y piense:
+El MVP debe lograr que un propietario de PYME abra el panel y piense:
 
 > Ya se que esta pasando y que tengo que hacer hoy.
