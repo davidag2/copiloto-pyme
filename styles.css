@@ -471,6 +471,14 @@ select:focus-visible {
   font-size: 15px;
 }
 
+.persistence-note {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: -8px 0 18px;
+}
+
 .importer-panel {
   background: var(--surface);
   border: 1px solid var(--line);

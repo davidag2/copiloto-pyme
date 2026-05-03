@@ -89,3 +89,44 @@ export async function POST(request: Request) {
     return fail(error, 400);
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const companyId = requiredString(body.companyId, "companyId");
+
+    const company = await query(
+      `UPDATE companies
+       SET name = COALESCE($2, name),
+           country = COALESCE($3, country),
+           business_type = COALESCE($4, business_type),
+           currency = COALESCE($5, currency),
+           plan = COALESCE($6, plan),
+           monthly_goal = COALESCE($7, monthly_goal),
+           minimum_stock = COALESCE($8, minimum_stock),
+           data_source = COALESCE($9, data_source),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [
+        companyId,
+        body.companyName || null,
+        body.country || null,
+        body.businessType || null,
+        body.currency || null,
+        body.plan || null,
+        optionalNumber(body.monthlyGoal),
+        optionalNumber(body.minimumStock),
+        body.dataSource || null
+      ]
+    );
+
+    if (!company.rows[0]) {
+      return fail(new Error("Empresa no encontrada"), 404);
+    }
+
+    return ok({ company: company.rows[0] });
+  } catch (error) {
+    return fail(error, 400);
+  }
+}

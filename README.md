@@ -37,6 +37,7 @@ Incluye:
 - Integraciones latinoamericanas simuladas.
 - Reportes automaticos simulados con descarga `.txt`.
 - API inicial con PostgreSQL para guardar empresas, usuarios, importaciones, alertas, integraciones, decisiones y reportes.
+- Frontend conectado a los endpoints con fallback local si PostgreSQL aun no esta configurado.
 
 ## Producto
 
@@ -301,6 +302,16 @@ Endpoints iniciales:
 - `POST /api/decisions`
 - `GET /api/reports?companyId=...`
 - `POST /api/reports`
+
+Flujos del frontend conectados:
+
+- Registro de empresa y usuario.
+- Onboarding.
+- Importador CSV.
+- Alertas configurables.
+- Integraciones.
+- Decisiones.
+- Reportes.
 
 ## Estructura Del Proyecto
 

@@ -26,7 +26,7 @@ type SalePoint = { day: string; value: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
 type Alert = { level: "positive" | "warning" | "danger"; title: string; text: string };
 type Decision = {
-  id: number;
+  id: number | string;
   text: string;
   owner: string;
   impact: string;
@@ -48,6 +48,9 @@ type Metrics = {
 };
 type ThemeMode = "light" | "dark";
 type NavItem = { label: string; icon: LucideIcon };
+type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
+type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
+type EntityResponse<T> = { [key: string]: T };
 
 const navItems: NavItem[] = [
   { label: "Panel diario", icon: Target },
@@ -59,6 +62,37 @@ const navItems: NavItem[] = [
   { label: "Integraciones", icon: Link2 },
   { label: "Reportes", icon: FileText }
 ];
+
+async function apiJson<T>(path: string, options: RequestInit): Promise<ApiResult<T>> {
+  try {
+    const response = await fetch(path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return { ok: false, error: data.error || "No se pudo guardar en PostgreSQL." };
+    }
+    return { ok: true, data };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "PostgreSQL no disponible." };
+  }
+}
+
+function parseCsv(text: string) {
+  const [headerLine, ...lines] = text.trim().split(/\r?\n/);
+  const headers = headerLine.split(",").map((header) => header.trim().toLowerCase());
+  return lines.filter(Boolean).map((line) => {
+    const values = line.split(",").map((value) => value.trim());
+    return headers.reduce<Record<string, string>>((row, header, index) => {
+      row[header] = values[index] || "";
+      return row;
+    }, {});
+  });
+}
 
 const initialWeeklySales: SalePoint[] = [
   { day: "Lun", value: 9.8 },
@@ -102,6 +136,8 @@ function statusClass(status: string) {
 export default function Home() {
   const [view, setView] = useState<"portal" | "app">("portal");
   const [theme, setTheme] = useState<ThemeMode>("light");
+  const [companyId, setCompanyId] = useState("");
+  const [persistenceStatus, setPersistenceStatus] = useState("Modo demo: aun no hay empresa guardada en PostgreSQL.");
   const [customer, setCustomer] = useState({
     ownerName: "",
     ownerEmail: "",
@@ -147,14 +183,25 @@ export default function Home() {
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
+    const savedCompanyId = window.localStorage.getItem("copiloto-pyme-company-id");
     if (savedTheme === "dark" || savedTheme === "light") {
       setTheme(savedTheme);
+    }
+    if (savedCompanyId) {
+      setCompanyId(savedCompanyId);
+      setPersistenceStatus("Empresa conectada a PostgreSQL.");
     }
   }, []);
 
   useEffect(() => {
     window.localStorage.setItem("copiloto-pyme-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (companyId) {
+      window.localStorage.setItem("copiloto-pyme-company-id", companyId);
+    }
+  }, [companyId]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
@@ -202,28 +249,90 @@ export default function Home() {
     });
   }
 
-  function completeSignup(event: FormEvent<HTMLFormElement>) {
+  async function ensureCompany() {
+    if (companyId) return companyId;
+
+    const result = await apiJson<CompanyCreateResponse>("/api/companies", {
+      method: "POST",
+      body: JSON.stringify({
+        companyName: customer.companyName,
+        ownerName: customer.ownerName || "Propietario",
+        ownerEmail: customer.ownerEmail || `demo-${Date.now()}@copilotopyme.local`,
+        country: customer.country,
+        businessType: customer.businessType,
+        currency: customer.currency.split(" - ")[0],
+        plan: customer.plan,
+        monthlyGoal: customer.monthlyGoal,
+        minimumStock: customer.minimumStock,
+        dataSource: customer.dataSource
+      })
+    });
+
+    if (!result.ok) {
+      setPersistenceStatus(`Modo demo local: ${result.error}`);
+      return "";
+    }
+
+    const nextCompanyId = result.data.company.id;
+    setCompanyId(nextCompanyId);
+    setPersistenceStatus("Empresa y usuario guardados en PostgreSQL.");
+    return nextCompanyId;
+  }
+
+  async function completeSignup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await ensureCompany();
     setPaid(false);
     setRecommendation("Usuario creado. Ya puedes pagar la suscripcion y continuar el onboarding.");
   }
 
-  function completeOnboarding(event: FormEvent<HTMLFormElement>) {
+  async function completeOnboarding(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const activeCompanyId = await ensureCompany();
+    if (activeCompanyId) {
+      const result = await apiJson<{ company: { id: string } }>("/api/companies", {
+        method: "PATCH",
+        body: JSON.stringify({
+          companyId: activeCompanyId,
+          companyName: customer.companyName,
+          country: customer.country,
+          businessType: customer.businessType,
+          currency: customer.currency.split(" - ")[0],
+          plan: customer.plan,
+          monthlyGoal: customer.monthlyGoal,
+          minimumStock: customer.minimumStock,
+          dataSource: customer.dataSource
+        })
+      });
+      setPersistenceStatus(result.ok ? "Onboarding guardado en PostgreSQL." : `Modo demo local: ${result.error}`);
+    }
     setRecommendation(`Bienvenido ${customer.ownerName || "equipo"}. Siguiente paso: cargar datos desde ${customer.dataSource}.`);
     setView("app");
   }
 
-  function connectIntegration(id: string) {
+  async function connectIntegration(id: string) {
     const selected = integrations.find((integration) => integration.id === id);
     if (!selected) return;
     setIntegrations((current) => current.map((integration) => (integration.id === id ? { ...integration, status: "Conectado", sync: "Sincronizado ahora" } : integration)));
     setCustomer((current) => ({ ...current, dataSource: selected.name }));
     updateMetrics({ sales: metrics.sales * 1.04, cash: metrics.cash * 1.02, margin: metrics.margin + 0.4, criticalStock: Math.max(0, metrics.criticalStock - 1) });
+    if (companyId) {
+      const result = await apiJson<EntityResponse<unknown>>("/api/integrations", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          provider: selected.name,
+          category: selected.category,
+          status: "Conectado",
+          syncLabel: "Sincronizado ahora"
+        })
+      });
+      setPersistenceStatus(result.ok ? `${selected.name} guardado en PostgreSQL.` : `Modo demo local: ${result.error}`);
+    }
     setRecommendation(`${selected.name} conectado. Datos sincronizados y panel actualizado con una muestra demo.`);
   }
 
-  function syncIntegrations() {
+  async function syncIntegrations() {
     const connected = integrations.filter((integration) => integration.status === "Conectado");
     if (!connected.length) {
       setRecommendation("Conecta al menos una fuente antes de sincronizar integraciones.");
@@ -231,23 +340,63 @@ export default function Home() {
     }
     setIntegrations((current) => current.map((integration) => (integration.status === "Conectado" ? { ...integration, sync: "Sincronizado ahora" } : integration)));
     updateMetrics({ ...metrics, sales: metrics.sales * 1.02, cash: metrics.cash * 1.01 });
+    if (companyId) {
+      await Promise.all(connected.map((integration) => apiJson<EntityResponse<unknown>>("/api/integrations", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          provider: integration.name,
+          category: integration.category,
+          status: "Conectado",
+          syncLabel: "Sincronizado ahora"
+        })
+      })));
+      setPersistenceStatus("Integraciones sincronizadas en PostgreSQL.");
+    }
     setRecommendation(`${connected.length} integracion(es) sincronizadas. Revisa alertas y decisiones sugeridas.`);
   }
 
-  function addDecision(event: FormEvent<HTMLFormElement>) {
+  async function addDecision(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const text = String(form.get("decision") || "").trim();
     if (!text) return;
+    const nextDecision: Decision = {
+      id: Date.now(),
+      text,
+      owner: String(form.get("owner")),
+      impact: String(form.get("impact")),
+      status: "Pendiente",
+      date: new Date().toISOString().slice(0, 10)
+    };
     setDecisions((current) => [
-      { id: Date.now(), text, owner: String(form.get("owner")), impact: String(form.get("impact")), status: "Pendiente", date: new Date().toISOString().slice(0, 10) },
+      nextDecision,
       ...current
     ]);
+    if (companyId) {
+      const result = await apiJson<{ decision: { id: string } }>("/api/decisions", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          text: nextDecision.text,
+          owner: nextDecision.owner,
+          impact: nextDecision.impact,
+          status: nextDecision.status,
+          date: nextDecision.date
+        })
+      });
+      if (result.ok) {
+        setDecisions((current) => current.map((decision) => decision.id === nextDecision.id ? { ...decision, id: result.data.decision.id } : decision));
+        setPersistenceStatus("Decision guardada en PostgreSQL.");
+      } else {
+        setPersistenceStatus(`Modo demo local: ${result.error}`);
+      }
+    }
     event.currentTarget.reset();
     setRecommendation("Decision registrada. Dale seguimiento desde el historial para medir si genera resultado.");
   }
 
-  function generateReport() {
+  async function generateReport() {
     const text = `Reporte ${reportSettings.frequency} - ${customer.companyName}
 Canal: ${reportSettings.channel}
 Destinatario: ${reportSettings.recipient}
@@ -266,7 +415,40 @@ ${alerts.map((alert) => `- ${alert.title}: ${alert.text}`).join("\n")}
 Accion recomendada
 ${recommendedAction()}`;
     setReport(text);
+    if (companyId) {
+      const result = await apiJson<EntityResponse<unknown>>("/api/reports", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          frequency: reportSettings.frequency,
+          channel: reportSettings.channel,
+          recipient: reportSettings.recipient,
+          content: text,
+          status: "draft"
+        })
+      });
+      setPersistenceStatus(result.ok ? "Reporte guardado en PostgreSQL." : `Modo demo local: ${result.error}`);
+    }
     setRecommendation(`Reporte ${reportSettings.frequency.toLowerCase()} listo para ${reportSettings.recipient}.`);
+  }
+
+  async function persistCurrentAlerts() {
+    if (!companyId) {
+      setPersistenceStatus("Modo demo local: crea o recupera una empresa antes de guardar alertas.");
+      return;
+    }
+    const results = await Promise.all(alerts.map((alert) => apiJson<EntityResponse<unknown>>("/api/alerts", {
+      method: "POST",
+      body: JSON.stringify({
+        companyId,
+        level: alert.level,
+        title: alert.title,
+        text: alert.text,
+        status: alert.level === "positive" ? "resolved" : "open"
+      })
+    })));
+    const failed = results.find((result) => !result.ok);
+    setPersistenceStatus(failed && !failed.ok ? `Modo demo local: ${failed.error}` : "Alertas guardadas en PostgreSQL.");
   }
 
   function downloadReport() {
@@ -314,11 +496,28 @@ ${recommendedAction()}`;
     else setAnswer(`Mi recomendacion: ${recommendedAction()}`);
   }
 
-  function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
+  async function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
     setImportStatus(`${file.name} listo para validar`);
-    setImportPreview("CSV cargado en el navegador. La version de produccion conectara este flujo a una API persistente.");
+    const text = await file.text();
+    const rows = parseCsv(text);
+    const validRows = rows.filter((row) => row.fecha && row.producto && row.ventas && row.stock);
+    setImportPreview(`${validRows.length} fila(s) validas detectadas. ${validRows.slice(0, 3).map((row) => `${row.fecha} - ${row.producto}: ${row.ventas}`).join(" | ")}`);
+    if (companyId && validRows.length) {
+      const result = await apiJson<EntityResponse<unknown>>("/api/imports", {
+        method: "POST",
+        body: JSON.stringify({
+          companyId,
+          source: "CSV",
+          fileName: file.name,
+          rows: validRows
+        })
+      });
+      setPersistenceStatus(result.ok ? "Importacion CSV guardada en PostgreSQL." : `Modo demo local: ${result.error}`);
+    } else if (!companyId) {
+      setPersistenceStatus("CSV validado localmente. Crea una empresa para guardarlo en PostgreSQL.");
+    }
     setRecommendation(`Archivo ${file.name} validado para el flujo de importacion.`);
   }
 
@@ -471,11 +670,12 @@ ${recommendedAction()}`;
         </section>
 
         <section className="setup-summary">
+          <div><span>Persistencia</span><strong>{companyId ? "PostgreSQL activo" : "Demo local"}</strong></div>
           <div><span>Tipo de negocio</span><strong>{customer.businessType}</strong></div>
           <div><span>Moneda</span><strong>{customer.currency.split(" - ")[0]}</strong></div>
           <div><span>Meta mensual</span><strong>{formatGoal(customer.monthlyGoal)}</strong></div>
-          <div><span>Fuente inicial</span><strong>{customer.dataSource}</strong></div>
         </section>
+        <p className="persistence-note">{persistenceStatus}</p>
 
         <section className="customizer-panel">
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
@@ -535,7 +735,7 @@ ${recommendedAction()}`;
         </section>
 
         <section className="rules-panel">
-          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button" type="button" onClick={() => setRecommendation("Reglas de alerta actualizadas.")}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
+          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button" type="button" onClick={() => { setRecommendation("Reglas de alerta actualizadas."); void persistCurrentAlerts(); }}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
           <div className="rules-grid">
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
             <label><span>Caja insuficiente</span><input type="number" value={rules.cash} onChange={(event) => setRules({ ...rules, cash: Number(event.target.value) })} /><small>Dias minimos de cobertura</small></label>

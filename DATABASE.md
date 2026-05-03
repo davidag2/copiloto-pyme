@@ -132,4 +132,16 @@ POST /api/reports
 
 ## 5. Siguiente Paso Recomendado
 
-Conectar el frontend actual a estos endpoints para que registro, onboarding, importador CSV, decisiones y reportes dejen de vivir solo en estado local.
+El frontend ya intenta guardar en estos endpoints para:
+
+- Registro.
+- Onboarding.
+- Importador CSV.
+- Alertas.
+- Integraciones.
+- Decisiones.
+- Reportes.
+
+Si `DATABASE_URL` no esta configurado o PostgreSQL no esta disponible, la experiencia sigue funcionando en modo demo local y muestra el estado de persistencia en el dashboard.
+
+El siguiente paso recomendado es cargar un PostgreSQL administrado en Vercel, Supabase, Neon, Railway o Render y probar los endpoints con datos reales.
