@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:check": "node scripts/db/check.mjs",
+    "db:apply": "node scripts/db/apply-schema.mjs",
+    "db:seed": "node scripts/db/seed-demo.mjs"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0",

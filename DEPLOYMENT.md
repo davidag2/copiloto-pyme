@@ -22,6 +22,13 @@ Copiloto Pyme tiene una version inicial en Next.js, React y TypeScript. El proto
 psql "$DATABASE_URL" -f database/schema.sql
 ```
 
+Tambien puedes validar y aplicar desde Node:
+
+```bash
+npm run db:check
+npm run db:apply
+```
+
 8. Publicar.
 
 ## Alternativas

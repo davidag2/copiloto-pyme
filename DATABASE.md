@@ -24,6 +24,14 @@ Aplicar el esquema SQL:
 psql "$DATABASE_URL" -f database/schema.sql
 ```
 
+O usando los scripts del proyecto:
+
+```bash
+npm run db:check
+npm run db:apply
+npm run db:seed
+```
+
 El modelo Prisma de referencia esta en:
 
 ```text
@@ -145,3 +153,12 @@ El frontend ya intenta guardar en estos endpoints para:
 Si `DATABASE_URL` no esta configurado o PostgreSQL no esta disponible, la experiencia sigue funcionando en modo demo local y muestra el estado de persistencia en el dashboard.
 
 El siguiente paso recomendado es cargar un PostgreSQL administrado en Vercel, Supabase, Neon, Railway o Render y probar los endpoints con datos reales.
+
+## 6. Prueba Completa
+
+1. Crear `.env` con `DATABASE_URL`.
+2. Ejecutar `npm run db:check`.
+3. Ejecutar `npm run db:apply`.
+4. Ejecutar `npm run db:seed`.
+5. Ejecutar `npm run dev`.
+6. Abrir el dashboard, registrar una empresa, importar CSV, crear una decision y generar un reporte.
