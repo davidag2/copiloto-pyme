@@ -253,7 +253,7 @@ export default function Home() {
   const [products, setProducts] = useState(initialProducts);
   const [integrations, setIntegrations] = useState(initialIntegrations);
   const [decisions, setDecisions] = useState<Decision[]>([
-    { id: 1, text: "Reponer Panela Organica antes del viernes", owner: "Operaciones", impact: "Inventario", status: "En curso", date: "2026-04-29" },
+    { id: 1, text: "Reponer Panela Organica antes del viernes", owner: "Administrador", impact: "Inventario", status: "En curso", date: "2026-04-29" },
     { id: 2, text: "Revisar gasto de transporte con proveedor", owner: "Administrador", impact: "Margen", status: "Pendiente", date: "2026-04-29" }
   ]);
   const [rules, setRules] = useState({ sales: 70, cash: 14, margin: 30, stock: 3 });
@@ -1164,7 +1164,7 @@ ${recommendedAction()}`;
 
         <section className="customizer-panel">
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
-            <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Propietario / Gerencia</option><option value="finance">Finanzas</option><option value="sales">Ventas</option><option value="operations">Operaciones</option></select>
+            <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Propietario / Gerencia</option><option value="admin">Administrador</option><option value="finance">Contador</option><option value="sales">Ventas</option></select>
           </div>
           <div className="customizer-grid">
             {Object.keys(visible).map((key) => (
@@ -1337,7 +1337,7 @@ ${recommendedAction()}`;
               <div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div>
               <form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}>
                 <input name="decision" required disabled={!permissions.canRegisterDecisions} placeholder="Ej. Reponer Panela Organica esta semana" />
-                <select name="owner" disabled={!permissions.canRegisterDecisions}><option>Propietario</option><option>Administrador</option><option>Contador</option><option>Ventas</option><option>Operaciones</option></select>
+                <select name="owner" disabled={!permissions.canRegisterDecisions}><option>Propietario</option><option>Administrador</option><option>Contador</option><option>Ventas</option></select>
                 <select name="impact" disabled={!permissions.canRegisterDecisions}><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select>
                 <button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit" disabled={!permissions.canRegisterDecisions}><ClipboardCheck aria-hidden="true" />Registrar</button>
               </form>

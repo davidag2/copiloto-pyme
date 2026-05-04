@@ -10,7 +10,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
     const email = normalizeEmail(requiredString(body.email, "email"));
-    const role = allowedRoles.has(body.role) ? normalizeRole(body.role) : "ventas";
+    const normalizedRole = normalizeRole(body.role);
+    const role = allowedRoles.has(normalizedRole) ? normalizedRole : "ventas";
     const invitedBy = typeof body.invitedBy === "string" && body.invitedBy ? body.invitedBy : null;
     const token = createPlainToken();
 

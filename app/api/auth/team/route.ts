@@ -18,8 +18,6 @@ export async function GET(request: Request) {
            WHEN 'admin' THEN 2
            WHEN 'contador' THEN 3
            WHEN 'finance' THEN 3
-           WHEN 'operaciones' THEN 4
-           WHEN 'operations' THEN 4
            WHEN 'ventas' THEN 5
            WHEN 'sales' THEN 5
            ELSE 6

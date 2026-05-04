@@ -36,7 +36,8 @@ UPDATE users SET role = CASE role
   WHEN 'admin' THEN 'administrador'
   WHEN 'finance' THEN 'contador'
   WHEN 'sales' THEN 'ventas'
-  WHEN 'operations' THEN 'operaciones'
+  WHEN 'operaciones' THEN 'administrador'
+  WHEN 'operations' THEN 'administrador'
   WHEN 'viewer' THEN 'ventas'
   ELSE role
 END;
@@ -70,7 +71,8 @@ UPDATE team_invitations SET role = CASE role
   WHEN 'admin' THEN 'administrador'
   WHEN 'finance' THEN 'contador'
   WHEN 'sales' THEN 'ventas'
-  WHEN 'operations' THEN 'operaciones'
+  WHEN 'operaciones' THEN 'administrador'
+  WHEN 'operations' THEN 'administrador'
   WHEN 'viewer' THEN 'ventas'
   ELSE role
 END;

@@ -31,7 +31,7 @@ Incluye:
 - Graficas refinadas con tendencias, comparativos, meta diaria y tooltips.
 - Microinteracciones en integraciones, reglas, reportes y registro de decisiones.
 - Autenticacion real con registro, login, recuperacion, invitaciones y roles por empresa.
-- Multiempresa con separacion por `company_id`, permisos visibles y roles para propietario, administrador, contador, ventas y operaciones.
+- Multiempresa con separacion por `company_id`, permisos visibles y roles para propietario, administrador, contador y ventas.
 - Diseño mobile first con tarjetas compactas, navegacion inferior con iconos y gestos de scroll mas naturales.
 - Estados vacios elegantes para datos, integraciones, decisiones y reportes, con llamados claros a la accion.
 - Onboarding visual con pasos, progreso, ayudas contextuales y confirmacion final antes del dashboard.
@@ -162,7 +162,6 @@ Tambien puede elegir enfoque:
 - Propietario / Gerencia
 - Finanzas
 - Ventas
-- Operaciones
 
 ### 5. Metas Y Semaforos
 
