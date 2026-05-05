@@ -1043,6 +1043,18 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="home-final-cta" aria-label="Crear cuenta">
+            <div>
+              <span>Listo para empezar</span>
+              <strong>Convierte los datos de tu PYME en decisiones diarias.</strong>
+              <p>Crea tu cuenta, elige un plan en pesos colombianos y completa el onboarding inicial.</p>
+            </div>
+            <div className="home-final-actions">
+              <button className="primary-button" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta gratis</button>
+              <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo</button>
+            </div>
+          </section>
+
           <section className="proof-strip" aria-label="Metricas de valor">
             <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
             <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>

@@ -816,6 +816,57 @@ select:focus-visible {
   margin: 0;
 }
 
+.home-final-cta {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.13), rgba(34, 197, 94, 0.14)),
+    color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 24%, var(--line));
+  border-radius: 8px;
+  box-shadow: 0 22px 54px rgba(37, 99, 235, 0.11);
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin: 0 auto 24px;
+  max-width: 1180px;
+  padding: clamp(24px, 4vw, 38px);
+}
+
+.home-final-cta span {
+  color: var(--brand-blue);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.home-final-cta strong {
+  color: var(--ink);
+  display: block;
+  font-size: clamp(28px, 5vw, 48px);
+  line-height: 1.05;
+  max-width: 760px;
+}
+
+.home-final-cta p {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 14px 0 0;
+  max-width: 680px;
+}
+
+.home-final-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.home-final-actions button {
+  min-height: 46px;
+}
+
 .proof-strip {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1104,6 +1155,7 @@ select:focus-visible {
 .portal-view.theme-dark .social-metrics div,
 .portal-view.theme-dark .trust-section,
 .portal-view.theme-dark .trust-items article,
+.portal-view.theme-dark .home-final-cta,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
@@ -3426,6 +3478,7 @@ select,
   .social-metrics,
   .trust-section,
   .trust-items,
+  .home-final-cta,
   .security-section {
     grid-template-columns: 1fr;
   }
