@@ -1348,6 +1348,344 @@ select:focus-visible {
   opacity: 0.78;
 }
 
+.simple-home-main {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(37, 99, 235, 0.08), transparent 30%),
+    linear-gradient(180deg, #f7fbfa 0%, #eef4f3 100%);
+}
+
+.simple-hero,
+.simple-how-section,
+.simple-benefit,
+.simple-final-cta {
+  margin: 0 auto;
+  max-width: 1120px;
+  padding-left: clamp(18px, 4vw, 28px);
+  padding-right: clamp(18px, 4vw, 28px);
+}
+
+.simple-hero {
+  align-items: center;
+  display: grid;
+  gap: clamp(28px, 5vw, 56px);
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 0.82fr);
+  padding-bottom: clamp(34px, 6vw, 72px);
+  padding-top: clamp(58px, 9vw, 112px);
+}
+
+.simple-hero-copy {
+  display: grid;
+  gap: 18px;
+}
+
+.simple-hero-copy .eyebrow {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+  justify-self: start;
+  margin: 0;
+  padding: 8px 12px;
+}
+
+.simple-hero-copy h1 {
+  color: var(--brand-primary);
+  font-size: clamp(42px, 6vw, 76px);
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+  max-width: 760px;
+}
+
+.simple-hero-copy > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 660px;
+}
+
+.simple-trust-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 2px;
+}
+
+.simple-trust-pills span {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 7px;
+  padding: 8px 11px;
+}
+
+.simple-trust-pills svg {
+  color: var(--brand-blue);
+  height: 16px;
+  width: 16px;
+}
+
+.simple-dashboard {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 12%, var(--line));
+  border-radius: 22px;
+  box-shadow: 0 24px 70px rgba(10, 37, 64, 0.12);
+  display: grid;
+  gap: 14px;
+  padding: clamp(18px, 3vw, 24px);
+}
+
+.simple-dashboard-header,
+.simple-decision-card,
+.simple-action-card,
+.simple-data-grid div {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.simple-dashboard-header {
+  align-items: center;
+  background: var(--brand-primary);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.simple-dashboard-header span,
+.simple-decision-card span,
+.simple-action-card span,
+.simple-data-grid span,
+.simple-section-heading span,
+.simple-benefit span {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.simple-dashboard-header strong {
+  font-size: 12px;
+  opacity: 0.76;
+}
+
+.simple-decision-card,
+.simple-action-card {
+  background: #f8fbff;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.simple-decision-card span,
+.simple-action-card span {
+  color: var(--brand-blue);
+}
+
+.simple-decision-card strong,
+.simple-action-card strong {
+  color: var(--brand-primary);
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.simple-decision-card p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.simple-data-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.simple-data-grid div {
+  background: #ffffff;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.simple-data-grid span {
+  color: var(--muted);
+}
+
+.simple-data-grid strong {
+  color: var(--brand-primary);
+  font-size: 18px;
+}
+
+.simple-how-section {
+  display: grid;
+  gap: 22px;
+  padding-bottom: 34px;
+}
+
+.simple-section-heading {
+  display: grid;
+  gap: 8px;
+  max-width: 620px;
+}
+
+.simple-section-heading span {
+  color: var(--brand-blue);
+}
+
+.simple-section-heading h2 {
+  color: var(--brand-primary);
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.simple-how-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.simple-how-grid article {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.simple-how-grid svg {
+  color: var(--brand-blue);
+  height: 24px;
+  width: 24px;
+}
+
+.simple-how-grid strong {
+  color: var(--brand-primary);
+  font-size: 18px;
+}
+
+.simple-how-grid p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.simple-benefit {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-bottom: 34px;
+}
+
+.simple-benefit div {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+}
+
+.simple-benefit span {
+  color: var(--muted);
+}
+
+.simple-benefit div:last-child {
+  border-color: color-mix(in srgb, var(--brand-green) 32%, var(--line));
+}
+
+.simple-benefit div:last-child span {
+  color: var(--brand-green);
+}
+
+.simple-benefit strong {
+  color: var(--brand-primary);
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.18;
+}
+
+.simple-final-cta {
+  align-items: center;
+  background: var(--brand-primary);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(10, 37, 64, 0.16);
+  color: white;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 42px;
+  padding-bottom: clamp(24px, 4vw, 34px);
+  padding-top: clamp(24px, 4vw, 34px);
+}
+
+.simple-final-cta strong {
+  font-size: clamp(24px, 4vw, 40px);
+  line-height: 1.08;
+  max-width: 720px;
+}
+
+@media (max-width: 900px) {
+  .simple-hero,
+  .simple-how-grid,
+  .simple-benefit {
+    grid-template-columns: 1fr;
+  }
+
+  .simple-hero {
+    padding-top: 44px;
+  }
+
+  .simple-dashboard {
+    order: 2;
+  }
+
+  .simple-data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .simple-final-cta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .simple-hero-copy h1 {
+    font-size: 38px;
+  }
+
+  .simple-hero-copy > p:not(.eyebrow) {
+    font-size: 16px;
+  }
+
+  .simple-dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .simple-final-cta button,
+  .simple-hero .hero-actions button {
+    width: 100%;
+  }
+}
+
 .spacious-heading p:not(.eyebrow) {
   color: var(--muted);
   font-size: 17px;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
@@ -30,7 +30,6 @@ import {
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import CountUp from "react-countup";
 import { motion } from "motion/react";
 import {
   Area,
@@ -43,7 +42,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { DashboardMockup } from "@/components/landing/dashboard-mockup";
 import { Button } from "@/components/ui/button";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
@@ -945,121 +943,54 @@ ${recommendedAction()}`;
         <main className={marketingPage === "inicio" ? "simple-home-main" : undefined}>
           {marketingPage === "inicio" && (
             <>
-          <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
-            <motion.div className="hero-copy" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08, duration: 0.55 }}>
-              <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
-              <h1>Copiloto IA que te dice que hacer hoy en tu PYME.</h1>
-              <p>Deja de revisar hojas y reportes. Copiloto Pyme analiza tus ventas, caja e inventario y te entrega la decision exacta que debes tomar hoy para evitar problemas y crecer.</p>
+          <motion.section className="simple-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: "easeOut" }}>
+            <div className="simple-hero-copy">
+              <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto Pyme</p>
+              <h1>La IA que te dice qué hacer hoy en tu PYME</h1>
+              <p>Deja de revisar hojas y reportes. Copiloto Pyme mira tus ventas, caja e inventario y te dice qué problema tienes, qué riesgo viene y qué debes hacer hoy.</p>
               <div className="hero-actions">
                 <Button className="hero-primary" type="button" size="lg" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</Button>
-                <Button type="button" variant="secondary" size="lg" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</Button>
+                <Button type="button" variant="secondary" size="lg" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo</Button>
               </div>
-              <p className="hero-microcopy">Sin tarjeta · Configuracion en minutos</p>
-              <div className="hero-metrics" aria-label="Resultados esperados">
-                <div><strong><CountUp end={10} duration={1.4} /> seg</strong><span>lectura ejecutiva diaria</span></div>
-                <div><strong>+<CountUp end={12} duration={1.5} /> dias</strong><span>proyeccion de caja anticipada</span></div>
-                <div><strong>COP</strong><span>planes disenados para Colombia</span></div>
+              <p className="hero-microcopy">Sin tarjeta · En minutos ves tu primer resumen</p>
+              <div className="simple-trust-pills" aria-label="Confianza">
+                <span><ShieldCheck aria-hidden="true" />Datos por empresa</span>
+                <span><Users aria-hidden="true" />Roles por equipo</span>
+                <span><Link2 aria-hidden="true" />Conexión con tus herramientas</span>
               </div>
-              <div className="hero-trust">
-                <span><ShieldCheck aria-hidden="true" />Multiempresa y roles</span>
-                <span><Database aria-hidden="true" />Datos reales conectados</span>
-                <span><Bot aria-hidden="true" />IA accionable</span>
+            </div>
+            <div className="simple-dashboard" aria-label="Resumen de hoy">
+              <div className="simple-dashboard-header">
+                <span>Resumen de hoy</span>
+                <strong>Actualizado ahora</strong>
               </div>
-            </motion.div>
-            <motion.div className="hero-product premium-product" initial={{ opacity: 0, scale: 0.96, x: 18 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.16, duration: 0.58, ease: "easeOut" }}>
-              <DashboardMockup
-                currency={customer.currency.split(" - ")[0]}
-                sales={formatMoney(metrics.sales)}
-                salesPercent={salesPercent}
-                cashDays={cashDays(metrics.cash)}
-                cash={formatMoney(metrics.cash)}
-                alertCount={criticalAlerts.length}
-                chartData={chartData}
-                onOpenDemo={() => setView("app")}
-              />
-            </motion.div>
+              <div className="simple-decision-card">
+                <span>Decisión</span>
+                <strong>Reponer Panela Orgánica</strong>
+                <p>Quedan pocas unidades y se está vendiendo más.</p>
+              </div>
+              <div className="simple-action-card">
+                <span>Acción</span>
+                <strong>Enviar orden a compras hoy.</strong>
+              </div>
+              <div className="simple-data-grid">
+                <div><span>Ventas</span><strong>$2.850.000</strong></div>
+                <div><span>Caja</span><strong>18 días</strong></div>
+                <div><span>Alertas</span><strong>2 críticos</strong></div>
+              </div>
+            </div>
           </motion.section>
 
-          <section className="proof-strip" aria-label="Metricas de valor">
-            <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
-            <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>
-            <div><strong>COP</strong><span>planes listos para Colombia</span></div>
-          </section>
-
-          <motion.section className="ai-story-section" aria-label="Historia de inteligencia artificial" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.55 }}>
-            <div className="ai-story-copy">
-              <span><Bot aria-hidden="true" />Ventaja competitiva</span>
-              <h2>La IA convierte datos sueltos en una decision clara para hoy.</h2>
-              <p>Una PYME no necesita otro tablero lleno de numeros. Necesita saber que producto reponer, que gasto revisar, que cliente priorizar y que accion asignar antes de que el problema crezca.</p>
+          <section className="simple-how-section" aria-label="Cómo funciona">
+            <div className="simple-section-heading">
+              <span>Cómo funciona</span>
+              <h2>Entras, conectas datos y recibes una decisión clara.</h2>
             </div>
-            <div className="ai-story-flow">
+            <div className="simple-how-grid">
               {[
-                { title: "Lee senales", text: "Ventas, caja, inventario y comportamiento reciente.", icon: Database },
-                { title: "Detecta patrones", text: "Cruza variaciones, margen, alertas y tendencia.", icon: Sparkles },
-                { title: "Recomienda accion", text: "Entrega prioridad, impacto y responsable.", icon: ClipboardCheck }
-              ].map((item, index) => {
-                const Icon = item.icon;
-                return <motion.article key={item.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.08, duration: 0.45 }}><span>{index + 1}</span><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></motion.article>;
-              })}
-            </div>
-          </motion.section>
-
-          <motion.section className="ai-graph-section" aria-label="Grafica de impacto de inteligencia artificial" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.55 }}>
-            <div className="ai-graph-copy">
-              <p className="eyebrow">Impacto visible</p>
-              <h2>De revisar datos a actuar antes.</h2>
-              <p>El copiloto prioriza lo urgente para que propietario, administrador, contador y ventas trabajen sobre la misma lectura.</p>
-            </div>
-            <div className="ai-graph-card">
-              <div className="ai-graph-bars" aria-hidden="true">
-                {[
-                  ["Lun", 38, 52],
-                  ["Mar", 45, 64],
-                  ["Mie", 43, 69],
-                  ["Jue", 56, 78],
-                  ["Vie", 62, 88]
-                ].map(([day, before, after]) => (
-                  <div key={String(day)}><span style={{ height: `${before}px` }} /><strong style={{ height: `${after}px` }} /><small>{day}</small></div>
-                ))}
-              </div>
-              <div className="ai-graph-legend">
-                <span><i />Sin copiloto</span>
-                <span><i />Con IA accionable</span>
-              </div>
-            </div>
-          </motion.section>
-
-          <section className="featured-integrations" aria-label="Integraciones destacadas">
-            <span>Integraciones destacadas</span>
-            <div>
-              {["Google Sheets", "Siigo", "Alegra", "Mercado Pago", "Shopify", "WooCommerce"].map((item) => <strong key={item}>{item}</strong>)}
-            </div>
-          </section>
-
-          <section className="social-proof" aria-label="Prueba social">
-            <div className="social-quote">
-              <span>Prueba social</span>
-              <strong>"En una sola vista entendemos que revisar hoy y quien debe actuar."</strong>
-              <p>Escenario piloto con PYMES de comercio, distribucion y servicios.</p>
-            </div>
-            <div className="social-metrics">
-              <div><strong>3 sectores</strong><span>comercio, distribucion y servicios</span></div>
-              <div><strong>10 seg.</strong><span>lectura ejecutiva esperada</span></div>
-              <div><strong>4 roles</strong><span>equipo operativo conectado</span></div>
-            </div>
-          </section>
-
-          <section className="trust-section" aria-label="Seguridad y confianza">
-            <div className="trust-heading">
-              <ShieldCheck aria-hidden="true" />
-              <div><span>Seguridad y confianza</span><strong>Preparado para manejar datos empresariales con control.</strong></div>
-            </div>
-            <div className="trust-items">
-              {[
-                { title: "Datos por empresa", text: "Informacion separada por tenant.", icon: Building2 },
-                { title: "Roles definidos", text: "Permisos por perfil de usuario.", icon: Users },
-                { title: "Acceso seguro", text: "Login y recuperacion de cuenta.", icon: LockKeyhole },
-                { title: "Base real", text: "Arquitectura lista para PostgreSQL.", icon: Database }
+                { title: "Conectas tus datos", text: "Google Sheets, ventas, caja e inventario.", icon: Link2 },
+                { title: "La IA analiza", text: "Encuentra problemas y cambios importantes.", icon: Bot },
+                { title: "Recibes una decisión", text: "Te dice qué hacer y a quién asignarlo.", icon: ClipboardCheck }
               ].map((item) => {
                 const Icon = item.icon;
                 return <article key={item.title}><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></article>;
@@ -1067,16 +998,20 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section className="home-final-cta" aria-label="Crear cuenta">
+          <section className="simple-benefit" aria-label="Antes y ahora">
             <div>
-              <span>Listo para empezar</span>
-              <strong>Convierte los datos de tu PYME en decisiones diarias.</strong>
-              <p>Crea tu cuenta, elige un plan en pesos colombianos y completa el onboarding inicial.</p>
+              <span>Antes</span>
+              <strong>Revisas datos y no sabes qué hacer.</strong>
             </div>
-            <div className="home-final-actions">
-              <Button type="button" size="lg" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta gratis</Button>
-              <Button type="button" variant="secondary" size="lg" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo</Button>
+            <div>
+              <span>Ahora</span>
+              <strong>Sabes exactamente qué hacer hoy.</strong>
             </div>
+          </section>
+
+          <section className="simple-final-cta" aria-label="Crear cuenta">
+            <strong>Empieza gratis y entiende tu negocio en minutos</strong>
+            <Button type="button" size="lg" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</Button>
           </section>
             </>
           )}
