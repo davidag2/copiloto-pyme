@@ -1,6 +1,6 @@
 :root {
   --brand-name: "Copiloto Pyme";
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Space Grotesk", "Aptos", "Segoe UI Variable", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   --brand-navy: #0A2540;
@@ -46,7 +46,8 @@
   --shadow-orb: 0 0 24px rgba(37, 99, 235, 0.4);
   --focus-ring: 0 0 0 3px rgba(49, 102, 224, 0.24);
 
-  --bg: var(--neutral-50);
+  --bg: #eef4f3;
+  --reading-bg: #eef4f3;
   --surface: var(--neutral-0);
   --surface-strong: var(--neutral-100);
   --ink: var(--brand-ink);
@@ -70,6 +71,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+  letter-spacing: 0.005em;
 }
 
 a {
@@ -122,16 +124,22 @@ select:focus-visible {
 }
 
 .portal-view {
+  --bg: #eef4f3;
+  --surface: #fbfcfa;
+  --surface-strong: #f1f6f4;
+  --ink: #172433;
+  --muted: #607083;
+  --line: #dce6e3;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.12), transparent 28%),
-    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.12), transparent 26%),
-    #f7f9fc;
+    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.1), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.1), transparent 24%),
+    linear-gradient(180deg, #eef4f3 0%, #f6f8f4 54%, #eef4f3 100%);
 }
 
 .marketing-nav {
   align-items: center;
-  background: rgba(247, 249, 252, 0.82);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
   border-bottom: 1px solid var(--line);
   display: grid;
   gap: 16px;
@@ -221,9 +229,14 @@ select:focus-visible {
 }
 
 .marketing-actions .primary-button,
-.marketing-actions .ghost-button {
+.marketing-actions .ghost-button,
+.marketing-actions .theme-toggle {
   min-height: 40px;
   padding: 9px 12px;
+}
+
+.marketing-theme-toggle span {
+  display: inline;
 }
 
 .hero-section,
@@ -631,6 +644,76 @@ select:focus-visible {
 .portal-view #integraciones,
 .portal-view .security-section {
   display: none;
+}
+
+.portal-view.theme-dark {
+  --bg: #09131f;
+  --surface: #101c2b;
+  --surface-strong: #142338;
+  --ink: #edf6ff;
+  --muted: #9eb1c8;
+  --line: #27384f;
+  --brand-primary: #dbeafe;
+  --brand-primary-dark: #bfdbfe;
+  --brand-primary-soft: #102a52;
+  --brand-blue-soft: #102a52;
+  --brand-green-soft: #123323;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.2), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.14), transparent 24%),
+    linear-gradient(180deg, #09131f 0%, #0e1928 54%, #09131f 100%);
+}
+
+.portal-view.theme-dark .dark-brand,
+.portal-view.theme-dark .hero-copy h1,
+.portal-view.theme-dark .section-heading h2,
+.portal-view.theme-dark .contact-hero h2,
+.portal-view.theme-dark .price-card strong,
+.portal-view.theme-dark .comparison-grid strong,
+.portal-view.theme-dark .preview-action-card strong,
+.portal-view.theme-dark .preview-decision strong {
+  color: var(--ink);
+}
+
+.portal-view.theme-dark .marketing-nav,
+.portal-view.theme-dark .proof-strip,
+.portal-view.theme-dark .proof-strip div,
+.portal-view.theme-dark .product-window,
+.portal-view.theme-dark .preview-decision,
+.portal-view.theme-dark .preview-kpis div,
+.portal-view.theme-dark .preview-footer span,
+.portal-view.theme-dark .preview-action-card,
+.portal-view.theme-dark .comparison-grid article,
+.portal-view.theme-dark .price-card,
+.portal-view.theme-dark .signup-form,
+.portal-view.theme-dark .checkout-card,
+.portal-view.theme-dark .onboarding-card,
+.portal-view.theme-dark .auth-card,
+.portal-view.theme-dark .contact-hero,
+.portal-view.theme-dark .contact-switch {
+  background: color-mix(in srgb, var(--surface) 94%, #000 6%);
+  border-color: var(--line);
+}
+
+.portal-view.theme-dark .hero-metrics div,
+.portal-view.theme-dark .hero-trust span {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-color: var(--line);
+}
+
+.portal-view.theme-dark .preview-chart {
+  background: linear-gradient(180deg, #101c2b, #142338);
+}
+
+.portal-view.theme-dark .window-bar {
+  background: #07111f;
+}
+
+.portal-view.theme-dark input,
+.portal-view.theme-dark select {
+  background: var(--surface-strong);
+  border-color: var(--line);
+  color: var(--ink);
 }
 
 .mini-dashboard {

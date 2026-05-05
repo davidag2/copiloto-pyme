@@ -908,7 +908,7 @@ ${recommendedAction()}`;
 
   if (view === "portal") {
     return (
-      <div id="portalView" className="portal-view">
+      <div id="portalView" className={`portal-view theme-${theme}`}>
         <header className="marketing-nav">
           <div className="brand dark-brand">
             <div className="brand-mark">CP</div>
@@ -932,6 +932,7 @@ ${recommendedAction()}`;
             ))}
           </nav>
           <div className="marketing-actions">
+            <button className="theme-toggle marketing-theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
             <button className="ghost-button" type="button" onClick={() => openMarketingPage("contactanos", "login")}>Login</button>
             <button className="primary-button" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta</button>
           </div>
