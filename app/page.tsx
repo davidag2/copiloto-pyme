@@ -1083,16 +1083,24 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section id="roles" className="landing-section">
-            <div className="section-heading"><p className="eyebrow">Para cada equipo</p><h2>Roles simples para una PYME real</h2></div>
+          <section id="roles" className="landing-section role-section" aria-labelledby="roles-equipo">
+            <div className="section-heading compact-heading"><p className="eyebrow">Roles</p><h2 id="roles-equipo">Cada persona ve lo que necesita</h2></div>
             <div className="role-landing-grid">
-              {companyRoles.map((role) => (
-                <article key={role.value}>
-                  <Users aria-hidden="true" />
-                  <strong>{role.label}</strong>
-                  <p>{role.description}</p>
-                </article>
-              ))}
+              {[
+                { title: "Propietario", text: "Resumen ejecutivo, caja y decisiones criticas.", icon: Building2 },
+                { title: "Administrador", text: "Operaciones, inventario y tareas pendientes.", icon: Settings2 },
+                { title: "Contador", text: "Caja, reportes y trazabilidad financiera.", icon: Banknote },
+                { title: "Ventas", text: "Meta comercial, productos lideres y alertas.", icon: TrendingUp }
+              ].map((role) => {
+                const Icon = role.icon;
+                return (
+                  <article key={role.title}>
+                    <Icon aria-hidden="true" />
+                    <strong>{role.title}</strong>
+                    <p>{role.text}</p>
+                  </article>
+                );
+              })}
             </div>
           </section>
 

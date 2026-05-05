@@ -696,7 +696,6 @@ select:focus-visible {
   line-height: 1.65;
 }
 
-.portal-view #roles,
 .portal-view #integraciones,
 .portal-view .security-section {
   display: none;
@@ -725,6 +724,11 @@ select:focus-visible {
 
 .feature-detail-section {
   padding-bottom: 26px;
+  padding-top: 28px;
+}
+
+.role-section {
+  padding-bottom: 28px;
   padding-top: 28px;
 }
 
@@ -804,6 +808,39 @@ select:focus-visible {
   font-size: 12px;
   font-weight: 900;
   padding: 7px 9px;
+}
+
+.role-landing-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.role-landing-grid article {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 12px;
+  min-height: 180px;
+  padding: 20px;
+}
+
+.role-landing-grid svg {
+  color: var(--brand-blue);
+  height: 23px;
+  width: 23px;
+}
+
+.role-landing-grid strong {
+  font-size: 18px;
+}
+
+.role-landing-grid p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
 }
 
 .how-steps {
@@ -893,6 +930,7 @@ select:focus-visible {
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
 .portal-view.theme-dark .feature-detail-grid span,
+.portal-view.theme-dark .role-landing-grid article,
 .portal-view.theme-dark .comparison-grid article,
 .portal-view.theme-dark .price-card,
 .portal-view.theme-dark .signup-form,
@@ -3195,6 +3233,7 @@ select,
   .how-steps,
   .benefit-pill-grid,
   .feature-detail-grid,
+  .role-landing-grid,
   .pricing-grid,
   .signup-layout,
   .onboarding-steps,
