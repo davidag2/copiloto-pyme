@@ -1012,6 +1012,19 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="social-proof" aria-label="Prueba social">
+            <div className="social-quote">
+              <span>Prueba social</span>
+              <strong>"En una sola vista entendemos que revisar hoy y quien debe actuar."</strong>
+              <p>Escenario piloto con PYMES de comercio, distribucion y servicios.</p>
+            </div>
+            <div className="social-metrics">
+              <div><strong>3 sectores</strong><span>comercio, distribucion y servicios</span></div>
+              <div><strong>10 seg.</strong><span>lectura ejecutiva esperada</span></div>
+              <div><strong>4 roles</strong><span>equipo operativo conectado</span></div>
+            </div>
+          </section>
+
           <section className="proof-strip" aria-label="Metricas de valor">
             <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
             <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>

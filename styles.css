@@ -680,6 +680,74 @@ select:focus-visible {
   padding: 9px 11px;
 }
 
+.social-proof {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  margin: 0 auto 24px;
+  max-width: 1180px;
+  padding: 0 clamp(18px, 4vw, 28px);
+}
+
+.social-quote,
+.social-metrics div {
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.social-quote {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+}
+
+.social-quote span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.social-quote strong {
+  color: var(--ink);
+  font-size: clamp(20px, 3vw, 30px);
+  line-height: 1.18;
+}
+
+.social-quote p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.social-metrics {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.social-metrics div {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+}
+
+.social-metrics strong {
+  color: var(--brand-primary);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.social-metrics span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .proof-strip {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -964,6 +1032,8 @@ select:focus-visible {
 .portal-view.theme-dark .preview-insight-grid div,
 .portal-view.theme-dark .featured-integrations,
 .portal-view.theme-dark .featured-integrations strong,
+.portal-view.theme-dark .social-quote,
+.portal-view.theme-dark .social-metrics div,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
@@ -3282,6 +3352,8 @@ select,
   .role-landing-grid,
   .integration-band,
   .featured-integrations,
+  .social-proof,
+  .social-metrics,
   .security-section {
     grid-template-columns: 1fr;
   }
