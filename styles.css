@@ -133,8 +133,9 @@ select:focus-visible {
   align-items: center;
   background: rgba(247, 249, 252, 0.82);
   border-bottom: 1px solid var(--line);
-  display: flex;
-  gap: 22px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   justify-content: space-between;
   padding: 18px clamp(18px, 4vw, 54px);
   position: sticky;
@@ -149,13 +150,49 @@ select:focus-visible {
 
 .marketing-nav nav {
   display: flex;
-  gap: 18px;
+  gap: 16px;
+  justify-content: center;
+  min-width: 0;
 }
 
 .marketing-nav nav a {
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.market-pill {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 7px;
+  padding: 8px 10px;
+}
+
+.market-pill span {
+  background: var(--brand-blue);
+  border-radius: var(--radius-pill);
+  color: white;
+  padding: 3px 6px;
+}
+
+.marketing-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.marketing-actions .primary-button,
+.marketing-actions .ghost-button {
+  min-height: 40px;
+  padding: 9px 12px;
 }
 
 .hero-section,
@@ -2706,10 +2743,17 @@ select,
   .marketing-nav {
     align-items: flex-start;
     display: grid;
+    grid-template-columns: 1fr;
   }
 
   .marketing-nav nav {
     flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .marketing-actions {
+    display: grid;
+    width: 100%;
   }
 
   .hero-section,

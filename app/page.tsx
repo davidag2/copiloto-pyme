@@ -895,16 +895,22 @@ ${recommendedAction()}`;
             <div className="brand-mark">CP</div>
             <div>
               <strong>Copiloto Pyme</strong>
-              <span>Decisiones para PYMES</span>
+              <span>SaaS para Colombia</span>
             </div>
           </div>
+          <div className="market-pill"><span>CO</span> Pesos colombianos</div>
           <nav aria-label="Producto">
+            <a href="#como-funciona">Como funciona</a>
             <a href="#beneficios">Beneficios</a>
+            <a href="#roles">Roles</a>
+            <a href="#integraciones">Integraciones</a>
             <a href="#planes">Planes</a>
-            <a href="#registro">Registro</a>
-            <a href="#login">Login</a>
+            <a href="#login">Ingresar</a>
           </nav>
-          <button className="ghost-button" type="button" onClick={() => setView("app")}>Ver demo</button>
+          <div className="marketing-actions">
+            <button className="ghost-button" type="button" onClick={() => setView("app")}>Ver demo</button>
+            <a className="primary-button" href="#registro"><ArrowRight aria-hidden="true" />Registrate gratis</a>
+          </div>
         </header>
 
         <main>
@@ -972,7 +978,7 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section className="landing-section">
+          <section id="como-funciona" className="landing-section">
             <div className="section-heading"><p className="eyebrow">Como funciona</p><h2>Activa claridad operativa en tres pasos</h2></div>
             <div className="benefits-section modern-benefits">
               {[
@@ -986,7 +992,7 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section className="landing-section">
+          <section id="roles" className="landing-section">
             <div className="section-heading"><p className="eyebrow">Para cada equipo</p><h2>Roles simples para una PYME real</h2></div>
             <div className="role-landing-grid">
               {companyRoles.map((role) => (
@@ -999,7 +1005,7 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section className="landing-section integration-band">
+          <section id="integraciones" className="landing-section integration-band">
             <div>
               <p className="eyebrow">Integraciones LatAm</p>
               <h2>Diseñado para datos que las PYMES ya usan</h2>
