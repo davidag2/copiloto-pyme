@@ -1046,6 +1046,29 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="landing-section feature-detail-section" aria-labelledby="funcionalidades-detalladas">
+            <div className="section-heading compact-heading"><p className="eyebrow">Funcionalidades detalladas</p><h2 id="funcionalidades-detalladas">Herramientas clave para operar con claridad</h2></div>
+            <div className="feature-detail-grid">
+              {[
+                { title: "Panel ejecutivo", icon: BarChart3, items: ["Ventas", "Caja", "Inventario"] },
+                { title: "Copiloto IA", icon: Bot, items: ["Resumen diario", "Riesgos", "Siguiente accion"] },
+                { title: "Datos reales", icon: Database, items: ["CSV avanzado", "Historial", "PostgreSQL"] },
+                { title: "Equipo y roles", icon: Users, items: ["Propietario", "Contador", "Ventas"] },
+                { title: "Reportes", icon: FileText, items: ["Semanal", "Compartible", "Trazable"] },
+                { title: "Integraciones", icon: Link2, items: ["Sheets", "Siigo", "Mercado Pago"] }
+              ].map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <article key={feature.title}>
+                    <Icon aria-hidden="true" />
+                    <strong>{feature.title}</strong>
+                    <div>{feature.items.map((item) => <span key={item}>{item}</span>)}</div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
           <section id="como-funciona" className="landing-section how-section">
             <div className="section-heading compact-heading"><p className="eyebrow">Como funciona</p><h2>Tres pasos para pasar de datos a decisiones</h2></div>
             <div className="how-steps">

@@ -723,6 +723,11 @@ select:focus-visible {
   padding-top: 26px;
 }
 
+.feature-detail-section {
+  padding-bottom: 26px;
+  padding-top: 28px;
+}
+
 .benefit-pill-grid {
   display: grid;
   gap: 12px;
@@ -757,6 +762,48 @@ select:focus-visible {
   color: var(--muted);
   line-height: 1.5;
   margin: 7px 0 0;
+}
+
+.feature-detail-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-detail-grid article {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.feature-detail-grid svg {
+  color: var(--brand-blue);
+  height: 22px;
+  width: 22px;
+}
+
+.feature-detail-grid strong {
+  font-size: 18px;
+}
+
+.feature-detail-grid div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.feature-detail-grid span {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 9px;
 }
 
 .how-steps {
@@ -844,6 +891,8 @@ select:focus-visible {
 .portal-view.theme-dark .preview-insight-grid div,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
+.portal-view.theme-dark .feature-detail-grid article,
+.portal-view.theme-dark .feature-detail-grid span,
 .portal-view.theme-dark .comparison-grid article,
 .portal-view.theme-dark .price-card,
 .portal-view.theme-dark .signup-form,
@@ -3145,6 +3194,7 @@ select,
   .benefits-section,
   .how-steps,
   .benefit-pill-grid,
+  .feature-detail-grid,
   .pricing-grid,
   .signup-layout,
   .onboarding-steps,
