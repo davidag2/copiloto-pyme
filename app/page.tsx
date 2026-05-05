@@ -1025,6 +1025,24 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="trust-section" aria-label="Seguridad y confianza">
+            <div className="trust-heading">
+              <ShieldCheck aria-hidden="true" />
+              <div><span>Seguridad y confianza</span><strong>Preparado para manejar datos empresariales con control.</strong></div>
+            </div>
+            <div className="trust-items">
+              {[
+                { title: "Datos por empresa", text: "Informacion separada por tenant.", icon: Building2 },
+                { title: "Roles definidos", text: "Permisos por perfil de usuario.", icon: Users },
+                { title: "Acceso seguro", text: "Login y recuperacion de cuenta.", icon: LockKeyhole },
+                { title: "Base real", text: "Arquitectura lista para PostgreSQL.", icon: Database }
+              ].map((item) => {
+                const Icon = item.icon;
+                return <article key={item.title}><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></article>;
+              })}
+            </div>
+          </section>
+
           <section className="proof-strip" aria-label="Metricas de valor">
             <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
             <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>

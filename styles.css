@@ -748,6 +748,74 @@ select:focus-visible {
   line-height: 1.35;
 }
 
+.trust-section {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  margin: 0 auto 24px;
+  max-width: 1180px;
+  padding: 22px clamp(18px, 4vw, 26px);
+}
+
+.trust-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+}
+
+.trust-heading svg,
+.trust-items svg {
+  color: var(--brand-blue);
+  height: 22px;
+  width: 22px;
+}
+
+.trust-heading span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.trust-heading strong {
+  color: var(--ink);
+  display: block;
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.2;
+}
+
+.trust-items {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.trust-items article {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 15px;
+}
+
+.trust-items strong {
+  font-size: 15px;
+}
+
+.trust-items p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
 .proof-strip {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1034,6 +1102,8 @@ select:focus-visible {
 .portal-view.theme-dark .featured-integrations strong,
 .portal-view.theme-dark .social-quote,
 .portal-view.theme-dark .social-metrics div,
+.portal-view.theme-dark .trust-section,
+.portal-view.theme-dark .trust-items article,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
@@ -3354,6 +3424,8 @@ select,
   .featured-integrations,
   .social-proof,
   .social-metrics,
+  .trust-section,
+  .trust-items,
   .security-section {
     grid-template-columns: 1fr;
   }
