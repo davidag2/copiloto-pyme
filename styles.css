@@ -644,6 +644,201 @@ select:focus-visible {
   grid-template-columns: 1fr 1fr;
 }
 
+.ai-story-section,
+.ai-graph-section {
+  margin: 0 auto 24px;
+  max-width: 1180px;
+  padding: 0 clamp(18px, 4vw, 28px);
+}
+
+.ai-story-section {
+  align-items: stretch;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.ai-story-copy,
+.ai-story-flow article,
+.ai-graph-section,
+.ai-graph-card {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-story-copy {
+  display: grid;
+  gap: 14px;
+  padding: clamp(24px, 4vw, 34px);
+}
+
+.ai-story-copy > span {
+  align-items: center;
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.ai-story-copy svg {
+  height: 18px;
+  width: 18px;
+}
+
+.ai-story-copy h2,
+.ai-graph-copy h2 {
+  color: var(--ink);
+  font-size: clamp(30px, 4.6vw, 52px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.ai-story-copy p,
+.ai-graph-copy p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.ai-story-flow {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-story-flow article {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  padding: 20px;
+}
+
+.ai-story-flow article > span {
+  background: var(--brand-primary-soft);
+  border-radius: var(--radius-pill);
+  color: var(--brand-blue);
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  height: 30px;
+  place-items: center;
+  width: 30px;
+}
+
+.ai-story-flow svg {
+  color: var(--brand-blue);
+  height: 24px;
+  width: 24px;
+}
+
+.ai-story-flow strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.ai-story-flow p {
+  color: var(--muted);
+  grid-column: 3;
+  line-height: 1.5;
+  margin: -4px 0 0;
+}
+
+.ai-graph-section {
+  align-items: center;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  padding-bottom: clamp(22px, 4vw, 34px);
+  padding-top: clamp(22px, 4vw, 34px);
+}
+
+.ai-graph-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-graph-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.ai-graph-bars {
+  align-items: end;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 62%, transparent), transparent),
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--line) 32px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 220px;
+  padding: 26px 18px 18px;
+}
+
+.ai-graph-bars div {
+  align-items: end;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  min-width: 0;
+}
+
+.ai-graph-bars span,
+.ai-graph-bars strong {
+  border-radius: 8px 8px 3px 3px;
+  display: block;
+}
+
+.ai-graph-bars span {
+  background: color-mix(in srgb, var(--muted) 44%, transparent);
+}
+
+.ai-graph-bars strong {
+  background: linear-gradient(180deg, var(--brand-blue), var(--brand-green));
+}
+
+.ai-graph-bars small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.ai-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ai-graph-legend span {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.ai-graph-legend i {
+  background: color-mix(in srgb, var(--muted) 44%, transparent);
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  height: 10px;
+  width: 22px;
+}
+
+.ai-graph-legend span:last-child i {
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+}
+
 .featured-integrations {
   align-items: center;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -1149,6 +1344,10 @@ select:focus-visible {
 .portal-view.theme-dark .preview-footer span,
 .portal-view.theme-dark .preview-action-card,
 .portal-view.theme-dark .preview-insight-grid div,
+.portal-view.theme-dark .ai-story-copy,
+.portal-view.theme-dark .ai-story-flow article,
+.portal-view.theme-dark .ai-graph-section,
+.portal-view.theme-dark .ai-graph-card,
 .portal-view.theme-dark .featured-integrations,
 .portal-view.theme-dark .featured-integrations strong,
 .portal-view.theme-dark .social-quote,
@@ -3479,6 +3678,8 @@ select,
   .trust-section,
   .trust-items,
   .home-final-cta,
+  .ai-story-section,
+  .ai-graph-section,
   .security-section {
     grid-template-columns: 1fr;
   }

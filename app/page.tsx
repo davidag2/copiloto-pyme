@@ -30,6 +30,8 @@ import {
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import CountUp from "react-countup";
+import { motion } from "motion/react";
 import {
   Area,
   CartesianGrid,
@@ -941,18 +943,18 @@ ${recommendedAction()}`;
         <main>
           {marketingPage === "inicio" && (
             <>
-          <section className="hero-section landing-hero">
-            <div className="hero-copy">
+          <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
+            <motion.div className="hero-copy" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08, duration: 0.55 }}>
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
-              <h1>Decide que hacer hoy con ventas, caja e inventario en tiempo real.</h1>
-              <p>Un panel ejecutivo que convierte datos diarios en recomendaciones claras para propietarios y equipos de PYMES.</p>
+              <h1>La inteligencia artificial que entiende la operacion diaria de tu PYME.</h1>
+              <p>Copiloto Pyme cruza ventas, caja, inventario y reportes para decirte que esta pasando, que riesgo viene y cual es la siguiente decision que tu equipo debe tomar.</p>
               <div className="hero-actions">
                 <button className="primary-button hero-primary" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</button>
                 <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
               </div>
               <div className="hero-metrics" aria-label="Resultados esperados">
-                <div><strong>10 seg</strong><span>lectura del dia</span></div>
-                <div><strong>+12 dias</strong><span>proyeccion de caja</span></div>
+                <div><strong><CountUp end={10} duration={1.4} /> seg</strong><span>lectura del dia</span></div>
+                <div><strong>+<CountUp end={12} duration={1.5} /> dias</strong><span>proyeccion de caja</span></div>
                 <div><strong>COP</strong><span>planes para Colombia</span></div>
               </div>
               <div className="hero-trust">
@@ -960,8 +962,8 @@ ${recommendedAction()}`;
                 <span><Database aria-hidden="true" />Base de datos real</span>
                 <span><Bot aria-hidden="true" />IA accionable</span>
               </div>
-            </div>
-            <div className="hero-product premium-product">
+            </motion.div>
+            <motion.div className="hero-product premium-product" initial={{ opacity: 0, scale: 0.96, x: 18 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.16, duration: 0.58, ease: "easeOut" }}>
               <div className="product-window">
                 <div className="window-bar"><span /><span /><span /><strong>Resumen ejecutivo de hoy</strong></div>
                 <div className="live-dashboard-preview">
@@ -1002,8 +1004,51 @@ ${recommendedAction()}`;
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </motion.section>
+
+          <motion.section className="ai-story-section" aria-label="Historia de inteligencia artificial" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.55 }}>
+            <div className="ai-story-copy">
+              <span><Bot aria-hidden="true" />Ventaja competitiva</span>
+              <h2>La IA convierte datos sueltos en una decision clara para hoy.</h2>
+              <p>Una PYME no necesita otro tablero lleno de numeros. Necesita saber que producto reponer, que gasto revisar, que cliente priorizar y que accion asignar antes de que el problema crezca.</p>
             </div>
-          </section>
+            <div className="ai-story-flow">
+              {[
+                { title: "Lee senales", text: "Ventas, caja, inventario y comportamiento reciente.", icon: Database },
+                { title: "Detecta patrones", text: "Cruza variaciones, margen, alertas y tendencia.", icon: Sparkles },
+                { title: "Recomienda accion", text: "Entrega prioridad, impacto y responsable.", icon: ClipboardCheck }
+              ].map((item, index) => {
+                const Icon = item.icon;
+                return <motion.article key={item.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.08, duration: 0.45 }}><span>{index + 1}</span><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></motion.article>;
+              })}
+            </div>
+          </motion.section>
+
+          <motion.section className="ai-graph-section" aria-label="Grafica de impacto de inteligencia artificial" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.55 }}>
+            <div className="ai-graph-copy">
+              <p className="eyebrow">Impacto visible</p>
+              <h2>De revisar datos a actuar antes.</h2>
+              <p>El copiloto prioriza lo urgente para que propietario, administrador, contador y ventas trabajen sobre la misma lectura.</p>
+            </div>
+            <div className="ai-graph-card">
+              <div className="ai-graph-bars" aria-hidden="true">
+                {[
+                  ["Lun", 38, 52],
+                  ["Mar", 45, 64],
+                  ["Mie", 43, 69],
+                  ["Jue", 56, 78],
+                  ["Vie", 62, 88]
+                ].map(([day, before, after]) => (
+                  <div key={String(day)}><span style={{ height: `${before}px` }} /><strong style={{ height: `${after}px` }} /><small>{day}</small></div>
+                ))}
+              </div>
+              <div className="ai-graph-legend">
+                <span><i />Sin copiloto</span>
+                <span><i />Con IA accionable</span>
+              </div>
+            </div>
+          </motion.section>
 
           <section className="featured-integrations" aria-label="Integraciones destacadas">
             <span>Integraciones destacadas</span>
