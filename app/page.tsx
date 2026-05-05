@@ -43,7 +43,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Spotlight } from "@/components/aceternity/spotlight";
 import { DashboardMockup } from "@/components/landing/dashboard-mockup";
 import { Button } from "@/components/ui/button";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
@@ -943,11 +942,10 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <main className={marketingPage === "inicio" ? "stripe-home-main" : undefined}>
+        <main className={marketingPage === "inicio" ? "simple-home-main" : undefined}>
           {marketingPage === "inicio" && (
             <>
           <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
-            <Spotlight className="opacity-90" />
             <motion.div className="hero-copy" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08, duration: 0.55 }}>
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
               <h1>Copiloto IA que te dice que hacer hoy en tu PYME.</h1>
