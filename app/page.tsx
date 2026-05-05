@@ -916,23 +916,32 @@ ${recommendedAction()}`;
         <main>
           <section className="hero-section landing-hero">
             <div className="hero-copy">
-              <p className="eyebrow"><Sparkles aria-hidden="true" />SaaS IA para PYMES en Latinoamerica</p>
-              <h1>El copiloto de decisiones para propietarios que quieren ver su negocio en tiempo real.</h1>
-              <p>Copiloto Pyme une ventas, caja, inventario, alertas, reportes y decisiones en un panel ejecutivo diseñado para actuar cada mañana sin depender de hojas sueltas, chats o reportes atrasados.</p>
+              <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
+              <h1>Decide que hacer hoy con ventas, caja e inventario en tiempo real.</h1>
+              <p>Copiloto Pyme convierte tus datos diarios en una recomendacion ejecutiva clara, alertas prioritarias y acciones listas para tu equipo, sin esperar reportes atrasados ni revisar hojas sueltas.</p>
               <div className="hero-actions">
-                <a className="primary-button" href="#registro"><ArrowRight aria-hidden="true" />Crear cuenta</a>
-                <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver dashboard</button>
+                <a className="primary-button hero-primary" href="#registro"><ArrowRight aria-hidden="true" />Empezar gratis</a>
+                <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
+              </div>
+              <div className="hero-metrics" aria-label="Resultados esperados">
+                <div><strong>10 seg</strong><span>lectura del dia</span></div>
+                <div><strong>+12 dias</strong><span>proyeccion de caja</span></div>
+                <div><strong>COP</strong><span>planes para Colombia</span></div>
               </div>
               <div className="hero-trust">
                 <span><ShieldCheck aria-hidden="true" />Multiempresa y roles</span>
-                <span><Database aria-hidden="true" />PostgreSQL ready</span>
-                <span><Bot aria-hidden="true" />Copiloto IA</span>
+                <span><Database aria-hidden="true" />Base de datos real</span>
+                <span><Bot aria-hidden="true" />IA accionable</span>
               </div>
             </div>
             <div className="hero-product premium-product">
               <div className="product-window">
-                <div className="window-bar"><span /><span /><span /><strong>Copiloto Pyme Live</strong></div>
+                <div className="window-bar"><span /><span /><span /><strong>Resumen ejecutivo de hoy</strong></div>
                 <div className="live-dashboard-preview">
+                  <div className="preview-live-row">
+                    <span><Clock3 aria-hidden="true" />Actualizado hace 4 min</span>
+                    <strong>{customer.currency.split(" - ")[0]}</strong>
+                  </div>
                   <div className="preview-decision">
                     <span><Sparkles aria-hidden="true" />Decision recomendada</span>
                     <strong>{recommendedAction()}</strong>
@@ -945,6 +954,13 @@ ${recommendedAction()}`;
                   </div>
                   <div className="preview-chart" aria-hidden="true">
                     {chartData.map((point) => <span key={point.day} style={{ height: `${Math.max(18, point.actual * 5)}px` }} />)}
+                  </div>
+                  <div className="preview-action-card">
+                    <div>
+                      <span>Accion siguiente</span>
+                      <strong>Enviar alerta a compras y aprobar reposicion</strong>
+                    </div>
+                    <button type="button" onClick={() => setView("app")}>Abrir</button>
                   </div>
                   <div className="preview-footer">
                     <span><Link2 aria-hidden="true" />Google Sheets conectado</span>

@@ -252,6 +252,46 @@ select:focus-visible {
   margin-top: 28px;
 }
 
+.hero-primary {
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.2);
+  min-height: 50px;
+  padding-inline: 18px;
+}
+
+.hero-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 22px;
+  max-width: 640px;
+}
+
+.hero-metrics div {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 13px;
+}
+
+.hero-metrics strong,
+.hero-metrics span {
+  display: block;
+}
+
+.hero-metrics strong {
+  color: var(--brand-primary);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.hero-metrics span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 7px;
+  text-transform: uppercase;
+}
+
 .hero-trust {
   display: flex;
   flex-wrap: wrap;
@@ -359,9 +399,38 @@ select:focus-visible {
   padding: 16px;
 }
 
+.preview-live-row {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  justify-content: space-between;
+}
+
+.preview-live-row span {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.preview-live-row svg {
+  color: var(--brand-green);
+  height: 16px;
+  width: 16px;
+}
+
+.preview-live-row strong {
+  background: var(--brand-green-soft);
+  border-radius: var(--radius-pill);
+  color: #15803d;
+  padding: 6px 9px;
+}
+
 .preview-decision,
 .preview-kpis div,
-.preview-footer span {
+.preview-footer span,
+.preview-action-card {
   background: white;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -433,6 +502,41 @@ select:focus-visible {
   background: linear-gradient(180deg, var(--brand-blue), var(--brand-green));
   border-radius: 8px 8px 3px 3px;
   flex: 1;
+}
+
+.preview-action-card {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.preview-action-card span,
+.preview-action-card strong {
+  display: block;
+}
+
+.preview-action-card span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.preview-action-card strong {
+  font-size: 14px;
+  line-height: 1.35;
+  margin-top: 5px;
+}
+
+.preview-action-card button {
+  background: var(--brand-primary);
+  border: 0;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 9px 12px;
 }
 
 .preview-footer {
@@ -2779,7 +2883,8 @@ select,
   }
 
   .hero-trust,
-  .hero-actions {
+  .hero-actions,
+  .hero-metrics {
     display: grid;
   }
 
@@ -2812,6 +2917,7 @@ select,
   }
 
   .mini-kpis,
+  .hero-metrics,
   .hero-actions {
     grid-template-columns: 1fr;
   }
