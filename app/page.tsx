@@ -68,6 +68,8 @@ type Metrics = {
   criticalStock: number;
 };
 type ThemeMode = "light" | "dark";
+type MarketingPage = "inicio" | "ventajas" | "precios" | "contactanos";
+type ContactMode = "signup" | "login";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
 type NavItem = { label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -118,6 +120,13 @@ const navItems: NavItem[] = [
   { label: "Decisiones", icon: ClipboardCheck },
   { label: "Integraciones", icon: Link2 },
   { label: "Reportes", icon: FileText }
+];
+
+const marketingNavItems: Array<{ label: string; page: MarketingPage }> = [
+  { label: "Inicio", page: "inicio" },
+  { label: "Ventajas", page: "ventajas" },
+  { label: "Precios", page: "precios" },
+  { label: "Contactanos", page: "contactanos" }
 ];
 
 async function apiJson<T>(path: string, options: RequestInit): Promise<ApiResult<T>> {
@@ -230,6 +239,8 @@ function statusClass(status: string) {
 
 export default function Home() {
   const [view, setView] = useState<"portal" | "app">("portal");
+  const [marketingPage, setMarketingPage] = useState<MarketingPage>("inicio");
+  const [contactMode, setContactMode] = useState<ContactMode>("signup");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
   const [persistenceStatus, setPersistenceStatus] = useState("Modo demo: aun no hay empresa guardada en PostgreSQL.");
@@ -294,6 +305,14 @@ export default function Home() {
   const [microFeedback, setMicroFeedback] = useState("");
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
+
+  function openMarketingPage(page: MarketingPage, mode?: ContactMode) {
+    setMarketingPage(page);
+    if (mode) setContactMode(mode);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
@@ -900,27 +919,34 @@ ${recommendedAction()}`;
           </div>
           <div className="market-pill"><span>CO</span> Pesos colombianos</div>
           <nav aria-label="Producto">
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#beneficios">Beneficios</a>
-            <a href="#roles">Roles</a>
-            <a href="#integraciones">Integraciones</a>
-            <a href="#planes">Planes</a>
-            <a href="#login">Ingresar</a>
+            {marketingNavItems.map((item) => (
+              <button
+                aria-current={marketingPage === item.page ? "page" : undefined}
+                className={marketingPage === item.page ? "active" : ""}
+                key={item.page}
+                onClick={() => openMarketingPage(item.page)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
           </nav>
           <div className="marketing-actions">
-            <button className="ghost-button" type="button" onClick={() => setView("app")}>Ver demo</button>
-            <a className="primary-button" href="#registro"><ArrowRight aria-hidden="true" />Registrate gratis</a>
+            <button className="ghost-button" type="button" onClick={() => openMarketingPage("contactanos", "login")}>Login</button>
+            <button className="primary-button" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta</button>
           </div>
         </header>
 
         <main>
+          {marketingPage === "inicio" && (
+            <>
           <section className="hero-section landing-hero">
             <div className="hero-copy">
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
               <h1>Decide que hacer hoy con ventas, caja e inventario en tiempo real.</h1>
               <p>Copiloto Pyme convierte tus datos diarios en una recomendacion ejecutiva clara, alertas prioritarias y acciones listas para tu equipo, sin esperar reportes atrasados ni revisar hojas sueltas.</p>
               <div className="hero-actions">
-                <a className="primary-button hero-primary" href="#registro"><ArrowRight aria-hidden="true" />Empezar gratis</a>
+                <button className="primary-button hero-primary" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</button>
                 <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
               </div>
               <div className="hero-metrics" aria-label="Resultados esperados">
@@ -977,7 +1003,11 @@ ${recommendedAction()}`;
             <div><strong>CSV+</strong><span>mapeo, duplicados y reversa</span></div>
             <div><strong>24/7</strong><span>alertas para caja, ventas e inventario</span></div>
           </section>
+            </>
+          )}
 
+          {marketingPage === "ventajas" && (
+            <>
           <section id="beneficios" className="landing-section">
             <div className="section-heading"><p className="eyebrow">Por que existe</p><h2>De reportes dispersos a decisiones accionables</h2></div>
             <div className="comparison-grid">
@@ -1031,32 +1061,56 @@ ${recommendedAction()}`;
               {["Google Sheets", "Siigo", "Alegra", "Mercado Pago", "Shopify", "WooCommerce"].map((item) => <span key={item}>{item}</span>)}
             </div>
           </section>
+            </>
+          )}
 
+          {marketingPage === "precios" && (
           <section id="planes" className="pricing-section">
-            <div className="section-heading"><p className="eyebrow">Planes iniciales</p><h2>Precios pensados para PYMES</h2></div>
+            <div className="section-heading"><p className="eyebrow">Planes en pesos colombianos</p><h2>Precios simples para empezar sin friccion</h2></div>
             <div className="pricing-grid">
-              {["Inicial", "Crecimiento", "Pro"].map((plan) => (
-                <article className={`price-card ${plan === "Crecimiento" ? "featured" : ""}`} key={plan}>
-                  <span>{plan}</span><strong>{plan === "Inicial" ? "$29" : plan === "Crecimiento" ? "$79" : "$149"} USD/mes</strong>
-                  <p>{plan === "Inicial" ? "Para empezar con panel, CSV y alertas basicas." : plan === "Crecimiento" ? "Para equipos que necesitan roles, reportes e integraciones." : "Para operacion multiempresa con mas control y soporte."}</p>
+              {[
+                { plan: "Gratis", price: "$0 COP/mes", text: "Para validar el panel con datos demo y una primera carga CSV.", users: "1 usuario", data: "CSV basico" },
+                { plan: "Inicio", price: "$50.000 COP/mes", text: "Para PYMES que quieren operar con tablero diario, alertas y reportes.", users: "Hasta 3 usuarios", data: "CSV avanzado" },
+                { plan: "Pro", price: "$100.000 COP/mes", text: "Para equipos que necesitan roles, integraciones y control multiempresa.", users: "Hasta 8 usuarios", data: "CSV + integraciones" }
+              ].map(({ plan, price, text, users, data }) => (
+                <article className={`price-card ${plan === "Inicio" ? "featured" : ""}`} key={plan}>
+                  <span>{plan}</span><strong>{price}</strong>
+                  <p>{text}</p>
                   <ul>
                     <li>Dashboard ejecutivo</li>
-                    <li>{plan === "Inicial" ? "1 usuario" : plan === "Crecimiento" ? "Hasta 5 usuarios" : "Usuarios ampliados"}</li>
-                    <li>{plan === "Inicial" ? "CSV avanzado" : "CSV + integraciones"}</li>
+                    <li>{users}</li>
+                    <li>{data}</li>
                   </ul>
-                  <button className={plan === "Crecimiento" ? "primary-button" : "secondary-button"} type="button" onClick={() => setCustomer({ ...customer, plan })}>Elegir {plan}</button>
+                  <button className={plan === "Inicio" ? "primary-button" : "secondary-button"} type="button" onClick={() => { setCustomer({ ...customer, plan }); openMarketingPage("contactanos", "signup"); }}>Elegir {plan}</button>
                 </article>
               ))}
             </div>
           </section>
+          )}
 
+          {marketingPage === "ventajas" && (
           <section className="landing-section security-section">
             <div><LockKeyhole aria-hidden="true" /><strong>Seguridad por empresa</strong><p>Separacion por company_id, roles, invitaciones, recuperacion y permisos visibles.</p></div>
             <div><TrendingUp aria-hidden="true" /><strong>Decisiones medibles</strong><p>Historial de decisiones, reportes y alertas para aprender que accion movio el negocio.</p></div>
             <div><Building2 aria-hidden="true" /><strong>Listo para crecer</strong><p>Arquitectura Next.js, React, TypeScript y PostgreSQL para evolucionar a produccion.</p></div>
           </section>
+          )}
 
-          <section id="registro" className="signup-section">
+          {marketingPage === "contactanos" && (
+            <>
+          <section className="landing-section contact-hero">
+            <div>
+              <p className="eyebrow">Contactanos</p>
+              <h2>Agenda tu entrada a Copiloto Pyme o crea tu cuenta ahora</h2>
+              <p>Estamos preparando una experiencia comercial clara para PYMES colombianas: registro, suscripcion, onboarding y acceso seguro al dashboard desde un solo lugar.</p>
+            </div>
+            <div className="contact-switch" aria-label="Acciones de contacto">
+              <button className={contactMode === "signup" ? "active" : ""} type="button" onClick={() => setContactMode("signup")}><ArrowRight aria-hidden="true" />Crear cuenta</button>
+              <button className={contactMode === "login" ? "active" : ""} type="button" onClick={() => setContactMode("login")}><LockKeyhole aria-hidden="true" />Login</button>
+            </div>
+          </section>
+
+          <section id="registro" className={`signup-section ${contactMode === "signup" ? "contact-active" : ""}`}>
             <div className="section-heading"><p className="eyebrow">Inicio del cliente</p><h2>Registro, pago y onboarding</h2></div>
             <div className="onboarding-progress">
               <div><span>Progreso de activacion</span><strong>{onboardingProgress}%</strong></div>
@@ -1112,7 +1166,7 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section id="login" className="auth-section">
+          <section id="login" className={`auth-section ${contactMode === "login" ? "contact-active" : ""}`}>
             <div className="section-heading"><p className="eyebrow">Acceso seguro</p><h2>Login y recuperacion</h2></div>
             <div className="auth-layout">
               <form className="auth-card" onSubmit={login}>
@@ -1134,6 +1188,8 @@ ${recommendedAction()}`;
               </div>
             </div>
           </section>
+            </>
+          )}
         </main>
         <footer className="site-footer"><span>Copiloto Pyme</span><strong>Un producto Tecnotitan S.A.S</strong></footer>
       </div>

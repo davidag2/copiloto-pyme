@@ -155,11 +155,32 @@ select:focus-visible {
   min-width: 0;
 }
 
-.marketing-nav nav a {
+.marketing-nav nav a,
+.marketing-nav nav button {
+  background: transparent;
+  border: 0;
   color: var(--muted);
+  cursor: pointer;
   font-size: 14px;
   font-weight: 700;
+  padding: 8px 4px;
   white-space: nowrap;
+}
+
+.marketing-nav nav button.active,
+.marketing-nav nav button[aria-current="page"] {
+  color: var(--brand-blue);
+}
+
+.marketing-nav nav button.active::after,
+.marketing-nav nav button[aria-current="page"]::after {
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+  border-radius: var(--radius-pill);
+  content: "";
+  display: block;
+  height: 3px;
+  margin-top: 7px;
+  width: 100%;
 }
 
 .market-pill {
@@ -734,6 +755,66 @@ select:focus-visible {
   color: white;
   font-weight: 900;
   padding: 10px 12px;
+}
+
+.contact-hero {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.1)),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 54px;
+}
+
+.contact-hero h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  margin: 0;
+  max-width: 760px;
+}
+
+.contact-hero p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 720px;
+}
+
+.contact-switch {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+}
+
+.contact-switch button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 13px;
+}
+
+.contact-switch button.active {
+  background: var(--brand-primary);
+  color: white;
+}
+
+.signup-section.contact-active,
+.auth-section.contact-active {
+  border-top: 4px solid var(--brand-blue);
 }
 
 .benefits-section article,
@@ -2890,6 +2971,20 @@ select,
 
   .proof-strip div {
     padding: 14px;
+  }
+
+  .contact-hero {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
+
+  .contact-switch {
+    border-radius: var(--radius-md);
+    display: grid;
+  }
+
+  .contact-switch button {
+    justify-content: center;
   }
 
   .product-window {
