@@ -965,6 +965,9 @@ ${recommendedAction()}`;
               <div className="product-window">
                 <div className="window-bar"><span /><span /><span /><strong>Resumen ejecutivo de hoy</strong></div>
                 <div className="live-dashboard-preview">
+                  <div className="preview-shell-nav" aria-hidden="true">
+                    {["Panel diario", "Ventas", "Caja", "Decisiones"].map((item, index) => <span className={index === 0 ? "active" : ""} key={item}>{item}</span>)}
+                  </div>
                   <div className="preview-live-row">
                     <span><Clock3 aria-hidden="true" />Actualizado hace 4 min</span>
                     <strong>{customer.currency.split(" - ")[0]}</strong>
@@ -981,6 +984,10 @@ ${recommendedAction()}`;
                   </div>
                   <div className="preview-chart" aria-hidden="true">
                     {chartData.map((point) => <span key={point.day} style={{ height: `${Math.max(18, point.actual * 5)}px` }} />)}
+                  </div>
+                  <div className="preview-insight-grid">
+                    <div><span>Producto lider</span><strong>Cafe Premium 500g</strong></div>
+                    <div><span>Riesgo</span><strong>Panela Organica en stock critico</strong></div>
                   </div>
                   <div className="preview-action-card">
                     <div>
