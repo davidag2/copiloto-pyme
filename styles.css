@@ -696,11 +696,71 @@ select:focus-visible {
   line-height: 1.65;
 }
 
-.portal-view #como-funciona,
 .portal-view #roles,
 .portal-view #integraciones,
 .portal-view .security-section {
   display: none;
+}
+
+.compact-heading {
+  margin: 0 auto 26px;
+  max-width: 680px;
+  text-align: center;
+}
+
+.compact-heading h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.12;
+  margin: 0;
+}
+
+.how-section {
+  padding-top: 20px;
+}
+
+.how-steps {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.how-steps article {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 10px;
+  min-height: 190px;
+  padding: 22px;
+}
+
+.how-steps article span {
+  background: var(--brand-primary-soft);
+  border-radius: var(--radius-pill);
+  color: var(--brand-blue);
+  display: grid;
+  font-size: 12px;
+  font-weight: 900;
+  height: 30px;
+  place-items: center;
+  width: 30px;
+}
+
+.how-steps svg {
+  color: var(--brand-blue);
+  height: 24px;
+  width: 24px;
+}
+
+.how-steps strong {
+  font-size: 20px;
+}
+
+.how-steps p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
 }
 
 .portal-view.theme-dark {
@@ -741,6 +801,7 @@ select:focus-visible {
 .portal-view.theme-dark .preview-footer span,
 .portal-view.theme-dark .preview-action-card,
 .portal-view.theme-dark .preview-insight-grid div,
+.portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .comparison-grid article,
 .portal-view.theme-dark .price-card,
 .portal-view.theme-dark .signup-form,
@@ -3040,6 +3101,7 @@ select,
 @media (max-width: 1020px) {
   .hero-section,
   .benefits-section,
+  .how-steps,
   .pricing-grid,
   .signup-layout,
   .onboarding-steps,

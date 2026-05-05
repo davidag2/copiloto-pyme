@@ -1031,13 +1031,13 @@ ${recommendedAction()}`;
             </div>
           </section>
 
-          <section id="como-funciona" className="landing-section">
-            <div className="section-heading"><p className="eyebrow">Como funciona</p><h2>Activa claridad operativa en tres pasos</h2></div>
-            <div className="benefits-section modern-benefits">
+          <section id="como-funciona" className="landing-section how-section">
+            <div className="section-heading compact-heading"><p className="eyebrow">Como funciona</p><h2>Tres pasos para pasar de datos a decisiones</h2></div>
+            <div className="how-steps">
               {[
-                { title: "Conecta datos", icon: Database, text: "Sube CSV avanzado o conecta fuentes como Google Sheets, Siigo, Alegra y Mercado Pago." },
-                { title: "Copiloto analiza", icon: Bot, text: "El sistema lee ventas, caja, margen, inventario y alertas por empresa." },
-                { title: "Decide con accion", icon: ClipboardCheck, text: "Recibe recomendacion, responsable, impacto y reporte ejecutivo listo para compartir." }
+                { title: "Conecta", icon: Database, text: "Sube CSV o conecta tus fuentes." },
+                { title: "Analiza", icon: Bot, text: "El copiloto detecta riesgos y oportunidades." },
+                { title: "Actua", icon: ClipboardCheck, text: "Recibe la siguiente decision recomendada." }
               ].map((item, index) => {
                 const Icon = item.icon;
                 return <article key={item.title}><span>{index + 1}</span><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></article>;
