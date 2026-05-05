@@ -718,6 +718,47 @@ select:focus-visible {
   padding-top: 20px;
 }
 
+.product-benefits {
+  padding-bottom: 24px;
+  padding-top: 26px;
+}
+
+.benefit-pill-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.benefit-pill-grid article {
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 12px;
+  min-height: 140px;
+  padding: 18px;
+}
+
+.benefit-pill-grid svg {
+  color: var(--brand-blue);
+  height: 22px;
+  margin-top: 2px;
+  width: 22px;
+}
+
+.benefit-pill-grid strong {
+  display: block;
+  font-size: 17px;
+}
+
+.benefit-pill-grid p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 7px 0 0;
+}
+
 .how-steps {
   display: grid;
   gap: 14px;
@@ -802,6 +843,7 @@ select:focus-visible {
 .portal-view.theme-dark .preview-action-card,
 .portal-view.theme-dark .preview-insight-grid div,
 .portal-view.theme-dark .how-steps article,
+.portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .comparison-grid article,
 .portal-view.theme-dark .price-card,
 .portal-view.theme-dark .signup-form,
@@ -3102,6 +3144,7 @@ select,
   .hero-section,
   .benefits-section,
   .how-steps,
+  .benefit-pill-grid,
   .pricing-grid,
   .signup-layout,
   .onboarding-steps,

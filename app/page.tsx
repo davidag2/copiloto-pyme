@@ -1031,6 +1031,21 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="landing-section product-benefits" aria-labelledby="beneficios-principales">
+            <div className="section-heading compact-heading"><p className="eyebrow">Beneficios principales</p><h2 id="beneficios-principales">Lo que mejora desde el primer dia</h2></div>
+            <div className="benefit-pill-grid">
+              {[
+                { title: "Lectura rapida", icon: Clock3, text: "Resumen ejecutivo en segundos." },
+                { title: "Alertas claras", icon: AlertTriangle, text: "Riesgos visibles antes de que escalen." },
+                { title: "Accion asignada", icon: ClipboardCheck, text: "Cada decision queda con responsable." },
+                { title: "Reportes listos", icon: FileText, text: "Informacion preparada para compartir." }
+              ].map((item) => {
+                const Icon = item.icon;
+                return <article key={item.title}><Icon aria-hidden="true" /><div><strong>{item.title}</strong><p>{item.text}</p></div></article>;
+              })}
+            </div>
+          </section>
+
           <section id="como-funciona" className="landing-section how-section">
             <div className="section-heading compact-heading"><p className="eyebrow">Como funciona</p><h2>Tres pasos para pasar de datos a decisiones</h2></div>
             <div className="how-steps">
