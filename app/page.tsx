@@ -943,7 +943,7 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <main>
+        <main className={marketingPage === "inicio" ? "stripe-home-main" : undefined}>
           {marketingPage === "inicio" && (
             <>
           <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
@@ -981,6 +981,12 @@ ${recommendedAction()}`;
               />
             </motion.div>
           </motion.section>
+
+          <section className="proof-strip" aria-label="Metricas de valor">
+            <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
+            <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>
+            <div><strong>COP</strong><span>planes listos para Colombia</span></div>
+          </section>
 
           <motion.section className="ai-story-section" aria-label="Historia de inteligencia artificial" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.55 }}>
             <div className="ai-story-copy">
@@ -1070,15 +1076,9 @@ ${recommendedAction()}`;
               <p>Crea tu cuenta, elige un plan en pesos colombianos y completa el onboarding inicial.</p>
             </div>
             <div className="home-final-actions">
-              <button className="primary-button" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta gratis</button>
-              <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo</button>
+              <Button type="button" size="lg" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Crear cuenta gratis</Button>
+              <Button type="button" variant="secondary" size="lg" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo</Button>
             </div>
-          </section>
-
-          <section className="proof-strip" aria-label="Metricas de valor">
-            <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
-            <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>
-            <div><strong>COP</strong><span>planes listos para Colombia</span></div>
           </section>
             </>
           )}

@@ -54,7 +54,7 @@ export function DashboardMockup({
           <small className="mt-2 block font-bold text-slate-500">Impacto estimado: Caja +12 dias · evita perdida de ventas</small>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Ventas</span><strong className="mt-1 block text-xl">{sales}</strong><small className="font-bold text-slate-500">{salesPercent}% de meta</small></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Caja</span><strong className="mt-1 block text-xl">{cashDays} dias</strong><small className="font-bold text-slate-500">{cash}</small></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Alertas</span><strong className="mt-1 block text-xl">{alertCount}</strong><small className="font-bold text-slate-500">{alertCount ? "revisar hoy" : "ok"}</small></div>
@@ -64,18 +64,18 @@ export function DashboardMockup({
           {chartData.map((point) => <span className="flex-1 rounded-t-xl bg-gradient-to-b from-blue-600 to-emerald-400" key={point.day} style={{ height: `${Math.max(18, point.actual * 5)}px` }} />)}
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Producto lider</span><strong className="mt-1 block text-sm leading-snug">Cafe Premium 500g</strong></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Riesgo</span><strong className="mt-1 block text-sm leading-snug">Panela en stock critico</strong></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-3"><span className="block text-xs font-black text-slate-500">Tendencia</span><strong className="mt-1 block text-sm leading-snug">Caida en margen ultima semana</strong></div>
         </div>
 
-        <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="grid grid-cols-1 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_auto]">
           <div><span className="block text-xs font-black text-slate-500">Accion siguiente</span><strong className="mt-1 block text-sm leading-snug">Enviar orden a compras + aprobar reposicion</strong></div>
           <Button className="bg-[#0A2540] px-4 text-sm font-black hover:bg-[#123553]" type="button" onClick={onOpenDemo}>Abrir</Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <span className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-black text-slate-500"><Link2 className="h-4 w-4" />Google Sheets conectado</span>
           <span className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-black text-slate-500"><FileText className="h-4 w-4" />Reporte semanal listo</span>
         </div>
