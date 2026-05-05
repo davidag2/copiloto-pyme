@@ -1005,6 +1005,13 @@ ${recommendedAction()}`;
             </div>
           </section>
 
+          <section className="featured-integrations" aria-label="Integraciones destacadas">
+            <span>Integraciones destacadas</span>
+            <div>
+              {["Google Sheets", "Siigo", "Alegra", "Mercado Pago", "Shopify", "WooCommerce"].map((item) => <strong key={item}>{item}</strong>)}
+            </div>
+          </section>
+
           <section className="proof-strip" aria-label="Metricas de valor">
             <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
             <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>

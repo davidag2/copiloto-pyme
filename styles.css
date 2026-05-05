@@ -644,6 +644,42 @@ select:focus-visible {
   grid-template-columns: 1fr 1fr;
 }
 
+.featured-integrations {
+  align-items: center;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: auto minmax(0, 1fr);
+  margin: -16px auto 24px;
+  max-width: 1180px;
+  padding: 16px clamp(18px, 4vw, 24px);
+}
+
+.featured-integrations > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.featured-integrations div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.featured-integrations strong {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: 13px;
+  padding: 9px 11px;
+}
+
 .proof-strip {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -926,6 +962,8 @@ select:focus-visible {
 .portal-view.theme-dark .preview-footer span,
 .portal-view.theme-dark .preview-action-card,
 .portal-view.theme-dark .preview-insight-grid div,
+.portal-view.theme-dark .featured-integrations,
+.portal-view.theme-dark .featured-integrations strong,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
@@ -3243,6 +3281,7 @@ select,
   .comparison-grid,
   .role-landing-grid,
   .integration-band,
+  .featured-integrations,
   .security-section {
     grid-template-columns: 1fr;
   }
