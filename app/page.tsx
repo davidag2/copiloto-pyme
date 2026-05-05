@@ -3,23 +3,30 @@
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  ArrowRight,
   Banknote,
   BarChart3,
   Boxes,
   Bot,
+  Building2,
   CheckCircle2,
   ClipboardCheck,
   Clock3,
   Database,
   FileText,
   Link2,
+  LockKeyhole,
   Moon,
   PackageCheck,
   RefreshCw,
+  ShieldCheck,
+  Sparkles,
   Settings2,
   Sun,
   Target,
+  TrendingUp,
   Upload,
+  Users,
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -901,33 +908,106 @@ ${recommendedAction()}`;
         </header>
 
         <main>
-          <section className="hero-section">
+          <section className="hero-section landing-hero">
             <div className="hero-copy">
-              <p className="eyebrow">SaaS para PYMES en Latinoamerica</p>
-              <h1>Tu negocio claro cada mañana: ventas, caja, inventario y alertas en un solo panel.</h1>
-              <p>Copiloto Pyme ayuda a propietarios y gerentes a dejar de perseguir reportes en Excel, WhatsApp y sistemas separados.</p>
+              <p className="eyebrow"><Sparkles aria-hidden="true" />SaaS IA para PYMES en Latinoamerica</p>
+              <h1>El copiloto de decisiones para propietarios que quieren ver su negocio en tiempo real.</h1>
+              <p>Copiloto Pyme une ventas, caja, inventario, alertas, reportes y decisiones en un panel ejecutivo diseñado para actuar cada mañana sin depender de hojas sueltas, chats o reportes atrasados.</p>
               <div className="hero-actions">
-                <a className="primary-button" href="#registro">Crear cuenta</a>
-                <button className="secondary-button" type="button" onClick={() => setView("app")}>Entrar al dashboard</button>
+                <a className="primary-button" href="#registro"><ArrowRight aria-hidden="true" />Crear cuenta</a>
+                <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver dashboard</button>
+              </div>
+              <div className="hero-trust">
+                <span><ShieldCheck aria-hidden="true" />Multiempresa y roles</span>
+                <span><Database aria-hidden="true" />PostgreSQL ready</span>
+                <span><Bot aria-hidden="true" />Copiloto IA</span>
               </div>
             </div>
-            <div className="hero-product">
-              <div className="mini-dashboard">
-                <div className="mini-header"><span>{customer.companyName}</span><strong>Decision de hoy</strong></div>
-                <div className="mini-kpis">
-                  <div><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong></div>
-                  <div><span>Caja</span><strong>{cashDays(metrics.cash)} dias</strong></div>
-                  <div><span>Stock critico</span><strong>{metrics.criticalStock} SKU</strong></div>
+            <div className="hero-product premium-product">
+              <div className="product-window">
+                <div className="window-bar"><span /><span /><span /><strong>Copiloto Pyme Live</strong></div>
+                <div className="live-dashboard-preview">
+                  <div className="preview-decision">
+                    <span><Sparkles aria-hidden="true" />Decision recomendada</span>
+                    <strong>{recommendedAction()}</strong>
+                    <small>Impacto estimado: caja +12 dias · inventario critico -2 SKU</small>
+                  </div>
+                  <div className="preview-kpis">
+                    <div><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small>{salesPercent}% de meta</small></div>
+                    <div><span>Caja</span><strong>{cashDays(metrics.cash)} dias</strong><small>{formatMoney(metrics.cash)}</small></div>
+                    <div><span>Alertas</span><strong>{criticalAlerts.length}</strong><small>{criticalAlerts.length ? "revisar hoy" : "ok"}</small></div>
+                  </div>
+                  <div className="preview-chart" aria-hidden="true">
+                    {chartData.map((point) => <span key={point.day} style={{ height: `${Math.max(18, point.actual * 5)}px` }} />)}
+                  </div>
+                  <div className="preview-footer">
+                    <span><Link2 aria-hidden="true" />Google Sheets conectado</span>
+                    <span><FileText aria-hidden="true" />Reporte semanal listo</span>
+                  </div>
                 </div>
-                <div className="mini-alert"><strong>Reponer inventario</strong><span>{recommendedAction()}</span></div>
               </div>
             </div>
           </section>
 
-          <section id="beneficios" className="benefits-section">
-            {["Conecta datos simples", "Recibe alertas accionables", "Decide con contexto"].map((item, index) => (
-              <article key={item}><span>{index + 1}</span><strong>{item}</strong><p>Convierte datos dispersos en acciones claras para el equipo.</p></article>
-            ))}
+          <section className="proof-strip" aria-label="Metricas de valor">
+            <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
+            <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>
+            <div><strong>CSV+</strong><span>mapeo, duplicados y reversa</span></div>
+            <div><strong>24/7</strong><span>alertas para caja, ventas e inventario</span></div>
+          </section>
+
+          <section id="beneficios" className="landing-section">
+            <div className="section-heading"><p className="eyebrow">Por que existe</p><h2>De reportes dispersos a decisiones accionables</h2></div>
+            <div className="comparison-grid">
+              <article>
+                <span>Antes</span>
+                <strong>Excel, WhatsApp y sistemas separados</strong>
+                <p>Ventas por un lado, caja por otro, inventario tarde y decisiones sin responsable claro.</p>
+              </article>
+              <article className="featured-comparison">
+                <span>Ahora</span>
+                <strong>Un panel vivo para decidir hoy</strong>
+                <p>El copiloto cruza datos, detecta riesgos y propone la siguiente accion para tu equipo.</p>
+              </article>
+            </div>
+          </section>
+
+          <section className="landing-section">
+            <div className="section-heading"><p className="eyebrow">Como funciona</p><h2>Activa claridad operativa en tres pasos</h2></div>
+            <div className="benefits-section modern-benefits">
+              {[
+                { title: "Conecta datos", icon: Database, text: "Sube CSV avanzado o conecta fuentes como Google Sheets, Siigo, Alegra y Mercado Pago." },
+                { title: "Copiloto analiza", icon: Bot, text: "El sistema lee ventas, caja, margen, inventario y alertas por empresa." },
+                { title: "Decide con accion", icon: ClipboardCheck, text: "Recibe recomendacion, responsable, impacto y reporte ejecutivo listo para compartir." }
+              ].map((item, index) => {
+                const Icon = item.icon;
+                return <article key={item.title}><span>{index + 1}</span><Icon aria-hidden="true" /><strong>{item.title}</strong><p>{item.text}</p></article>;
+              })}
+            </div>
+          </section>
+
+          <section className="landing-section">
+            <div className="section-heading"><p className="eyebrow">Para cada equipo</p><h2>Roles simples para una PYME real</h2></div>
+            <div className="role-landing-grid">
+              {companyRoles.map((role) => (
+                <article key={role.value}>
+                  <Users aria-hidden="true" />
+                  <strong>{role.label}</strong>
+                  <p>{role.description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="landing-section integration-band">
+            <div>
+              <p className="eyebrow">Integraciones LatAm</p>
+              <h2>Diseñado para datos que las PYMES ya usan</h2>
+              <p>Empieza con CSV avanzado y deja preparado el camino para facturacion, pagos, ecommerce y hojas de calculo.</p>
+            </div>
+            <div className="integration-cloud">
+              {["Google Sheets", "Siigo", "Alegra", "Mercado Pago", "Shopify", "WooCommerce"].map((item) => <span key={item}>{item}</span>)}
+            </div>
           </section>
 
           <section id="planes" className="pricing-section">
@@ -936,11 +1016,22 @@ ${recommendedAction()}`;
               {["Inicial", "Crecimiento", "Pro"].map((plan) => (
                 <article className={`price-card ${plan === "Crecimiento" ? "featured" : ""}`} key={plan}>
                   <span>{plan}</span><strong>{plan === "Inicial" ? "$29" : plan === "Crecimiento" ? "$79" : "$149"} USD/mes</strong>
-                  <p>Panel, alertas, reportes y copiloto para decisiones diarias.</p>
+                  <p>{plan === "Inicial" ? "Para empezar con panel, CSV y alertas basicas." : plan === "Crecimiento" ? "Para equipos que necesitan roles, reportes e integraciones." : "Para operacion multiempresa con mas control y soporte."}</p>
+                  <ul>
+                    <li>Dashboard ejecutivo</li>
+                    <li>{plan === "Inicial" ? "1 usuario" : plan === "Crecimiento" ? "Hasta 5 usuarios" : "Usuarios ampliados"}</li>
+                    <li>{plan === "Inicial" ? "CSV avanzado" : "CSV + integraciones"}</li>
+                  </ul>
                   <button className={plan === "Crecimiento" ? "primary-button" : "secondary-button"} type="button" onClick={() => setCustomer({ ...customer, plan })}>Elegir {plan}</button>
                 </article>
               ))}
             </div>
+          </section>
+
+          <section className="landing-section security-section">
+            <div><LockKeyhole aria-hidden="true" /><strong>Seguridad por empresa</strong><p>Separacion por company_id, roles, invitaciones, recuperacion y permisos visibles.</p></div>
+            <div><TrendingUp aria-hidden="true" /><strong>Decisiones medibles</strong><p>Historial de decisiones, reportes y alertas para aprender que accion movio el negocio.</p></div>
+            <div><Building2 aria-hidden="true" /><strong>Listo para crecer</strong><p>Arquitectura Next.js, React, TypeScript y PostgreSQL para evolucionar a produccion.</p></div>
           </section>
 
           <section id="registro" className="signup-section">

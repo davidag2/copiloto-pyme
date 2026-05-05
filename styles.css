@@ -123,12 +123,15 @@ select:focus-visible {
 
 .portal-view {
   min-height: 100vh;
-  background: #f7f9fc;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.12), transparent 28%),
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.12), transparent 26%),
+    #f7f9fc;
 }
 
 .marketing-nav {
   align-items: center;
-  background: rgba(247, 249, 252, 0.9);
+  background: rgba(247, 249, 252, 0.82);
   border-bottom: 1px solid var(--line);
   display: flex;
   gap: 22px;
@@ -159,7 +162,8 @@ select:focus-visible {
 .benefits-section,
 .pricing-section,
 .signup-section,
-.auth-section {
+.auth-section,
+.landing-section {
   margin: 0 auto;
   max-width: 1180px;
   padding: 54px clamp(18px, 4vw, 28px);
@@ -173,7 +177,26 @@ select:focus-visible {
   min-height: calc(100vh - 82px);
 }
 
+.landing-hero {
+  min-height: min(760px, calc(100vh - 72px));
+  padding-top: 44px;
+}
+
+.hero-copy .eyebrow {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.hero-copy .eyebrow svg {
+  height: 16px;
+  width: 16px;
+}
+
 .hero-copy h1 {
+  font-size: clamp(44px, 6vw, 72px);
+  letter-spacing: 0;
+  line-height: 0.98;
   max-width: 780px;
 }
 
@@ -190,6 +213,32 @@ select:focus-visible {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
+}
+
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.hero-trust span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 7px;
+  padding: 8px 10px;
+}
+
+.hero-trust svg {
+  color: var(--brand-blue);
+  height: 16px;
+  width: 16px;
 }
 
 .secondary-button,
@@ -221,6 +270,167 @@ select:focus-visible {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   padding: 18px;
+}
+
+.premium-product {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(34, 197, 94, 0.2)),
+    var(--brand-navy);
+  padding: 12px;
+}
+
+.product-window {
+  background: #f8fbff;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.window-bar {
+  align-items: center;
+  background: #0f1f33;
+  color: #dbeafe;
+  display: flex;
+  gap: 7px;
+  padding: 11px 13px;
+}
+
+.window-bar span {
+  background: #60a5fa;
+  border-radius: 50%;
+  height: 9px;
+  opacity: 0.8;
+  width: 9px;
+}
+
+.window-bar span:nth-child(2) {
+  background: #22c55e;
+}
+
+.window-bar span:nth-child(3) {
+  background: #f59e0b;
+}
+
+.window-bar strong {
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.live-dashboard-preview {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.preview-decision,
+.preview-kpis div,
+.preview-footer span {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px;
+}
+
+.preview-decision {
+  border-left: 5px solid var(--brand-green);
+}
+
+.preview-decision span,
+.preview-footer span {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 7px;
+}
+
+.preview-decision strong {
+  display: block;
+  line-height: 1.35;
+  margin: 8px 0;
+}
+
+.preview-decision small,
+.preview-kpis small {
+  color: var(--muted);
+  display: block;
+  font-weight: 800;
+}
+
+.preview-kpis,
+.preview-footer {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.preview-kpis span,
+.preview-kpis strong {
+  display: block;
+}
+
+.preview-kpis span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.preview-kpis strong {
+  font-size: 22px;
+  margin: 6px 0;
+}
+
+.preview-chart {
+  align-items: flex-end;
+  background: linear-gradient(180deg, white, #f0f6ff);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 9px;
+  height: 136px;
+  padding: 16px;
+}
+
+.preview-chart span {
+  background: linear-gradient(180deg, var(--brand-blue), var(--brand-green));
+  border-radius: 8px 8px 3px 3px;
+  flex: 1;
+}
+
+.preview-footer {
+  grid-template-columns: 1fr 1fr;
+}
+
+.proof-strip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(4, 1fr);
+  margin: -30px auto 24px;
+  max-width: 1180px;
+  overflow: hidden;
+}
+
+.proof-strip div {
+  background: var(--surface);
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+}
+
+.proof-strip strong {
+  color: var(--brand-primary);
+  font-size: 28px;
+}
+
+.proof-strip span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .mini-dashboard {
@@ -287,6 +497,104 @@ select:focus-visible {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.modern-benefits article svg {
+  color: var(--brand-blue);
+  height: 24px;
+  margin: 12px 0 4px;
+  width: 24px;
+}
+
+.comparison-grid,
+.role-landing-grid,
+.security-section {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.comparison-grid article,
+.role-landing-grid article,
+.security-section div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.comparison-grid span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.comparison-grid strong,
+.role-landing-grid strong,
+.security-section strong {
+  display: block;
+  font-size: 22px;
+  margin: 10px 0;
+}
+
+.comparison-grid p,
+.role-landing-grid p,
+.security-section p,
+.integration-band p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.featured-comparison {
+  border-color: rgba(37, 99, 235, 0.42) !important;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.13) !important;
+}
+
+.role-landing-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.role-landing-grid svg,
+.security-section svg {
+  color: var(--brand-blue);
+  height: 26px;
+  width: 26px;
+}
+
+.integration-band {
+  align-items: center;
+  background: var(--brand-primary);
+  border-radius: 8px;
+  color: white;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.integration-band .eyebrow,
+.integration-band p {
+  color: #bfdbfe;
+}
+
+.integration-band h2 {
+  color: white;
+}
+
+.integration-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.integration-cloud span {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  color: white;
+  font-weight: 900;
+  padding: 10px 12px;
+}
+
 .benefits-section article,
 .price-card,
 .signup-form,
@@ -342,6 +650,14 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.price-card ul {
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .price-card span {
@@ -2310,12 +2626,26 @@ select,
   .signup-layout,
   .onboarding-steps,
   .onboarding-confirmation,
-  .auth-layout {
+  .auth-layout,
+  .proof-strip,
+  .comparison-grid,
+  .role-landing-grid,
+  .integration-band,
+  .security-section {
     grid-template-columns: 1fr;
   }
 
   .hero-section {
     min-height: auto;
+  }
+
+  .proof-strip {
+    margin: 0 auto 18px;
+  }
+
+  .preview-kpis,
+  .preview-footer {
+    grid-template-columns: 1fr;
   }
 
   .app-shell {
@@ -2386,8 +2716,45 @@ select,
   .benefits-section,
   .pricing-section,
   .signup-section,
-  .auth-section {
+  .auth-section,
+  .landing-section {
     padding: 34px 18px;
+  }
+
+  .landing-hero {
+    padding-top: 34px;
+  }
+
+  .hero-copy h1 {
+    font-size: 38px;
+    line-height: 1.02;
+  }
+
+  .hero-copy p:not(.eyebrow) {
+    font-size: 16px;
+  }
+
+  .hero-trust,
+  .hero-actions {
+    display: grid;
+  }
+
+  .proof-strip div {
+    padding: 14px;
+  }
+
+  .product-window {
+    max-width: calc(100vw - 36px);
+  }
+
+  .preview-chart {
+    height: 112px;
+  }
+
+  .comparison-grid strong,
+  .role-landing-grid strong,
+  .security-section strong {
+    font-size: 19px;
   }
 
   .onboarding-progress,
