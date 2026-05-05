@@ -43,6 +43,9 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { Spotlight } from "@/components/aceternity/spotlight";
+import { DashboardMockup } from "@/components/landing/dashboard-mockup";
+import { Button } from "@/components/ui/button";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
 type SalePoint = { day: string; value: number };
@@ -944,13 +947,14 @@ ${recommendedAction()}`;
           {marketingPage === "inicio" && (
             <>
           <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
+            <Spotlight className="opacity-90" />
             <motion.div className="hero-copy" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08, duration: 0.55 }}>
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
               <h1>Copiloto IA que te dice que hacer hoy en tu PYME.</h1>
               <p>Deja de revisar hojas y reportes. Copiloto Pyme analiza tus ventas, caja e inventario y te entrega la decision exacta que debes tomar hoy para evitar problemas y crecer.</p>
               <div className="hero-actions">
-                <button className="primary-button hero-primary" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</button>
-                <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
+                <Button className="hero-primary" type="button" size="lg" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</Button>
+                <Button type="button" variant="secondary" size="lg" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</Button>
               </div>
               <p className="hero-microcopy">Sin tarjeta · Configuracion en minutos</p>
               <div className="hero-metrics" aria-label="Resultados esperados">
@@ -965,47 +969,16 @@ ${recommendedAction()}`;
               </div>
             </motion.div>
             <motion.div className="hero-product premium-product" initial={{ opacity: 0, scale: 0.96, x: 18 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.16, duration: 0.58, ease: "easeOut" }}>
-              <div className="product-window">
-                <div className="window-bar"><span /><span /><span /><strong>Resumen ejecutivo de hoy</strong></div>
-                <div className="live-dashboard-preview">
-                  <div className="preview-shell-nav" aria-hidden="true">
-                    {["Panel diario", "Ventas", "Caja", "Decisiones"].map((item, index) => <span className={index === 0 ? "active" : ""} key={item}>{item}</span>)}
-                  </div>
-                  <div className="preview-live-row">
-                    <span><Clock3 aria-hidden="true" />Actualizado hace 4 min</span>
-                    <strong>{customer.currency.split(" - ")[0]}</strong>
-                  </div>
-                  <div className="preview-decision">
-                    <span><Sparkles aria-hidden="true" />Decision recomendada</span>
-                    <strong>Reponer Panela Organica hoy para evitar ruptura de stock</strong>
-                    <small>Impacto estimado: Caja +12 dias · evita perdida de ventas</small>
-                  </div>
-                  <div className="preview-kpis">
-                    <div><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small>{salesPercent}% de meta</small></div>
-                    <div><span>Caja</span><strong>{cashDays(metrics.cash)} dias</strong><small>{formatMoney(metrics.cash)}</small></div>
-                    <div><span>Alertas</span><strong>{criticalAlerts.length}</strong><small>{criticalAlerts.length ? "revisar hoy" : "ok"}</small></div>
-                  </div>
-                  <div className="preview-chart" aria-hidden="true">
-                    {chartData.map((point) => <span key={point.day} style={{ height: `${Math.max(18, point.actual * 5)}px` }} />)}
-                  </div>
-                  <div className="preview-insight-grid">
-                    <div><span>Producto lider</span><strong>Cafe Premium 500g</strong></div>
-                    <div><span>Riesgo</span><strong>Panela en stock critico</strong></div>
-                    <div><span>Tendencia</span><strong>Caida en margen ultima semana</strong></div>
-                  </div>
-                  <div className="preview-action-card">
-                    <div>
-                      <span>Accion siguiente</span>
-                      <strong>Enviar orden a compras + aprobar reposicion</strong>
-                    </div>
-                    <button type="button" onClick={() => setView("app")}>Abrir</button>
-                  </div>
-                  <div className="preview-footer">
-                    <span><Link2 aria-hidden="true" />Google Sheets conectado</span>
-                    <span><FileText aria-hidden="true" />Reporte semanal listo</span>
-                  </div>
-                </div>
-              </div>
+              <DashboardMockup
+                currency={customer.currency.split(" - ")[0]}
+                sales={formatMoney(metrics.sales)}
+                salesPercent={salesPercent}
+                cashDays={cashDays(metrics.cash)}
+                cash={formatMoney(metrics.cash)}
+                alertCount={criticalAlerts.length}
+                chartData={chartData}
+                onOpenDemo={() => setView("app")}
+              />
             </motion.div>
           </motion.section>
 
