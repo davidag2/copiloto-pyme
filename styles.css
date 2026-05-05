@@ -172,6 +172,10 @@ select:focus-visible {
   color: var(--brand-blue);
 }
 
+.marketing-nav nav button:hover {
+  color: var(--brand-primary);
+}
+
 .marketing-nav nav button.active::after,
 .marketing-nav nav button[aria-current="page"]::after {
   background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
@@ -181,6 +185,12 @@ select:focus-visible {
   height: 3px;
   margin-top: 7px;
   width: 100%;
+}
+
+.marketing-nav nav button:focus-visible,
+.contact-switch button:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: 0;
 }
 
 .market-pill {
@@ -224,7 +234,7 @@ select:focus-visible {
 .landing-section {
   margin: 0 auto;
   max-width: 1180px;
-  padding: 54px clamp(18px, 4vw, 28px);
+  padding: 72px clamp(18px, 4vw, 28px);
 }
 
 .hero-section {
@@ -570,15 +580,18 @@ select:focus-visible {
   border-radius: 8px;
   box-shadow: var(--shadow);
   display: grid;
-  gap: 1px;
-  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
   margin: -30px auto 24px;
   max-width: 1180px;
   overflow: hidden;
+  padding: 10px;
 }
 
 .proof-strip div {
   background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
   display: grid;
   gap: 5px;
   padding: 18px;
@@ -593,6 +606,31 @@ select:focus-visible {
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
+}
+
+.spacious-heading {
+  margin: 0 auto 34px;
+  max-width: 760px;
+  text-align: center;
+}
+
+.spacious-heading h2 {
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.spacious-heading p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.portal-view #como-funciona,
+.portal-view #roles,
+.portal-view #integraciones,
+.portal-view .security-section {
+  display: none;
 }
 
 .mini-dashboard {
@@ -680,8 +718,8 @@ select:focus-visible {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  padding: 28px;
 }
 
 .comparison-grid span {
@@ -709,7 +747,7 @@ select:focus-visible {
 
 .featured-comparison {
   border-color: rgba(37, 99, 235, 0.42) !important;
-  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.13) !important;
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.1) !important;
 }
 
 .role-landing-grid {
@@ -817,6 +855,11 @@ select:focus-visible {
   border-top: 4px solid var(--brand-blue);
 }
 
+.signup-section:not(.contact-active),
+.auth-section:not(.contact-active) {
+  display: none;
+}
+
 .benefits-section article,
 .price-card,
 .signup-form,
@@ -871,7 +914,8 @@ select:focus-visible {
 .price-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  min-height: 360px;
 }
 
 .price-card ul {
@@ -890,7 +934,7 @@ select:focus-visible {
 }
 
 .price-card strong {
-  font-size: 30px;
+  font-size: clamp(26px, 3vw, 34px);
   margin: 0;
 }
 
@@ -1086,6 +1130,17 @@ select:focus-visible {
   display: block;
   line-height: 1.5;
   margin-top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .signup-form small,

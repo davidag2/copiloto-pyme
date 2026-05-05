@@ -944,7 +944,7 @@ ${recommendedAction()}`;
             <div className="hero-copy">
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
               <h1>Decide que hacer hoy con ventas, caja e inventario en tiempo real.</h1>
-              <p>Copiloto Pyme convierte tus datos diarios en una recomendacion ejecutiva clara, alertas prioritarias y acciones listas para tu equipo, sin esperar reportes atrasados ni revisar hojas sueltas.</p>
+              <p>Un panel ejecutivo que convierte datos diarios en recomendaciones claras para propietarios y equipos de PYMES.</p>
               <div className="hero-actions">
                 <button className="primary-button hero-primary" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</button>
                 <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
@@ -1000,8 +1000,7 @@ ${recommendedAction()}`;
           <section className="proof-strip" aria-label="Metricas de valor">
             <div><strong>10 seg.</strong><span>lectura ejecutiva diaria</span></div>
             <div><strong>4 roles</strong><span>propietario, administrador, contador y ventas</span></div>
-            <div><strong>CSV+</strong><span>mapeo, duplicados y reversa</span></div>
-            <div><strong>24/7</strong><span>alertas para caja, ventas e inventario</span></div>
+            <div><strong>COP</strong><span>planes listos para Colombia</span></div>
           </section>
             </>
           )}
@@ -1009,17 +1008,17 @@ ${recommendedAction()}`;
           {marketingPage === "ventajas" && (
             <>
           <section id="beneficios" className="landing-section">
-            <div className="section-heading"><p className="eyebrow">Por que existe</p><h2>De reportes dispersos a decisiones accionables</h2></div>
+            <div className="section-heading spacious-heading"><p className="eyebrow">Ventajas</p><h2>Menos ruido operativo. Mas claridad para decidir.</h2><p>Una experiencia tranquila para leer lo importante y actuar con confianza.</p></div>
             <div className="comparison-grid">
               <article>
-                <span>Antes</span>
-                <strong>Excel, WhatsApp y sistemas separados</strong>
-                <p>Ventas por un lado, caja por otro, inventario tarde y decisiones sin responsable claro.</p>
+                <span>Hoy</span>
+                <strong>La informacion vive dispersa</strong>
+                <p>Ventas, caja e inventario llegan por canales distintos y consumen tiempo de gerencia.</p>
               </article>
               <article className="featured-comparison">
-                <span>Ahora</span>
-                <strong>Un panel vivo para decidir hoy</strong>
-                <p>El copiloto cruza datos, detecta riesgos y propone la siguiente accion para tu equipo.</p>
+                <span>Con Copiloto Pyme</span>
+                <strong>Una lectura clara del dia</strong>
+                <p>El panel prioriza riesgos, oportunidades y la siguiente accion recomendada.</p>
               </article>
             </div>
           </section>
@@ -1069,9 +1068,9 @@ ${recommendedAction()}`;
             <div className="section-heading"><p className="eyebrow">Planes en pesos colombianos</p><h2>Precios simples para empezar sin friccion</h2></div>
             <div className="pricing-grid">
               {[
-                { plan: "Gratis", price: "$0 COP/mes", text: "Para validar el panel con datos demo y una primera carga CSV.", users: "1 usuario", data: "CSV basico" },
-                { plan: "Inicio", price: "$50.000 COP/mes", text: "Para PYMES que quieren operar con tablero diario, alertas y reportes.", users: "Hasta 3 usuarios", data: "CSV avanzado" },
-                { plan: "Pro", price: "$100.000 COP/mes", text: "Para equipos que necesitan roles, integraciones y control multiempresa.", users: "Hasta 8 usuarios", data: "CSV + integraciones" }
+                { plan: "Gratis", price: "$0 COP/mes", text: "Para probar el panel con datos demo.", users: "1 usuario", data: "CSV basico" },
+                { plan: "Inicio", price: "$50.000 COP/mes", text: "Para operar el resumen diario de la empresa.", users: "Hasta 3 usuarios", data: "CSV avanzado" },
+                { plan: "Pro", price: "$100.000 COP/mes", text: "Para equipos con roles e integraciones.", users: "Hasta 8 usuarios", data: "CSV + integraciones" }
               ].map(({ plan, price, text, users, data }) => (
                 <article className={`price-card ${plan === "Inicio" ? "featured" : ""}`} key={plan}>
                   <span>{plan}</span><strong>{price}</strong>
@@ -1102,7 +1101,7 @@ ${recommendedAction()}`;
             <div>
               <p className="eyebrow">Contactanos</p>
               <h2>Agenda tu entrada a Copiloto Pyme o crea tu cuenta ahora</h2>
-              <p>Estamos preparando una experiencia comercial clara para PYMES colombianas: registro, suscripcion, onboarding y acceso seguro al dashboard desde un solo lugar.</p>
+              <p>Elige si quieres crear una cuenta nueva o entrar con tu usuario empresarial.</p>
             </div>
             <div className="contact-switch" aria-label="Acciones de contacto">
               <button className={contactMode === "signup" ? "active" : ""} type="button" onClick={() => setContactMode("signup")}><ArrowRight aria-hidden="true" />Crear cuenta</button>
