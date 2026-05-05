@@ -127,8 +127,8 @@ const navItems: NavItem[] = [
 const marketingNavItems: Array<{ label: string; page: MarketingPage }> = [
   { label: "Inicio", page: "inicio" },
   { label: "Ventajas", page: "ventajas" },
-  { label: "Precios", page: "precios" },
-  { label: "Contactanos", page: "contactanos" }
+  { label: "Precio", page: "precios" },
+  { label: "Contactenos", page: "contactanos" }
 ];
 
 async function apiJson<T>(path: string, options: RequestInit): Promise<ApiResult<T>> {
@@ -946,20 +946,21 @@ ${recommendedAction()}`;
           <motion.section className="hero-section landing-hero" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
             <motion.div className="hero-copy" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08, duration: 0.55 }}>
               <p className="eyebrow"><Sparkles aria-hidden="true" />Copiloto IA para PYMES en Colombia</p>
-              <h1>La inteligencia artificial que entiende la operacion diaria de tu PYME.</h1>
-              <p>Copiloto Pyme cruza ventas, caja, inventario y reportes para decirte que esta pasando, que riesgo viene y cual es la siguiente decision que tu equipo debe tomar.</p>
+              <h1>Copiloto IA que te dice que hacer hoy en tu PYME.</h1>
+              <p>Deja de revisar hojas y reportes. Copiloto Pyme analiza tus ventas, caja e inventario y te entrega la decision exacta que debes tomar hoy para evitar problemas y crecer.</p>
               <div className="hero-actions">
                 <button className="primary-button hero-primary" type="button" onClick={() => openMarketingPage("contactanos", "signup")}><ArrowRight aria-hidden="true" />Empezar gratis</button>
                 <button className="secondary-button" type="button" onClick={() => setView("app")}><BarChart3 aria-hidden="true" />Ver demo en vivo</button>
               </div>
+              <p className="hero-microcopy">Sin tarjeta · Configuracion en minutos</p>
               <div className="hero-metrics" aria-label="Resultados esperados">
-                <div><strong><CountUp end={10} duration={1.4} /> seg</strong><span>lectura del dia</span></div>
-                <div><strong>+<CountUp end={12} duration={1.5} /> dias</strong><span>proyeccion de caja</span></div>
-                <div><strong>COP</strong><span>planes para Colombia</span></div>
+                <div><strong><CountUp end={10} duration={1.4} /> seg</strong><span>lectura ejecutiva diaria</span></div>
+                <div><strong>+<CountUp end={12} duration={1.5} /> dias</strong><span>proyeccion de caja anticipada</span></div>
+                <div><strong>COP</strong><span>planes disenados para Colombia</span></div>
               </div>
               <div className="hero-trust">
                 <span><ShieldCheck aria-hidden="true" />Multiempresa y roles</span>
-                <span><Database aria-hidden="true" />Base de datos real</span>
+                <span><Database aria-hidden="true" />Datos reales conectados</span>
                 <span><Bot aria-hidden="true" />IA accionable</span>
               </div>
             </motion.div>
@@ -976,8 +977,8 @@ ${recommendedAction()}`;
                   </div>
                   <div className="preview-decision">
                     <span><Sparkles aria-hidden="true" />Decision recomendada</span>
-                    <strong>{recommendedAction()}</strong>
-                    <small>Impacto estimado: caja +12 dias · inventario critico -2 SKU</small>
+                    <strong>Reponer Panela Organica hoy para evitar ruptura de stock</strong>
+                    <small>Impacto estimado: Caja +12 dias · evita perdida de ventas</small>
                   </div>
                   <div className="preview-kpis">
                     <div><span>Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small>{salesPercent}% de meta</small></div>
@@ -989,12 +990,13 @@ ${recommendedAction()}`;
                   </div>
                   <div className="preview-insight-grid">
                     <div><span>Producto lider</span><strong>Cafe Premium 500g</strong></div>
-                    <div><span>Riesgo</span><strong>Panela Organica en stock critico</strong></div>
+                    <div><span>Riesgo</span><strong>Panela en stock critico</strong></div>
+                    <div><span>Tendencia</span><strong>Caida en margen ultima semana</strong></div>
                   </div>
                   <div className="preview-action-card">
                     <div>
                       <span>Accion siguiente</span>
-                      <strong>Enviar alerta a compras y aprobar reposicion</strong>
+                      <strong>Enviar orden a compras + aprobar reposicion</strong>
                     </div>
                     <button type="button" onClick={() => setView("app")}>Abrir</button>
                   </div>
@@ -1111,7 +1113,7 @@ ${recommendedAction()}`;
           {marketingPage === "ventajas" && (
             <>
           <section id="beneficios" className="landing-section">
-            <div className="section-heading spacious-heading"><p className="eyebrow">Ventajas</p><h2>Menos ruido operativo. Mas claridad para decidir.</h2><p>Una experiencia tranquila para leer lo importante y actuar con confianza.</p></div>
+            <div className="section-heading spacious-heading"><p className="eyebrow">Ventajas</p><h2>La IA convierte datos sueltos en una decision clara para hoy.</h2><p>Copiloto Pyme traduce la operacion diaria en prioridades, riesgos y acciones que tu equipo puede ejecutar.</p></div>
             <div className="comparison-grid">
               <article>
                 <span>Hoy</span>
@@ -1123,6 +1125,14 @@ ${recommendedAction()}`;
                 <strong>Una lectura clara del dia</strong>
                 <p>El panel prioriza riesgos, oportunidades y la siguiente accion recomendada.</p>
               </article>
+            </div>
+          </section>
+
+          <section className="landing-section impact-compare-section" aria-label="Impacto visible">
+            <div className="section-heading compact-heading"><p className="eyebrow">Impacto visible</p><h2>El cambio se nota en la forma de decidir.</h2></div>
+            <div className="impact-compare-grid">
+              <article><span>Sin copiloto</span><strong>Reportes dispersos, revision manual y decisiones tardias.</strong></article>
+              <article><span>Con IA accionable</span><strong>Prioridad clara, riesgo anticipado y accion asignada.</strong></article>
             </div>
           </section>
 
@@ -1213,23 +1223,22 @@ ${recommendedAction()}`;
           )}
 
           {marketingPage === "precios" && (
-          <section id="planes" className="pricing-section">
-            <div className="section-heading"><p className="eyebrow">Planes en pesos colombianos</p><h2>Precios simples para empezar sin friccion</h2></div>
+          <section id="planes" className="pricing-section premium-pricing">
+            <div className="section-heading spacious-heading"><p className="eyebrow">Precio en COP</p><h2>Planes claros para PYMES que quieren decidir mejor.</h2><p>Empieza con IA accionable, sube tus datos y escala cuando tu equipo necesite mas control.</p></div>
             <div className="pricing-grid">
               {[
-                { plan: "Gratis", price: "$0 COP/mes", text: "Para probar el panel con datos demo.", users: "1 usuario", data: "CSV basico" },
-                { plan: "Inicio", price: "$50.000 COP/mes", text: "Para operar el resumen diario de la empresa.", users: "Hasta 3 usuarios", data: "CSV avanzado" },
-                { plan: "Pro", price: "$100.000 COP/mes", text: "Para equipos con roles e integraciones.", users: "Hasta 8 usuarios", data: "CSV + integraciones" }
-              ].map(({ plan, price, text, users, data }) => (
-                <article className={`price-card ${plan === "Inicio" ? "featured" : ""}`} key={plan}>
+                { plan: "Basico", price: "COP $99.000/mes", text: "Para empezar con lectura ejecutiva diaria e importacion de datos.", badge: "", features: ["Dashboard ejecutivo", "1 empresa", "CSV avanzado", "Alertas basicas"] },
+                { plan: "Pro", price: "COP $249.000/mes", text: "Recomendado para PYMES en crecimiento que necesitan roles, IA y reportes.", badge: "Recomendado para PYMES en crecimiento", features: ["Todo Basico", "Hasta 8 usuarios", "Roles por equipo", "Reportes semanales", "Integraciones clave"] },
+                { plan: "Empresa", price: "COP $499.000/mes", text: "Para operaciones multiempresa con acompanamiento e integraciones ampliadas.", badge: "", features: ["Todo Pro", "Multiempresa", "Soporte inicial", "Implementacion guiada", "Prioridad comercial"] }
+              ].map(({ plan, price, text, badge, features }) => (
+                <article className={`price-card ${plan === "Pro" ? "featured" : ""}`} key={plan}>
+                  {badge ? <em>{badge}</em> : null}
                   <span>{plan}</span><strong>{price}</strong>
                   <p>{text}</p>
                   <ul>
-                    <li>Dashboard ejecutivo</li>
-                    <li>{users}</li>
-                    <li>{data}</li>
+                    {features.map((feature) => <li key={feature}>{feature}</li>)}
                   </ul>
-                  <button className={plan === "Inicio" ? "primary-button" : "secondary-button"} type="button" onClick={() => { setCustomer({ ...customer, plan }); openMarketingPage("contactanos", "signup"); }}>Elegir {plan}</button>
+                  <button className={plan === "Pro" ? "primary-button" : "secondary-button"} type="button" onClick={() => { setCustomer({ ...customer, plan }); openMarketingPage("contactanos", "signup"); }}>Elegir {plan}</button>
                 </article>
               ))}
             </div>
@@ -1248,13 +1257,34 @@ ${recommendedAction()}`;
             <>
           <section className="landing-section contact-hero">
             <div>
-              <p className="eyebrow">Contactanos</p>
-              <h2>Agenda tu entrada a Copiloto Pyme o crea tu cuenta ahora</h2>
-              <p>Elige si quieres crear una cuenta nueva o entrar con tu usuario empresarial.</p>
+              <p className="eyebrow">Contactenos</p>
+              <h2>Solicita una demo pensada para tu PYME.</h2>
+              <p>Cuentanos como manejas ventas, caja e inventario y te mostramos como Copiloto Pyme puede ayudarte.</p>
             </div>
             <div className="contact-switch" aria-label="Acciones de contacto">
               <button className={contactMode === "signup" ? "active" : ""} type="button" onClick={() => setContactMode("signup")}><ArrowRight aria-hidden="true" />Crear cuenta</button>
               <button className={contactMode === "login" ? "active" : ""} type="button" onClick={() => setContactMode("login")}><LockKeyhole aria-hidden="true" />Login</button>
+            </div>
+          </section>
+
+          <section className="contact-demo-section" aria-label="Solicitar demo">
+            <form className="contact-demo-form" onSubmit={(event) => event.preventDefault()}>
+              <strong>Solicitar demo</strong>
+              <label>Nombre<input placeholder="Tu nombre" /></label>
+              <label>Empresa<input placeholder="Nombre de la empresa" /></label>
+              <label>Email<input type="email" placeholder="correo@empresa.com" /></label>
+              <label>Telefono<input placeholder="+57 300 000 0000" /></label>
+              <label>Mensaje<textarea placeholder="Cuéntanos qué quieres mejorar en ventas, caja o inventario." /></label>
+              <button className="primary-button" type="submit"><ArrowRight aria-hidden="true" />Solicitar demo</button>
+            </form>
+            <div className="contact-demo-card">
+              <span><Sparkles aria-hidden="true" />Demo para PYMES</span>
+              <strong>Te mostramos el flujo completo con una lectura ejecutiva de ejemplo.</strong>
+              <div>
+                <p><CheckCircle2 aria-hidden="true" />Implementacion guiada</p>
+                <p><CheckCircle2 aria-hidden="true" />Soporte inicial</p>
+                <p><CheckCircle2 aria-hidden="true" />Recomendaciones para conectar tus datos</p>
+              </div>
             </div>
           </section>
 

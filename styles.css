@@ -81,7 +81,8 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -132,8 +133,9 @@ select:focus-visible {
   --line: #dce6e3;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.1), transparent 26%),
-    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.1), transparent 24%),
+    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.16), transparent 26%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.74), transparent 36%),
     linear-gradient(180deg, #eef4f3 0%, #f6f8f4 54%, #eef4f3 100%);
 }
 
@@ -256,6 +258,26 @@ select:focus-visible {
   grid-template-columns: minmax(340px, 0.78fr) minmax(520px, 1.22fr);
   gap: clamp(34px, 5vw, 64px);
   min-height: calc(100vh - 82px);
+  position: relative;
+}
+
+.hero-section::before {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(34, 197, 94, 0.1)),
+    rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 32px;
+  content: "";
+  inset: 24px 10px 20px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.hero-copy,
+.hero-product {
+  position: relative;
+  z-index: 1;
 }
 
 .landing-hero {
@@ -275,10 +297,17 @@ select:focus-visible {
 }
 
 .hero-copy h1 {
-  font-size: clamp(44px, 6vw, 72px);
+  font-size: clamp(44px, 6.6vw, 84px);
   letter-spacing: 0;
   line-height: 0.98;
   max-width: 780px;
+}
+
+.hero-microcopy {
+  color: var(--muted);
+  font-size: 13px !important;
+  font-weight: 900;
+  margin-top: 14px !important;
 }
 
 .hero-copy p:not(.eyebrow) {
@@ -398,14 +427,15 @@ select:focus-visible {
     linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(34, 197, 94, 0.2)),
     var(--brand-navy);
   justify-self: stretch;
-  max-width: 720px;
+  border-radius: 28px;
+  max-width: 780px;
   padding: 12px;
 }
 
 .product-window {
   background: #f8fbff;
   border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 8px;
+  border-radius: 22px;
   overflow: hidden;
 }
 
@@ -504,7 +534,7 @@ select:focus-visible {
 .preview-action-card {
   background: white;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 18px;
   padding: 13px;
 }
 
@@ -585,13 +615,13 @@ select:focus-visible {
 .preview-insight-grid {
   display: grid;
   gap: 10px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .preview-insight-grid div {
   background: white;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 18px;
   padding: 13px;
 }
 
@@ -1145,6 +1175,41 @@ select:focus-visible {
   padding-top: 28px;
 }
 
+.impact-compare-section {
+  padding-bottom: 26px;
+  padding-top: 28px;
+}
+
+.impact-compare-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.impact-compare-grid article {
+  background: color-mix(in srgb, var(--surface) 91%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm);
+  padding: 26px;
+}
+
+.impact-compare-grid span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.impact-compare-grid strong {
+  color: var(--ink);
+  display: block;
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.14;
+}
+
 .role-section {
   padding-bottom: 28px;
   padding-top: 28px;
@@ -1355,11 +1420,14 @@ select:focus-visible {
 .portal-view.theme-dark .trust-section,
 .portal-view.theme-dark .trust-items article,
 .portal-view.theme-dark .home-final-cta,
+.portal-view.theme-dark .contact-demo-form,
+.portal-view.theme-dark .contact-demo-card,
 .portal-view.theme-dark .how-steps article,
 .portal-view.theme-dark .benefit-pill-grid article,
 .portal-view.theme-dark .feature-detail-grid article,
 .portal-view.theme-dark .feature-detail-grid span,
 .portal-view.theme-dark .role-landing-grid article,
+.portal-view.theme-dark .impact-compare-grid article,
 .portal-view.theme-dark .comparison-grid article,
 .portal-view.theme-dark .price-card,
 .portal-view.theme-dark .signup-form,
@@ -1569,6 +1637,91 @@ select:focus-visible {
   margin-top: 54px;
 }
 
+.contact-demo-section {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 0 clamp(18px, 4vw, 28px) 34px;
+}
+
+.contact-demo-form,
+.contact-demo-card {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface-strong) 78%, transparent));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+  padding: clamp(22px, 4vw, 30px);
+}
+
+.contact-demo-form {
+  display: grid;
+  gap: 14px;
+}
+
+.contact-demo-form strong,
+.contact-demo-card strong {
+  color: var(--ink);
+  font-size: clamp(24px, 3.4vw, 36px);
+  line-height: 1.1;
+}
+
+.contact-demo-form label {
+  color: var(--muted);
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 7px;
+}
+
+.contact-demo-form input,
+.contact-demo-form textarea {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--ink);
+  min-width: 0;
+  padding: 13px 14px;
+}
+
+.contact-demo-form textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.contact-demo-card {
+  align-self: start;
+  display: grid;
+  gap: 18px;
+}
+
+.contact-demo-card > span,
+.contact-demo-card p {
+  align-items: center;
+  display: flex;
+  gap: 9px;
+}
+
+.contact-demo-card > span {
+  color: var(--brand-blue);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.contact-demo-card svg {
+  height: 18px;
+  width: 18px;
+}
+
+.contact-demo-card p {
+  color: var(--muted);
+  font-weight: 900;
+  margin: 0 0 10px;
+}
+
 .contact-hero h2 {
   font-size: clamp(32px, 4vw, 48px);
   line-height: 1.05;
@@ -1675,7 +1828,38 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 360px;
+  min-height: 430px;
+  position: relative;
+}
+
+.premium-pricing .pricing-grid {
+  align-items: stretch;
+}
+
+.premium-pricing .price-card {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface-strong) 78%, transparent));
+  border-radius: 24px;
+  padding: 28px;
+}
+
+.premium-pricing .price-card.featured {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.16), transparent 38%),
+    radial-gradient(circle at 80% 10%, rgba(34, 197, 94, 0.12), transparent 36%),
+    var(--surface);
+  transform: translateY(-8px);
+}
+
+.price-card em {
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+  border-radius: var(--radius-pill);
+  color: white;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 8px 10px;
+  width: fit-content;
 }
 
 .price-card ul {
@@ -3663,6 +3847,7 @@ select,
   .benefit-pill-grid,
   .feature-detail-grid,
   .role-landing-grid,
+  .impact-compare-grid,
   .pricing-grid,
   .signup-layout,
   .onboarding-steps,
@@ -3680,6 +3865,7 @@ select,
   .home-final-cta,
   .ai-story-section,
   .ai-graph-section,
+  .contact-demo-section,
   .security-section {
     grid-template-columns: 1fr;
   }
