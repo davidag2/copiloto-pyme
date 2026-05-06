@@ -141,6 +141,12 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <FeatureCard icon={AlertTriangle} title="Te avisa problemas" text="Te dice antes si algo se va a acabar o si algo va mal." />
               <FeatureCard icon={ClipboardCheck} title={"Te dice qu\u00e9 hacer"} text={"No tienes que pensar mucho. Te dice la siguiente acci\u00f3n."} />
             </div>
+            <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre c\u00f3mo la IA entiende cada parte del negocio">
+              <img
+                alt="Infograf\u00eda: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
+                src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
+              />
+            </section>
           </section>
         )}
 
