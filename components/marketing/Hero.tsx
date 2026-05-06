@@ -7,7 +7,7 @@ export function Hero() {
     <section id="inicio" className="mkt-hero">
       <div className="mkt-hero-copy">
         <span className="mkt-eyebrow"><Bot aria-hidden="true" />IA para PYMES en Colombia</span>
-        <h1>La IA que te ayuda a administrar y tomar decisiones en tu PYME</h1>
+        <h1>La IA que te ayuda a tomar desiciones en tu PYME</h1>
         <p>Copiloto Pyme analiza tus ventas, caja e inventario y te muestra qué está pasando, qué riesgo viene y qué acción debes tomar hoy para no perder dinero.</p>
         <div className="mkt-bullets">
           {["Entiende tu negocio en segundos", "Detecta problemas antes de que crezcan", "Recibe una decisión clara cada día"].map((item) => (
