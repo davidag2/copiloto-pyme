@@ -64,6 +64,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               />
             </section>
 
+            <section className="mkt-infographic-section" aria-label="Infografía antes y después de usar Copiloto Pyme">
+              <img
+                alt="Infografía: de revisar datos a tomar decisiones con Copiloto Pyme, comparando antes y después"
+                src="/images/infografia-antes-despues-copiloto-pyme.png"
+              />
+            </section>
+
             <section className="mkt-home-features">
               <div className="mkt-section-heading">
                 <span>Todo lo que necesitas</span>
