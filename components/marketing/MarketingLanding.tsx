@@ -134,13 +134,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
           <section className="mkt-section mkt-single-section">
             <div className="mkt-section-heading">
               <span>Precio</span>
-              <h2>Planes simples en pesos colombianos</h2>
-              <p>Empieza gratis y escala a medida que tu negocio crece.</p>
+              <h2>Elige el plan que se adapta a tu PYME</h2>
+              <p>Cancelas cuando quieras. Sin letras pequeñas.</p>
             </div>
             <div className="mkt-pricing-grid">
-              <PricingCard name="Gratis" price="COP $0" href="/register" cta="Empezar gratis" features={["1 empresa", "Lectura diaria b\u00e1sica", "Dashboard simple", "Features b\u00e1sicas"]} />
-              <PricingCard name="Basic" price="COP $50.000 / mes" href="/register" cta="Elegir Basic" features={["Hasta 2 empresas", "Alertas b\u00e1sicas", "Resumen diario", "Datos de ventas, caja e inventario", "Soporte est\u00e1ndar"]} />
-              <PricingCard highlighted badge="Recomendado" name="Pro" price="COP $100.000 / mes" href="/register" cta="Elegir Pro" features={["Hasta 5 empresas", "Alertas inteligentes", "Proyecci\u00f3n de caja", "Reporte semanal", "Roles de equipo", "Prioridad en soporte"]} />
+              <PricingCard name="Gratis" price="COP $0" href="/register" cta="Empezar gratis" features={["Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]} />
+              <PricingCard highlighted badge="Más popular" name="Basic" price="COP $50.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan gratis", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]} />
+              <PricingCard name="Pro" price="COP $100.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]} />
             </div>
             <p className="mkt-price-note">{"Precios en COP \u00b7 No incluyen IVA"}</p>
           </section>
