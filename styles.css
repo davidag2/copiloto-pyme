@@ -1659,25 +1659,27 @@ select:focus-visible {
   box-shadow: 0 20px 60px rgba(10, 37, 64, 0.1);
   display: grid;
   gap: 12px;
-  grid-template-columns: 280px minmax(420px, 1fr) 280px;
-  left: 50%;
+  grid-template-columns: 300px minmax(430px, 1fr) 300px;
   margin: 0 auto;
   max-width: min(1240px, calc(100% - 28px));
   padding: 12px 14px;
   position: sticky;
   top: 12px;
-  transform: translateX(-50%);
-  width: 100%;
+  width: calc(100% - 28px);
   z-index: 30;
 }
 
 .mkt-brand {
   align-items: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(239, 246, 255, 0.74));
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 20px;
   display: inline-flex;
   gap: 12px;
   font-weight: 900;
   justify-self: start;
   min-width: 0;
+  padding: 8px 12px 8px 8px;
 }
 
 .mkt-brand span {
@@ -1691,9 +1693,9 @@ select:focus-visible {
   flex: 0 0 auto;
   font-size: 15px;
   font-weight: 950;
-  height: 48px;
+  height: 52px;
   place-items: center;
-  width: 48px;
+  width: 52px;
 }
 
 .mkt-brand div {
@@ -1704,7 +1706,7 @@ select:focus-visible {
 
 .mkt-brand strong {
   color: var(--brand-primary);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1;
   white-space: nowrap;
 }
@@ -1727,6 +1729,7 @@ select:focus-visible {
   justify-content: center;
   justify-self: center;
   padding: 5px;
+  width: max-content;
 }
 
 .mkt-desktop-nav a,
@@ -2509,7 +2512,7 @@ select:focus-visible {
 
 @media (max-width: 1120px) and (min-width: 941px) {
   .mkt-header {
-    grid-template-columns: 230px minmax(380px, 1fr) 245px;
+    grid-template-columns: 250px minmax(360px, 1fr) 250px;
   }
 
   .mkt-brand small {
@@ -2517,8 +2520,8 @@ select:focus-visible {
   }
 
   .mkt-brand span {
-    height: 44px;
-    width: 44px;
+    height: 46px;
+    width: 46px;
   }
 
   .mkt-desktop-nav a {
