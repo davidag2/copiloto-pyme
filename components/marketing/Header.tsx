@@ -24,8 +24,11 @@ export function Header({ activePage, theme, onToggleTheme }: HeaderProps) {
   return (
     <header className="mkt-header">
       <a className="mkt-brand" href="/" aria-label="Copiloto Pyme inicio">
-        <span>CP</span>
-        <strong>Copiloto Pyme</strong>
+        <span aria-hidden="true">CP</span>
+        <div>
+          <strong>Copiloto Pyme</strong>
+          <small>IA para PYMES</small>
+        </div>
       </a>
       <nav className="mkt-desktop-nav" aria-label="Navegacion principal">
         {navItems.map((item) => (
