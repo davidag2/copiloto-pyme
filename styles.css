@@ -2189,6 +2189,7 @@ select:focus-visible {
 
 .mkt-logo-strip,
 .mkt-process-section,
+.mkt-infographic-section,
 .mkt-home-features,
 .mkt-testimonial-section,
 .mkt-home-pricing,
@@ -2316,6 +2317,19 @@ select:focus-visible {
   color: var(--muted);
   line-height: 1.5;
   margin: 0;
+}
+
+.mkt-infographic-section {
+  padding-bottom: clamp(42px, 6vw, 72px);
+}
+
+.mkt-infographic-section img {
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgba(10, 37, 64, 0.1);
+  display: block;
+  height: auto;
+  width: 100%;
 }
 
 .mkt-home-features {

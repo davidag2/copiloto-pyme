@@ -57,6 +57,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               </div>
             </section>
 
+            <section className="mkt-infographic-section" aria-label="Infografía de cómo funciona Copiloto Pyme">
+              <img
+                alt="Infografía: así funciona Copiloto Pyme en tres pasos, conectas tus datos, la IA analiza y recibes una decisión"
+                src="/images/infografia-como-funciona-copiloto-pyme.png"
+              />
+            </section>
+
             <section className="mkt-home-features">
               <div className="mkt-section-heading">
                 <span>Todo lo que necesitas</span>
