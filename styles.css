@@ -2323,6 +2323,24 @@ select:focus-visible {
   padding-bottom: clamp(42px, 6vw, 72px);
 }
 
+.mkt-advantages-story {
+  display: grid;
+  gap: clamp(30px, 5vw, 56px);
+  padding-top: clamp(48px, 7vw, 84px);
+}
+
+.mkt-advantages-story .mkt-section-heading {
+  margin-bottom: 0;
+}
+
+.mkt-advantages-story .mkt-infographic-section {
+  padding-bottom: clamp(20px, 4vw, 42px);
+}
+
+.mkt-advantages-story .mkt-infographic-section:last-child {
+  padding-bottom: 0;
+}
+
 .mkt-infographic-section img {
   border: 1px solid rgba(226, 232, 240, 0.92);
   border-radius: 28px;

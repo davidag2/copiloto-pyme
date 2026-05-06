@@ -141,12 +141,34 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <FeatureCard icon={AlertTriangle} title="Te avisa problemas" text="Te dice antes si algo se va a acabar o si algo va mal." />
               <FeatureCard icon={ClipboardCheck} title={"Te dice qu\u00e9 hacer"} text={"No tienes que pensar mucho. Te dice la siguiente acci\u00f3n."} />
             </div>
-            <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre c\u00f3mo la IA entiende cada parte del negocio">
-              <img
-                alt="Infograf\u00eda: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
-                src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
-              />
-            </section>
+            <div className="mkt-advantages-story">
+              <div className="mkt-section-heading">
+                <span>{"Claridad operativa"}</span>
+                <h2>{"La IA conecta las se\u00f1ales importantes de tu empresa"}</h2>
+                <p>
+                  {"Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas. La ventaja es simple: menos revisi\u00f3n manual y m\u00e1s decisiones correctas en el momento adecuado."}
+                </p>
+              </div>
+              <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre c\u00f3mo la IA entiende cada parte del negocio">
+                <img
+                  alt="Infograf\u00eda: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
+                  src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
+                />
+              </section>
+              <div className="mkt-section-heading">
+                <span>{"Impacto real"}</span>
+                <h2>{"Decisiones m\u00e1s r\u00e1pidas, menos riesgo y mayor control"}</h2>
+                <p>
+                  {"El valor no est\u00e1 solo en ver gr\u00e1ficas bonitas. Est\u00e1 en ahorrar tiempo, evitar p\u00e9rdidas, mantener el negocio bajo control y convertir cada resumen diario en una acci\u00f3n que mejora los resultados."}
+                </p>
+              </div>
+              <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre el impacto real de Copiloto Pyme">
+                <img
+                  alt="Infograf\u00eda: impacto real de Copiloto Pyme en ahorro de tiempo, reducci\u00f3n de p\u00e9rdidas, control y crecimiento"
+                  src="/images/infografia-impacto-real-copiloto-pyme.png"
+                />
+              </section>
+            </div>
           </section>
         )}
 
