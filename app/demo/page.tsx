@@ -43,7 +43,7 @@ export default function DemoPage() {
 
         <section className="demo-cta">
           <a className="mkt-button primary large" href="/register"><ArrowRight aria-hidden="true" />Crear cuenta gratis</a>
-          <a className="mkt-button secondary large" href="/#precio">Ver planes</a>
+          <a className="mkt-button secondary large" href="/precio">Ver planes</a>
         </section>
       </main>
       <Footer />

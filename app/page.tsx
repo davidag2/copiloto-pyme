@@ -910,7 +910,7 @@ ${recommendedAction()}`;
   }
 
   if (view === "portal") {
-    return <MarketingLanding theme={theme} onToggleTheme={toggleTheme} />;
+    return <MarketingLanding activePage="inicio" theme={theme} onToggleTheme={toggleTheme} />;
   }
 
   return (

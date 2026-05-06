@@ -1659,7 +1659,7 @@ select:focus-visible {
   box-shadow: 0 18px 55px rgba(10, 37, 64, 0.08);
   display: grid;
   gap: 18px;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(210px, 1fr) auto minmax(320px, 1fr);
   left: 50%;
   margin: 0 auto;
   max-width: min(1160px, calc(100% - 28px));
@@ -1676,6 +1676,7 @@ select:focus-visible {
   display: inline-flex;
   gap: 10px;
   font-weight: 900;
+  justify-self: start;
 }
 
 .mkt-brand span {
@@ -1697,6 +1698,7 @@ select:focus-visible {
   display: flex;
   gap: 6px;
   justify-content: center;
+  justify-self: center;
 }
 
 .mkt-desktop-nav a,
@@ -1709,6 +1711,8 @@ select:focus-visible {
 }
 
 .mkt-desktop-nav a:hover,
+.mkt-desktop-nav a.active,
+.mkt-desktop-nav a[aria-current="page"],
 .mkt-mobile-menu a:hover {
   background: rgba(37, 99, 235, 0.08);
   color: var(--brand-primary);
@@ -1718,6 +1722,7 @@ select:focus-visible {
   align-items: center;
   display: flex;
   gap: 8px;
+  justify-self: end;
 }
 
 .mkt-button {
@@ -2005,6 +2010,11 @@ select:focus-visible {
 
 .mkt-section {
   padding-bottom: clamp(54px, 7vw, 88px);
+}
+
+.mkt-single-section {
+  min-height: calc(100vh - 170px);
+  padding-top: clamp(72px, 10vw, 122px);
 }
 
 .mkt-section-heading {
