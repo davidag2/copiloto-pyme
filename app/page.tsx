@@ -332,6 +332,7 @@ export default function Home() {
       try {
         setAuthUser(JSON.parse(savedAuthUser) as AuthUser);
         setAuthStatus("Sesion local restaurada.");
+        setView("app");
       } catch {
         window.localStorage.removeItem("copiloto-pyme-user");
       }

@@ -2855,6 +2855,20 @@ select:focus-visible {
   font-weight: 800;
 }
 
+.auth-form-status {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.auth-form-status.is-error {
+  color: #dc2626;
+}
+
+.auth-form-status.is-success {
+  color: #15803d;
+}
+
 .auth-route-card > a {
   color: var(--brand-blue);
   font-weight: 900;

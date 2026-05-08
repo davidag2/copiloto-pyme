@@ -1,6 +1,6 @@
-import { ArrowRight } from "lucide-react";
 import { Footer } from "@/components/marketing/Footer";
 import { getPlanById } from "@/lib/plans";
+import { RegisterForm } from "./RegisterForm";
 
 type RegisterPageProps = {
   searchParams?: Promise<{ plan?: string }>;
@@ -23,14 +23,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
             <strong>{selectedPlan.name}</strong>
             <small>{selectedPlan.priceLabel} después del mes gratis</small>
           </div>
-          <form>
-            <input name="plan" type="hidden" value={selectedPlan.id} />
-            <label>Nombre<input name="ownerName" placeholder="Tu nombre" /></label>
-            <label>Empresa<input name="companyName" placeholder="Nombre de tu empresa" /></label>
-            <label>Email<input name="ownerEmail" type="email" placeholder="correo@empresa.com" /></label>
-            <label>Contraseña<input name="password" type="password" placeholder="Mínimo 8 caracteres" /></label>
-            <button className="mkt-button primary" type="submit"><ArrowRight aria-hidden="true" />Crear cuenta</button>
-          </form>
+          <RegisterForm selectedPlan={selectedPlan} />
           <a href="/login">Ya tengo cuenta</a>
         </section>
       </main>

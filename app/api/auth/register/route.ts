@@ -23,11 +23,14 @@ const defaultIntegrations = [
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const headers = request.headers;
     const companyName = requiredString(body.companyName, "companyName");
     const ownerName = requiredString(body.ownerName, "ownerName");
     const ownerEmail = normalizeEmail(requiredString(body.ownerEmail, "ownerEmail"));
     const password = requirePassword(body.password);
     const selectedPlan = getPlanById(body.plan);
+    const trialStartsAt = new Date();
+    const trialEndsAt = getTrialEndsAt(trialStartsAt);
 
     const result = await transaction(async (client) => {
       const company = await client.query(
@@ -73,20 +76,54 @@ export async function POST(request: Request) {
       }
 
       const sessionToken = createPlainToken();
+      const sessionTokenHash = hashToken(sessionToken);
+      const sessionExpiresAt = new Date();
+      sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 30);
+
+      const subscription = await client.query(
+        `INSERT INTO subscriptions (company_id, plan_id, status, current_period_start, current_period_end, trial_starts_at, trial_ends_at)
+         VALUES ($1, $2, 'trial', $3, $4, $3, $4)
+         RETURNING id, company_id AS "companyId", plan_id AS "planId", status, trial_starts_at AS "trialStartsAt", trial_ends_at AS "trialEndsAt", created_at AS "createdAt"`,
+        [companyId, selectedPlan.id, trialStartsAt, trialEndsAt]
+      );
+
+      const onboarding = await client.query(
+        `INSERT INTO onboarding_progress (company_id, status, current_step)
+         VALUES ($1, 'pending', 'connect_data')
+         RETURNING id, company_id AS "companyId", status, current_step AS "currentStep", completed_steps AS "completedSteps", created_at AS "createdAt"`,
+        [companyId]
+      );
+
+      const session = await client.query(
+        `INSERT INTO sessions (user_id, company_id, token_hash, user_agent, ip_address, expires_at)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id, user_id AS "userId", company_id AS "companyId", expires_at AS "expiresAt", created_at AS "createdAt"`,
+        [
+          user.rows[0].id,
+          companyId,
+          sessionTokenHash,
+          headers.get("user-agent") || null,
+          headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+          sessionExpiresAt
+        ]
+      );
+
       return {
         company: company.rows[0],
         user: user.rows[0],
         session: {
           token: sessionToken,
-          tokenHash: hashToken(sessionToken),
-          expiresIn: "demo-session"
+          tokenHash: sessionTokenHash,
+          expiresAt: session.rows[0].expiresAt
         },
+        subscription: subscription.rows[0],
+        onboarding: onboarding.rows[0],
         registration: {
           plan: selectedPlan,
           trial: {
             status: "trial",
-            startsAt: new Date().toISOString(),
-            endsAt: getTrialEndsAt().toISOString()
+            startsAt: trialStartsAt.toISOString(),
+            endsAt: trialEndsAt.toISOString()
           },
           nextStep: "/onboarding"
         }

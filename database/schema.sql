@@ -30,6 +30,71 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
+CREATE TABLE IF NOT EXISTS plans (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  price_cop INTEGER NOT NULL,
+  trial_days INTEGER NOT NULL DEFAULT 30,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived')),
+  features JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO plans (id, name, price_cop, trial_days, features)
+VALUES
+  ('go', 'Go', 20000, 30, '["Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]'::jsonb),
+  ('basic', 'Basic', 50000, 30, '["Todo lo del plan Go", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]'::jsonb),
+  ('pro', 'Pro', 100000, 30, '["Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]'::jsonb)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  price_cop = EXCLUDED.price_cop,
+  trial_days = EXCLUDED.trial_days,
+  status = 'active',
+  features = EXCLUDED.features,
+  updated_at = NOW();
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  plan_id TEXT NOT NULL REFERENCES plans(id),
+  status TEXT NOT NULL DEFAULT 'trial' CHECK (status IN ('trial', 'active', 'past_due', 'canceled')),
+  current_period_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  current_period_end TIMESTAMPTZ,
+  trial_starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  trial_ends_at TIMESTAMPTZ NOT NULL,
+  canceled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_company_active
+  ON subscriptions(company_id)
+  WHERE status IN ('trial', 'active', 'past_due');
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  user_agent TEXT,
+  ip_address TEXT,
+  expires_at TIMESTAMPTZ NOT NULL,
+  revoked_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS onboarding_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL UNIQUE REFERENCES companies(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed')),
+  current_step TEXT NOT NULL DEFAULT 'connect_data',
+  completed_steps JSONB NOT NULL DEFAULT '[]'::jsonb,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 UPDATE users SET role = CASE role
   WHEN 'dueno' THEN 'propietario'
   WHEN 'owner' THEN 'propietario'
@@ -189,5 +254,8 @@ CREATE INDEX IF NOT EXISTS idx_alerts_company_status ON alerts(company_id, statu
 CREATE INDEX IF NOT EXISTS idx_decisions_company_status ON decisions(company_id, status, decision_date DESC);
 CREATE INDEX IF NOT EXISTS idx_reports_company_created ON reports(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, status);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_company_status ON subscriptions(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_team_invitations_company_status ON team_invitations(company_id, status, created_at DESC);

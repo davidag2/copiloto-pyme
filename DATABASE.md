@@ -61,6 +61,10 @@ prisma/schema.prisma
 - Integraciones.
 - Decisiones.
 - Reportes.
+- Planes.
+- Suscripciones.
+- Sesiones.
+- Progreso de onboarding.
 
 ## 4. Auditoria Del Paso 2
 
@@ -72,12 +76,12 @@ Resultado local validado contra PostgreSQL:
 - Login API existente: `POST /api/auth/login` valida email, contrasena cifrada y devuelve usuario, empresa y token temporal.
 - Roles existentes: `propietario`, `administrador`, `contador`, `ventas`.
 
-Brechas para conectar el portal comercial a produccion:
+Brechas detectadas en el Paso 2 y cerradas en el Paso 4:
 
-- Falta tabla `plans` para definir Go, Basic y Pro como datos reales.
-- Falta tabla `subscriptions` para guardar plan, estado trial, fechas e historial.
-- Falta tabla `sessions` para guardar sesiones reales en base de datos o cookies seguras.
-- Falta tabla `onboarding_progress` para saber si la empresa debe ir a onboarding o dashboard.
+- Tabla `plans` creada para definir Go, Basic y Pro como datos reales.
+- Tabla `subscriptions` creada para guardar plan, estado trial, fechas e historial.
+- Tabla `sessions` creada para guardar sesiones reales en base de datos.
+- Tabla `onboarding_progress` creada para saber si la empresa debe ir a onboarding o dashboard.
 - `prisma/schema.prisma` esta desactualizado frente a `database/schema.sql`; por ahora la fuente operativa es SQL + `pg`.
 
 ## 5. Endpoints
@@ -131,7 +135,15 @@ Respuesta esperada del modelo de registro:
 }
 ```
 
-Este contrato ya esta preparado en codigo, pero en el Paso 4 debe persistirse en `plans`, `subscriptions`, `sessions` y `onboarding_progress`.
+Este contrato ya esta preparado en codigo y desde el Paso 4 persiste en `plans`, `subscriptions`, `sessions` y `onboarding_progress`.
+
+Flujo actual de `/register?plan=go|basic|pro`:
+
+1. El usuario ve el plan seleccionado.
+2. El formulario envia `companyName`, `ownerName`, `ownerEmail`, `password` y `plan`.
+3. `POST /api/auth/register` crea empresa, usuario propietario, reglas, integraciones, suscripcion trial, sesion y onboarding pendiente.
+4. El frontend guarda usuario, empresa, sesion, suscripcion y onboarding en `localStorage`.
+5. El cliente entra al dashboard para comenzar a usar la plataforma.
 
 Crear empresa y usuario propietario:
 
