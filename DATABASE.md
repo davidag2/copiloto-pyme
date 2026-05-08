@@ -145,6 +145,16 @@ Flujo actual de `/register?plan=go|basic|pro`:
 4. El frontend guarda usuario, empresa, sesion, suscripcion y onboarding en `localStorage`.
 5. El cliente entra al dashboard para comenzar a usar la plataforma.
 
+Flujo actual de `/login`:
+
+1. El usuario envia email y contrasena.
+2. `POST /api/auth/login` valida el hash de contrasena en `users.password_hash`.
+3. La API actualiza `last_login_at`, crea una fila nueva en `sessions` y devuelve empresa, usuario, sesion, suscripcion y onboarding.
+4. El frontend guarda los datos de acceso en `localStorage`.
+5. El cliente entra al dashboard de Copiloto Pyme.
+
+Nota de seguridad para el siguiente endurecimiento: el login ya crea sesiones en PostgreSQL, pero el Paso 6 debe proteger rutas privadas con cookie segura o middleware de sesion.
+
 Crear empresa y usuario propietario:
 
 ```http

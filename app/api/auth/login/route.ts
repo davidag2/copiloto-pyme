@@ -5,6 +5,7 @@ import { query } from "@/lib/db";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const headers = request.headers;
     const email = normalizeEmail(requiredString(body.email, "email"));
     const password = requiredString(body.password, "password");
 
@@ -54,6 +55,47 @@ export async function POST(request: Request) {
     await query("UPDATE users SET last_login_at = NOW(), status = 'active' WHERE id = $1", [account.id]);
 
     const token = createPlainToken();
+    const tokenHash = hashToken(token);
+    const sessionExpiresAt = new Date();
+    sessionExpiresAt.setDate(sessionExpiresAt.getDate() + 30);
+
+    const session = await query<{
+      id: string;
+      userId: string;
+      companyId: string;
+      expiresAt: string;
+      createdAt: string;
+    }>(
+      `INSERT INTO sessions (user_id, company_id, token_hash, user_agent, ip_address, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, user_id AS "userId", company_id AS "companyId", expires_at AS "expiresAt", created_at AS "createdAt"`,
+      [
+        account.id,
+        account.companyId,
+        tokenHash,
+        headers.get("user-agent") || null,
+        headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        sessionExpiresAt
+      ]
+    );
+
+    const subscription = await query(
+      `SELECT id, company_id AS "companyId", plan_id AS "planId", status, trial_starts_at AS "trialStartsAt", trial_ends_at AS "trialEndsAt", created_at AS "createdAt"
+       FROM subscriptions
+       WHERE company_id = $1 AND status IN ('trial', 'active', 'past_due')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [account.companyId]
+    );
+
+    const onboarding = await query(
+      `SELECT id, company_id AS "companyId", status, current_step AS "currentStep", completed_steps AS "completedSteps", created_at AS "createdAt"
+       FROM onboarding_progress
+       WHERE company_id = $1
+       LIMIT 1`,
+      [account.companyId]
+    );
+
     return ok({
       user: {
         id: account.id,
@@ -76,9 +118,11 @@ export async function POST(request: Request) {
       },
       session: {
         token,
-        tokenHash: hashToken(token),
-        expiresIn: "demo-session"
-      }
+        tokenHash,
+        expiresAt: session.rows[0].expiresAt
+      },
+      subscription: subscription.rows[0] || null,
+      onboarding: onboarding.rows[0] || null
     });
   } catch (error) {
     return fail(error, 400);
