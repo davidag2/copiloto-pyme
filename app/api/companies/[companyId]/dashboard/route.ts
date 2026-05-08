@@ -1,13 +1,16 @@
 import { fail, ok } from "@/lib/api";
 import { query } from "@/lib/db";
+import { requireCompanySession } from "@/lib/session";
 
 type RouteContext = {
   params: Promise<{ companyId: string }>;
 };
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   try {
     const { companyId } = await context.params;
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const [company, users, latestImports, alertRules, alerts, integrations, decisions, reports] = await Promise.all([
       query(`SELECT * FROM companies WHERE id = $1`, [companyId]),
       query(`SELECT id, name, email, role, created_at AS "createdAt" FROM users WHERE company_id = $1 ORDER BY created_at DESC`, [companyId]),

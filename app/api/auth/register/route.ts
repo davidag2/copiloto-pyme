@@ -3,6 +3,7 @@ import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassw
 import { transaction } from "@/lib/db";
 import { getPlanById, getTrialEndsAt } from "@/lib/plans";
 import { normalizeRole } from "@/lib/roles";
+import { setSessionCookie } from "@/lib/session";
 
 const defaultRules = [
   ["sales", 70, "below"],
@@ -130,7 +131,9 @@ export async function POST(request: Request) {
       };
     });
 
-    return ok(result, 201);
+    const response = ok(result, 201);
+    setSessionCookie(response, result.session.token, result.session.expiresAt);
+    return response;
   } catch (error) {
     return fail(error, 400);
   }

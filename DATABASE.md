@@ -155,6 +155,41 @@ Flujo actual de `/login`:
 
 Nota de seguridad para el siguiente endurecimiento: el login ya crea sesiones en PostgreSQL, pero el Paso 6 debe proteger rutas privadas con cookie segura o middleware de sesion.
 
+## 6. Proteccion De Rutas Privadas
+
+Implementado en el Paso 6:
+
+- `POST /api/auth/register` y `POST /api/auth/login` crean una sesion en PostgreSQL y escriben cookie HTTP-only `copiloto_session`.
+- `/dashboard` es la ruta privada para entrar a la plataforma.
+- `middleware.ts` redirige `/dashboard` a `/login` cuando no existe cookie de sesion.
+- Las APIs de negocio validan la sesion contra PostgreSQL antes de leer o escribir datos por `companyId`.
+- `POST /api/auth/logout` revoca la sesion en PostgreSQL y borra la cookie.
+
+APIs protegidas:
+
+- `/api/companies`
+- `/api/companies/:companyId/dashboard`
+- `/api/auth/team`
+- `/api/auth/invite`
+- `/api/imports`
+- `/api/alerts`
+- `/api/integrations`
+- `/api/decisions`
+- `/api/reports`
+
+Rutas publicas:
+
+- `/`
+- `/ventajas`
+- `/precio`
+- `/contactenos`
+- `/demo`
+- `/login`
+- `/register`
+- `/api/auth/register`
+- `/api/auth/login`
+- `/api/auth/recover`
+
 Crear empresa y usuario propietario:
 
 ```http

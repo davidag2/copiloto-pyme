@@ -1,6 +1,7 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { createPlainToken, hashToken, normalizeEmail, verifyPassword } from "@/lib/auth";
 import { query } from "@/lib/db";
+import { setSessionCookie } from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
       [account.companyId]
     );
 
-    return ok({
+    const responseData = {
       user: {
         id: account.id,
         companyId: account.companyId,
@@ -123,7 +124,10 @@ export async function POST(request: Request) {
       },
       subscription: subscription.rows[0] || null,
       onboarding: onboarding.rows[0] || null
-    });
+    };
+    const response = ok(responseData);
+    setSessionCookie(response, token, session.rows[0].expiresAt);
+    return response;
   } catch (error) {
     return fail(error, 400);
   }

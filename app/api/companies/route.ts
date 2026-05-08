@@ -1,5 +1,6 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { query, transaction } from "@/lib/db";
+import { requireCompanySession, validateRequestSession } from "@/lib/session";
 
 const defaultRules = [
   ["sales", 70, "below"],
@@ -17,13 +18,17 @@ const defaultIntegrations = [
   ["WooCommerce", "Ecommerce", "Disponible", "Cada 3 horas"]
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const session = await validateRequestSession(request);
+    if (!session) return fail(new Error("Sesion requerida o expirada."), 401);
     const companies = await query(
       `SELECT id, name, country, business_type AS "businessType", plan, created_at AS "createdAt"
        FROM companies
+       WHERE id = $1
        ORDER BY created_at DESC
-       LIMIT 50`
+       LIMIT 50`,
+      [session.companyId]
     );
     return ok({ companies: companies.rows });
   } catch (error) {
@@ -94,6 +99,8 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
 
     const company = await query(
       `UPDATE companies

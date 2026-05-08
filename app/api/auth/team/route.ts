@@ -1,10 +1,13 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { requireCompanySession } from "@/lib/session";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const users = await query(
       `SELECT id, company_id AS "companyId", name, email, role, status, last_login_at AS "lastLoginAt", created_at AS "createdAt"
        FROM users

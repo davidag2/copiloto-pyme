@@ -2,6 +2,7 @@ import { fail, ok, requiredString } from "@/lib/api";
 import { createPlainToken, hashToken, normalizeEmail } from "@/lib/auth";
 import { query, transaction } from "@/lib/db";
 import { canManageTeam, companyRoles, normalizeRole } from "@/lib/roles";
+import { requireCompanySession } from "@/lib/session";
 
 const allowedRoles = new Set(companyRoles.map((role) => role.value));
 
@@ -9,6 +10,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const email = normalizeEmail(requiredString(body.email, "email"));
     const normalizedRole = normalizeRole(body.role);
     const role = allowedRoles.has(normalizedRole) ? normalizedRole : "ventas";
@@ -68,6 +71,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const invitations = await query(
       `SELECT id, email, role, status, expires_at AS "expiresAt", created_at AS "createdAt"
        FROM team_invitations

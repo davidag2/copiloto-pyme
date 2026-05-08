@@ -1,10 +1,13 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { requireCompanySession } from "@/lib/session";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const alerts = await query(
       `SELECT * FROM alerts
        WHERE company_id = $1
@@ -22,6 +25,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const level = requiredString(body.level, "level");
     const title = requiredString(body.title, "title");
     const text = requiredString(body.text, "text");

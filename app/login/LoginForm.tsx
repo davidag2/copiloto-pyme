@@ -67,7 +67,7 @@ export function LoginForm() {
     setStatus("success");
     setMessage("Sesión iniciada. Abriendo tu dashboard...");
     window.setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     }, 600);
   }
 

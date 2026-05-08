@@ -241,7 +241,10 @@ function statusClass(status: string) {
 }
 
 export default function Home() {
-  const [view, setView] = useState<"portal" | "app">("portal");
+  const [view, setView] = useState<"portal" | "app">(() => {
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/dashboard")) return "app";
+    return "portal";
+  });
   const [marketingPage, setMarketingPage] = useState<MarketingPage>("inicio");
   const [contactMode, setContactMode] = useState<ContactMode>("signup");
   const [theme, setTheme] = useState<ThemeMode>("light");
@@ -609,7 +612,8 @@ export default function Home() {
     await loadTeam(companyId);
   }
 
-  function logout() {
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     setAuthUser(null);
     setCompanyId("");
     setTeamMembers([]);
@@ -617,8 +621,11 @@ export default function Home() {
     setInviteLink("");
     window.localStorage.removeItem("copiloto-pyme-user");
     window.localStorage.removeItem("copiloto-pyme-company-id");
+    window.localStorage.removeItem("copiloto-pyme-session");
+    window.localStorage.removeItem("copiloto-pyme-subscription");
+    window.localStorage.removeItem("copiloto-pyme-onboarding");
     setAuthStatus("Sesion cerrada.");
-    setView("portal");
+    window.location.href = "/";
   }
 
   async function completeOnboarding(event: FormEvent<HTMLFormElement>) {

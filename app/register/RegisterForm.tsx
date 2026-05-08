@@ -87,7 +87,7 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
     setStatus("success");
     setMessage("Cuenta creada. Te llevamos al dashboard para comenzar el onboarding.");
     window.setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     }, 800);
   }
 

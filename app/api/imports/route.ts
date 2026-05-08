@@ -1,5 +1,6 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { query, transaction } from "@/lib/db";
+import { requireCompanySession } from "@/lib/session";
 
 type ImportRow = Record<string, string | number | null | undefined>;
 type ColumnMapping = {
@@ -86,6 +87,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const batches = await query(
       `SELECT id,
               source,
@@ -115,6 +118,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const rows = Array.isArray(body.rows) ? body.rows as ImportRow[] : [];
     const mapping = { ...defaultMapping, ...(body.columnMapping || {}) };
 
@@ -208,6 +213,8 @@ export async function DELETE(request: Request) {
   try {
     const body = await request.json();
     const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
     const batchId = requiredString(body.batchId, "batchId");
 
     const result = await transaction(async (client) => {
