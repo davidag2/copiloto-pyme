@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, BarChart3, Brain, ClipboardCheck, Database, Eye, LockKeyhole, MessageSquareText, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, BarChart3, Brain, ClipboardCheck, Database, Eye, LockKeyhole, MessageSquareText, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 import { ContactForm } from "./ContactForm";
 import { FeatureCard } from "./FeatureCard";
@@ -14,6 +14,29 @@ type MarketingLandingProps = {
   theme?: "light" | "dark";
   onToggleTheme?: () => void;
 };
+
+const commercialPlans = [
+  {
+    name: "Go",
+    price: "COP $20.000 / mes",
+    href: "/register?plan=go",
+    features: ["1 mes gratis", "Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]
+  },
+  {
+    name: "Basic",
+    price: "COP $50.000 / mes",
+    href: "/register?plan=basic",
+    badge: "Más popular",
+    highlighted: true,
+    features: ["1 mes gratis", "Todo lo del plan Go", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]
+  },
+  {
+    name: "Pro",
+    price: "COP $100.000 / mes",
+    href: "/register?plan=pro",
+    features: ["1 mes gratis", "Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]
+  }
+];
 
 export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }: MarketingLandingProps) {
   const [localTheme, setLocalTheme] = useState<"light" | "dark">("light");
@@ -102,17 +125,27 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <div className="mkt-section-heading">
                 <span>Precios simples y justos</span>
                 <h2>Elige el plan que se adapta a tu PYME</h2>
-                <p>Cancelas cuando quieras. Sin letras pequeñas.</p>
+                <p>Todos los planes incluyen 1 mes gratis. Cancelas cuando quieras. Sin letras pequeñas.</p>
               </div>
               <div className="mkt-pricing-grid">
-                <PricingCard name="Gratis" price="COP $0" href="/register" cta="Empezar gratis" features={["Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]} />
-                <PricingCard highlighted badge="Más popular" name="Basic" price="COP $50.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan gratis", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]} />
-                <PricingCard name="Pro" price="COP $100.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]} />
+                {commercialPlans.map((plan) => (
+                  <PricingCard
+                    badge={plan.badge}
+                    cta="Probar 1 mes gratis"
+                    features={plan.features}
+                    highlighted={plan.highlighted}
+                    href={plan.href}
+                    key={plan.name}
+                    name={plan.name}
+                    price={plan.price}
+                  />
+                ))}
               </div>
               <a className="mkt-link-button" href="/precio">Ver todos los planes <ArrowRight aria-hidden="true" /></a>
             </section>
 
             <section className="mkt-assurance-strip" aria-label="Garantías">
+              <span>1 mes gratis en todos los planes</span>
               <span>Sin tarjeta de crédito</span>
               <span>Configuración en minutos</span>
               <span>Soporte humano</span>
@@ -123,7 +156,7 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <span><Sparkles aria-hidden="true" />Listo para decidir mejor</span>
               <h2>Convierte los datos de tu PYME en decisiones diarias</h2>
               <div>
-                <a className="mkt-button primary large" href="/register">Crear cuenta gratis</a>
+                <a className="mkt-button primary large" href="/register?plan=go">Probar 1 mes gratis</a>
                 <a className="mkt-button secondary large" href="/demo"><BarChart3 aria-hidden="true" />Ver demo</a>
               </div>
             </section>
@@ -134,37 +167,33 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
           <section className="mkt-section mkt-single-section">
             <div className="mkt-section-heading">
               <span>Ventajas</span>
-              <h2>{"As\u00ed te ayuda Copiloto Pyme"}</h2>
+              <h2>Así te ayuda Copiloto Pyme</h2>
             </div>
             <div className="mkt-feature-grid">
-              <FeatureCard icon={Eye} title="Ve todo claro" text={"Sabes cu\u00e1nto vendes, cu\u00e1nto tienes y qu\u00e9 est\u00e1 pasando."} />
+              <FeatureCard icon={Eye} title="Ve todo claro" text="Sabes cuánto vendes, cuánto tienes y qué está pasando." />
               <FeatureCard icon={AlertTriangle} title="Te avisa problemas" text="Te dice antes si algo se va a acabar o si algo va mal." />
-              <FeatureCard icon={ClipboardCheck} title={"Te dice qu\u00e9 hacer"} text={"No tienes que pensar mucho. Te dice la siguiente acci\u00f3n."} />
+              <FeatureCard icon={ClipboardCheck} title="Te dice qué hacer" text="No tienes que pensar mucho. Te dice la siguiente acción." />
             </div>
             <div className="mkt-advantages-story">
               <div className="mkt-section-heading">
-                <span>{"Claridad operativa"}</span>
-                <h2>{"La IA conecta las se\u00f1ales importantes de tu empresa"}</h2>
-                <p>
-                  {"Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas. La ventaja es simple: menos revisi\u00f3n manual y m\u00e1s decisiones correctas en el momento adecuado."}
-                </p>
+                <span>Claridad operativa</span>
+                <h2>La IA conecta las señales importantes de tu empresa</h2>
+                <p>Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas. La ventaja es simple: menos revisión manual y más decisiones correctas en el momento adecuado.</p>
               </div>
-              <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre c\u00f3mo la IA entiende cada parte del negocio">
+              <section className="mkt-infographic-section" aria-label="Infografía sobre cómo la IA entiende cada parte del negocio">
                 <img
-                  alt="Infograf\u00eda: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
+                  alt="Infografía: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
                   src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
                 />
               </section>
               <div className="mkt-section-heading">
-                <span>{"Impacto real"}</span>
-                <h2>{"Decisiones m\u00e1s r\u00e1pidas, menos riesgo y mayor control"}</h2>
-                <p>
-                  {"El valor no est\u00e1 solo en ver gr\u00e1ficas bonitas. Est\u00e1 en ahorrar tiempo, evitar p\u00e9rdidas, mantener el negocio bajo control y convertir cada resumen diario en una acci\u00f3n que mejora los resultados."}
-                </p>
+                <span>Impacto real</span>
+                <h2>Decisiones más rápidas, menos riesgo y mayor control</h2>
+                <p>El valor no está solo en ver gráficas bonitas. Está en ahorrar tiempo, evitar pérdidas, mantener el negocio bajo control y convertir cada resumen diario en una acción que mejora los resultados.</p>
               </div>
-              <section className="mkt-infographic-section" aria-label="Infograf\u00eda sobre el impacto real de Copiloto Pyme">
+              <section className="mkt-infographic-section" aria-label="Infografía sobre el impacto real de Copiloto Pyme">
                 <img
-                  alt="Infograf\u00eda: impacto real de Copiloto Pyme en ahorro de tiempo, reducci\u00f3n de p\u00e9rdidas, control y crecimiento"
+                  alt="Infografía: impacto real de Copiloto Pyme en ahorro de tiempo, reducción de pérdidas, control y crecimiento"
                   src="/images/infografia-impacto-real-copiloto-pyme.png"
                 />
               </section>
@@ -177,23 +206,32 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
             <div className="mkt-section-heading">
               <span>Precio</span>
               <h2>Elige el plan que se adapta a tu PYME</h2>
-              <p>Cancelas cuando quieras. Sin letras pequeñas.</p>
+              <p>Todos los planes incluyen 1 mes gratis. Cancelas cuando quieras. Sin letras pequeñas.</p>
             </div>
             <div className="mkt-pricing-grid">
-              <PricingCard name="Gratis" price="COP $0" href="/register" cta="Empezar gratis" features={["Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]} />
-              <PricingCard highlighted badge="Más popular" name="Basic" price="COP $50.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan gratis", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]} />
-              <PricingCard name="Pro" price="COP $100.000 / mes" href="/register" cta="Empezar gratis" features={["Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]} />
+              {commercialPlans.map((plan) => (
+                <PricingCard
+                  badge={plan.badge}
+                  cta="Probar 1 mes gratis"
+                  features={plan.features}
+                  highlighted={plan.highlighted}
+                  href={plan.href}
+                  key={plan.name}
+                  name={plan.name}
+                  price={plan.price}
+                />
+              ))}
             </div>
-            <p className="mkt-price-note">{"Precios en COP \u00b7 No incluyen IVA"}</p>
+            <p className="mkt-price-note">Todos los planes incluyen 1 mes gratis · Precios en COP · No incluyen IVA</p>
           </section>
         )}
 
         {activePage === "contactenos" && (
           <section className="mkt-section mkt-contact-section mkt-single-section">
             <div className="mkt-contact-copy">
-              <span><MessageSquareText aria-hidden="true" />{"Cont\u00e1ctenos"}</span>
+              <span><MessageSquareText aria-hidden="true" />Contáctenos</span>
               <h2>Habla con nosotros</h2>
-              <p>{"D\u00e9janos tus datos y te mostramos c\u00f3mo Copiloto Pyme puede ayudarte."}</p>
+              <p>Déjanos tus datos y te mostramos cómo Copiloto Pyme puede ayudarte.</p>
             </div>
             <ContactForm />
           </section>

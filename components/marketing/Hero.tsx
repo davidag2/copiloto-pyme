@@ -21,10 +21,10 @@ export function Hero() {
           ))}
         </div>
         <div className="mkt-hero-actions">
-          <a className="mkt-button primary large" href="/register"><ArrowRight aria-hidden="true" />Empezar gratis</a>
+          <a className="mkt-button primary large" href="/register?plan=go"><ArrowRight aria-hidden="true" />Probar 1 mes gratis</a>
           <a className="mkt-button secondary large" href="/demo"><BarChart3 aria-hidden="true" />Ver demo</a>
         </div>
-        <small>Sin tarjeta · Configuración en minutos</small>
+        <small>1 mes gratis · Sin tarjeta · Configuración en minutos</small>
         <div className="mkt-trust-pills">
           <span><Database aria-hidden="true" />Datos por empresa</span>
           <span><Users aria-hidden="true" />Roles por equipo</span>

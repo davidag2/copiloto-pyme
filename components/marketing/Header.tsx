@@ -42,7 +42,7 @@ export function Header({ activePage, theme, onToggleTheme }: HeaderProps) {
           {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
         </button>
         <a className="mkt-button secondary mkt-login-link" href="/login">{"Iniciar sesi\u00f3n"}</a>
-        <a className="mkt-button primary" href="/register">Crear cuenta</a>
+        <a className="mkt-button primary" href="/register?plan=go">Crear cuenta</a>
         <button className="mkt-menu-button" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Abrir menu">
           {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
@@ -55,7 +55,7 @@ export function Header({ activePage, theme, onToggleTheme }: HeaderProps) {
             </a>
           ))}
           <a href="/login">{"Iniciar sesi\u00f3n"}</a>
-          <a className="mkt-button primary" href="/register">Crear cuenta</a>
+          <a className="mkt-button primary" href="/register?plan=go">Crear cuenta</a>
         </div>
       ) : null}
     </header>
