@@ -8,35 +8,13 @@ import { Footer } from "./Footer";
 import { Header, type MarketingPageKey } from "./Header";
 import { Hero } from "./Hero";
 import { PricingCard } from "./PricingCard";
+import { commercialPlans } from "@/lib/plans";
 
 type MarketingLandingProps = {
   activePage?: MarketingPageKey;
   theme?: "light" | "dark";
   onToggleTheme?: () => void;
 };
-
-const commercialPlans = [
-  {
-    name: "Go",
-    price: "COP $20.000 / mes",
-    href: "/register?plan=go",
-    features: ["1 mes gratis", "Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]
-  },
-  {
-    name: "Basic",
-    price: "COP $50.000 / mes",
-    href: "/register?plan=basic",
-    badge: "Más popular",
-    highlighted: true,
-    features: ["1 mes gratis", "Todo lo del plan Go", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]
-  },
-  {
-    name: "Pro",
-    price: "COP $100.000 / mes",
-    href: "/register?plan=pro",
-    features: ["1 mes gratis", "Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]
-  }
-];
 
 export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }: MarketingLandingProps) {
   const [localTheme, setLocalTheme] = useState<"light" | "dark">("light");
@@ -137,7 +115,7 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
                     href={plan.href}
                     key={plan.name}
                     name={plan.name}
-                    price={plan.price}
+                    price={plan.priceLabel}
                   />
                 ))}
               </div>
@@ -218,7 +196,7 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
                   href={plan.href}
                   key={plan.name}
                   name={plan.name}
-                  price={plan.price}
+                  price={plan.priceLabel}
                 />
               ))}
             </div>

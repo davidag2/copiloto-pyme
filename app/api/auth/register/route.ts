@@ -1,6 +1,7 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassword } from "@/lib/auth";
 import { transaction } from "@/lib/db";
+import { getPlanById, getTrialEndsAt } from "@/lib/plans";
 import { normalizeRole } from "@/lib/roles";
 
 const defaultRules = [
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
     const ownerName = requiredString(body.ownerName, "ownerName");
     const ownerEmail = normalizeEmail(requiredString(body.ownerEmail, "ownerEmail"));
     const password = requirePassword(body.password);
+    const selectedPlan = getPlanById(body.plan);
 
     const result = await transaction(async (client) => {
       const company = await client.query(
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
           body.country || "Colombia",
           body.businessType || "PYME",
           body.currency || "COP",
-          body.plan || "Crecimiento",
+          selectedPlan.id,
           optionalNumber(body.monthlyGoal) ?? 0,
           optionalNumber(body.minimumStock) ?? 0,
           body.dataSource || "Excel/CSV"
@@ -78,6 +80,15 @@ export async function POST(request: Request) {
           token: sessionToken,
           tokenHash: hashToken(sessionToken),
           expiresIn: "demo-session"
+        },
+        registration: {
+          plan: selectedPlan,
+          trial: {
+            status: "trial",
+            startsAt: new Date().toISOString(),
+            endsAt: getTrialEndsAt().toISOString()
+          },
+          nextStep: "/onboarding"
         }
       };
     });

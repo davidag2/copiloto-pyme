@@ -82,6 +82,57 @@ Brechas para conectar el portal comercial a produccion:
 
 ## 5. Endpoints
 
+### Registro Comercial
+
+Modelo definido para `POST /api/auth/register`:
+
+```json
+{
+  "companyName": "Distribuidora Andina",
+  "ownerName": "Diana Gomez",
+  "ownerEmail": "diana@andina.com",
+  "password": "minimo-8-caracteres",
+  "plan": "go"
+}
+```
+
+Planes validos:
+
+| Plan | Precio mensual | Trial |
+| --- | ---: | --- |
+| Go | COP $20.000 | 30 dias |
+| Basic | COP $50.000 | 30 dias |
+| Pro | COP $100.000 | 30 dias |
+
+Respuesta esperada del modelo de registro:
+
+```json
+{
+  "company": {},
+  "user": {},
+  "session": {
+    "token": "temporal",
+    "expiresIn": "demo-session"
+  },
+  "registration": {
+    "plan": {
+      "id": "go",
+      "name": "Go",
+      "priceCop": 20000,
+      "trialDays": 30
+    },
+    "trial": {
+      "status": "trial",
+      "startsAt": "fecha ISO",
+      "endsAt": "fecha ISO"
+    },
+    "nextStep": "/onboarding"
+  }
+}
+```
+
+Este contrato ya esta preparado en codigo, pero en el Paso 4 debe persistirse en `plans`, `subscriptions`, `sessions` y `onboarding_progress`.
+
 Crear empresa y usuario propietario:
 
 ```http
