@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import type { CommercialPlan } from "@/lib/plans";
+import { commercialPlans, type CommercialPlan, type PlanId } from "@/lib/plans";
 
 type RegisterFormProps = {
   selectedPlan: CommercialPlan;
@@ -45,8 +45,10 @@ type RegisterResponse = {
 };
 
 export function RegisterForm({ selectedPlan }: RegisterFormProps) {
+  const [planId, setPlanId] = useState<PlanId>(selectedPlan.id);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("Completa tus datos para activar tu mes gratis.");
+  const activePlan = commercialPlans.find((plan) => plan.id === planId) ?? selectedPlan;
 
   async function submitRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,7 +60,7 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        plan: selectedPlan.id,
+        plan: activePlan.id,
         ownerName: form.get("ownerName"),
         companyName: form.get("companyName"),
         ownerEmail: form.get("ownerEmail"),
@@ -93,13 +95,28 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
 
   return (
     <form onSubmit={submitRegister}>
-      <input name="plan" type="hidden" value={selectedPlan.id} />
+      <div className="auth-plan-picker" aria-label="Seleccionar plan">
+        {commercialPlans.map((plan) => (
+          <button
+            className={plan.id === activePlan.id ? "is-selected" : ""}
+            key={plan.id}
+            onClick={() => setPlanId(plan.id)}
+            type="button"
+          >
+            <span>{plan.name}</span>
+            <strong>{plan.priceLabel}</strong>
+            <small>{plan.trialDays} días gratis</small>
+            {plan.id === activePlan.id ? <CheckCircle2 aria-hidden="true" /> : null}
+          </button>
+        ))}
+      </div>
+      <input name="plan" type="hidden" value={activePlan.id} />
       <label>Nombre<input name="ownerName" placeholder="Tu nombre" required /></label>
       <label>Empresa<input name="companyName" placeholder="Nombre de tu empresa" required /></label>
       <label>Email<input name="ownerEmail" type="email" placeholder="correo@empresa.com" required /></label>
       <label>Contraseña<input name="password" type="password" placeholder="Mínimo 8 caracteres" required minLength={8} /></label>
       <button className="mkt-button primary" disabled={status === "loading"} type="submit">
-        <ArrowRight aria-hidden="true" />{status === "loading" ? "Creando cuenta..." : "Crear cuenta"}
+        <ArrowRight aria-hidden="true" />{status === "loading" ? "Creando cuenta..." : `Crear cuenta ${activePlan.name}`}
       </button>
       <p className={`auth-form-status ${status === "error" ? "is-error" : ""} ${status === "success" ? "is-success" : ""}`}>{message}</p>
     </form>

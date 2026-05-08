@@ -19,9 +19,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           <h1>Activa tu mes gratis</h1>
           <p>Tu cuenta iniciará con el plan {selectedPlan.name}. Durante 30 días podrás validar Copiloto Pyme con tus ventas, caja e inventario antes de pagar.</p>
           <div className="auth-selected-plan" aria-label="Plan seleccionado">
-            <span>Plan seleccionado</span>
+            <span>Plan inicial</span>
             <strong>{selectedPlan.name}</strong>
-            <small>{selectedPlan.priceLabel} después del mes gratis</small>
+            <small>{selectedPlan.priceLabel} después del mes gratis. Puedes cambiarlo antes de crear la cuenta.</small>
           </div>
           <RegisterForm selectedPlan={selectedPlan} />
           <a href="/login">Ya tengo cuenta</a>

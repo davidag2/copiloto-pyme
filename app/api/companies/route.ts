@@ -53,7 +53,7 @@ export async function POST(request: Request) {
           body.country || "Colombia",
           body.businessType || "PYME",
           body.currency || "COP",
-          body.plan || "Crecimiento",
+          body.plan || "go",
           optionalNumber(body.monthlyGoal) ?? 0,
           optionalNumber(body.minimumStock) ?? 0,
           body.dataSource || "Excel/CSV"

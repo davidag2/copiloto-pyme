@@ -140,10 +140,19 @@ Este contrato ya esta preparado en codigo y desde el Paso 4 persiste en `plans`,
 Flujo actual de `/register?plan=go|basic|pro`:
 
 1. El usuario ve el plan seleccionado.
-2. El formulario envia `companyName`, `ownerName`, `ownerEmail`, `password` y `plan`.
-3. `POST /api/auth/register` crea empresa, usuario propietario, reglas, integraciones, suscripcion trial, sesion y onboarding pendiente.
-4. El frontend guarda usuario, empresa, sesion, suscripcion y onboarding en `localStorage`.
-5. El cliente entra al dashboard para comenzar a usar la plataforma.
+2. Puede cambiar entre Go, Basic y Pro antes de crear la cuenta.
+3. El formulario envia `companyName`, `ownerName`, `ownerEmail`, `password` y `plan`.
+4. `POST /api/auth/register` crea empresa, usuario propietario, reglas, integraciones, suscripcion trial, sesion y onboarding pendiente.
+5. El frontend guarda usuario, empresa, sesion, suscripcion y onboarding en `localStorage`.
+6. El cliente entra al dashboard para comenzar a usar la plataforma.
+
+Endpoint publico de planes:
+
+```http
+GET /api/plans
+```
+
+Devuelve los planes activos desde PostgreSQL con `priceCop`, `trialDays` y `features`.
 
 Flujo actual de `/login`:
 

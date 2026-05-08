@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS companies (
   country TEXT NOT NULL DEFAULT 'Colombia',
   business_type TEXT NOT NULL,
   currency TEXT NOT NULL DEFAULT 'COP',
-  plan TEXT NOT NULL DEFAULT 'Crecimiento',
+  plan TEXT NOT NULL DEFAULT 'go',
   monthly_goal NUMERIC(14, 2) NOT NULL DEFAULT 0,
   minimum_stock INTEGER NOT NULL DEFAULT 0,
   data_source TEXT NOT NULL DEFAULT 'Excel/CSV',

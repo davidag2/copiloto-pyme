@@ -2855,6 +2855,55 @@ select:focus-visible {
   font-weight: 800;
 }
 
+.auth-plan-picker {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.auth-plan-picker button {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  color: var(--brand-primary);
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  min-height: 116px;
+  padding: 14px;
+  position: relative;
+  text-align: left;
+}
+
+.auth-plan-picker button.is-selected {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(34, 197, 94, 0.08));
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
+}
+
+.auth-plan-picker span {
+  color: var(--brand-blue);
+  font-size: 13px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.auth-plan-picker strong {
+  font-size: 16px;
+}
+
+.auth-plan-picker small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.auth-plan-picker svg {
+  color: var(--brand-green);
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+
 .auth-form-status {
   color: var(--muted);
   font-size: 14px;
@@ -3035,6 +3084,10 @@ select:focus-visible {
   .demo-hero h1,
   .auth-route-card h1 {
     font-size: 40px;
+  }
+
+  .auth-plan-picker {
+    grid-template-columns: 1fr;
   }
 
   .mkt-hero-actions,

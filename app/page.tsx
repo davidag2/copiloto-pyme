@@ -263,7 +263,7 @@ export default function Home() {
     ownerEmail: "",
     companyName: "Distribuidora Andina",
     country: "Colombia",
-    plan: "Crecimiento",
+    plan: "go",
     businessType: "Distribuidora",
     currency: "COP - Peso colombiano",
     monthlyGoal: 100_000_000,
