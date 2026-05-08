@@ -28,8 +28,18 @@ O usando los scripts del proyecto:
 
 ```bash
 npm run db:check
+npm run db:audit
 npm run db:apply
 npm run db:seed
+```
+
+En PowerShell, si `npm.ps1` esta bloqueado por la politica de ejecucion de Windows, usar Node directamente:
+
+```bash
+node scripts/db/check.mjs
+node scripts/db/audit-schema.mjs
+node scripts/db/apply-schema.mjs
+node scripts/db/seed-demo.mjs
 ```
 
 El modelo Prisma de referencia esta en:
@@ -42,6 +52,8 @@ prisma/schema.prisma
 
 - Empresas.
 - Usuarios.
+- Recuperacion de contrasena.
+- Invitaciones de equipo.
 - Lotes de importacion.
 - Filas de datos importados.
 - Reglas de alerta.
@@ -50,7 +62,25 @@ prisma/schema.prisma
 - Decisiones.
 - Reportes.
 
-## 4. Endpoints
+## 4. Auditoria Del Paso 2
+
+Resultado local validado contra PostgreSQL:
+
+- Conexion OK: base `copiloto_pyme`, usuario `postgres`.
+- Tablas existentes: `companies`, `users`, `password_reset_tokens`, `team_invitations`, `imported_data_batches`, `imported_data_rows`, `alert_rules`, `alerts`, `integrations`, `decisions`, `reports`.
+- Registro API existente: `POST /api/auth/register` crea empresa, usuario propietario, reglas e integraciones por defecto.
+- Login API existente: `POST /api/auth/login` valida email, contrasena cifrada y devuelve usuario, empresa y token temporal.
+- Roles existentes: `propietario`, `administrador`, `contador`, `ventas`.
+
+Brechas para conectar el portal comercial a produccion:
+
+- Falta tabla `plans` para definir Go, Basic y Pro como datos reales.
+- Falta tabla `subscriptions` para guardar plan, estado trial, fechas e historial.
+- Falta tabla `sessions` para guardar sesiones reales en base de datos o cookies seguras.
+- Falta tabla `onboarding_progress` para saber si la empresa debe ir a onboarding o dashboard.
+- `prisma/schema.prisma` esta desactualizado frente a `database/schema.sql`; por ahora la fuente operativa es SQL + `pg`.
+
+## 5. Endpoints
 
 Crear empresa y usuario propietario:
 
@@ -138,7 +168,7 @@ Guardar reporte:
 POST /api/reports
 ```
 
-## 5. Siguiente Paso Recomendado
+## 6. Siguiente Paso Recomendado
 
 El frontend ya intenta guardar en estos endpoints para:
 
@@ -152,13 +182,14 @@ El frontend ya intenta guardar en estos endpoints para:
 
 Si `DATABASE_URL` no esta configurado o PostgreSQL no esta disponible, la experiencia sigue funcionando en modo demo local y muestra el estado de persistencia en el dashboard.
 
-El siguiente paso recomendado es cargar un PostgreSQL administrado en Vercel, Supabase, Neon, Railway o Render y probar los endpoints con datos reales.
+El siguiente paso recomendado para el flujo Login/Crear cuenta es ampliar `database/schema.sql` con `plans`, `subscriptions`, `sessions` y `onboarding_progress`, y despues conectar `/register?plan=go|basic|pro` con `POST /api/auth/register`.
 
-## 6. Prueba Completa
+## 7. Prueba Completa
 
 1. Crear `.env` con `DATABASE_URL`.
 2. Ejecutar `npm run db:check`.
-3. Ejecutar `npm run db:apply`.
-4. Ejecutar `npm run db:seed`.
-5. Ejecutar `npm run dev`.
-6. Abrir el dashboard, registrar una empresa, importar CSV, crear una decision y generar un reporte.
+3. Ejecutar `npm run db:audit`.
+4. Ejecutar `npm run db:apply`.
+5. Ejecutar `npm run db:seed`.
+6. Ejecutar `npm run dev`.
+7. Abrir el dashboard, registrar una empresa, importar CSV, crear una decision y generar un reporte.
