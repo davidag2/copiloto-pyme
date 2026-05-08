@@ -28,7 +28,7 @@ type LoginResponse = {
     expiresAt: string;
   };
   subscription: unknown;
-  onboarding: unknown;
+  onboarding: { status?: string } | null;
 };
 
 export function LoginForm() {
@@ -65,9 +65,9 @@ export function LoginForm() {
     if (data.onboarding) window.localStorage.setItem("copiloto-pyme-onboarding", JSON.stringify(data.onboarding));
 
     setStatus("success");
-    setMessage("Sesión iniciada. Abriendo tu dashboard...");
+    setMessage("Sesión iniciada. Abriendo tu espacio...");
     window.setTimeout(() => {
-      window.location.href = "/dashboard";
+      window.location.href = data.onboarding?.status === "completed" ? "/dashboard" : "/onboarding";
     }, 600);
   }
 

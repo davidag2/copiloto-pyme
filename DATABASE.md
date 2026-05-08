@@ -144,7 +144,8 @@ Flujo actual de `/register?plan=go|basic|pro`:
 3. El formulario envia `companyName`, `ownerName`, `ownerEmail`, `password` y `plan`.
 4. `POST /api/auth/register` crea empresa, usuario propietario, reglas, integraciones, suscripcion trial, sesion y onboarding pendiente.
 5. El frontend guarda usuario, empresa, sesion, suscripcion y onboarding en `localStorage`.
-6. El cliente entra al dashboard para comenzar a usar la plataforma.
+6. El cliente entra a `/onboarding` para confirmar contexto del negocio.
+7. Al completar onboarding, se marca `onboarding_progress.status = completed` y entra a `/dashboard`.
 
 Endpoint publico de planes:
 
@@ -160,7 +161,16 @@ Flujo actual de `/login`:
 2. `POST /api/auth/login` valida el hash de contrasena en `users.password_hash`.
 3. La API actualiza `last_login_at`, crea una fila nueva en `sessions` y devuelve empresa, usuario, sesion, suscripcion y onboarding.
 4. El frontend guarda los datos de acceso en `localStorage`.
-5. El cliente entra al dashboard de Copiloto Pyme.
+5. Si `onboarding_progress.status` esta pendiente, el cliente entra a `/onboarding`.
+6. Si onboarding esta completo, entra a `/dashboard`.
+
+Flujo actual de `/onboarding`:
+
+1. Ruta privada protegida por cookie `copiloto_session`.
+2. `GET /api/onboarding` carga empresa, usuario y progreso desde PostgreSQL.
+3. El cliente confirma tipo de negocio, fuente principal, meta mensual y stock minimo.
+4. `POST /api/onboarding` actualiza `companies` y marca `onboarding_progress` como `completed`.
+5. El cliente entra al dashboard.
 
 Nota de seguridad para el siguiente endurecimiento: el login ya crea sesiones en PostgreSQL, pero el Paso 6 debe proteger rutas privadas con cookie segura o middleware de sesion.
 

@@ -10,6 +10,9 @@ type SessionRow = {
   userId: string;
   companyId: string;
   role: string;
+  userName: string;
+  userEmail: string;
+  companyName: string;
 };
 
 function cookieValue(request: Request, name: string) {
@@ -47,9 +50,13 @@ export async function validateRequestSession(request: Request, companyId?: strin
     `SELECT sessions.id,
             sessions.user_id AS "userId",
             sessions.company_id AS "companyId",
-            users.role
+            users.role,
+            users.name AS "userName",
+            users.email AS "userEmail",
+            companies.name AS "companyName"
      FROM sessions
      JOIN users ON users.id = sessions.user_id
+     JOIN companies ON companies.id = sessions.company_id
      WHERE sessions.token_hash = $1
        AND sessions.revoked_at IS NULL
        AND sessions.expires_at > NOW()

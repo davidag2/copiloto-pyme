@@ -87,9 +87,9 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
     window.localStorage.setItem("copiloto-pyme-onboarding", JSON.stringify(data.onboarding));
 
     setStatus("success");
-    setMessage("Cuenta creada. Te llevamos al dashboard para comenzar el onboarding.");
+    setMessage("Cuenta creada. Te llevamos al onboarding para preparar tu primer resumen.");
     window.setTimeout(() => {
-      window.location.href = "/dashboard";
+      window.location.href = "/onboarding";
     }, 800);
   }
 
