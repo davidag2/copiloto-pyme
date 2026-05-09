@@ -38,6 +38,11 @@ export function BillingClient() {
   const activePlan = commercialPlans.find((plan) => plan.id === planId) ?? commercialPlans[0];
 
   useEffect(() => {
+    const reason = new URLSearchParams(window.location.search).get("reason");
+    if (reason === "trial_expired" || reason === "past_due" || reason === "subscription_expired") {
+      setStatus("Tu mes gratis terminó. Para volver al dashboard, activa el pago de tu suscripción.");
+    }
+
     fetch("/api/payments/providers")
       .then((response) => response.json())
       .then((data) => setProviders(data.providers || []))

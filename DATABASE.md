@@ -183,6 +183,16 @@ Flujo actual de `/billing`:
 5. Si faltan credenciales, la transaccion queda en `configuration_required`.
 6. Cuando se configuren credenciales reales, el siguiente paso es conectar cada adaptador API y webhooks para marcar pagos como `paid`, `failed` o `expired`.
 
+Regla de acceso al dashboard:
+
+1. `/dashboard` valida la cookie `copiloto_session`.
+2. Luego valida la suscripcion de la empresa en PostgreSQL.
+3. Si el estado es `trial` y `trial_ends_at` no ha vencido, el cliente puede entrar.
+4. Si el estado es `active` y el periodo vigente no ha vencido, el cliente puede entrar.
+5. Si el mes gratis vencio y no hay pago activo, la suscripcion pasa a `past_due`.
+6. Con `past_due`, `canceled`, suscripcion vencida o suscripcion inexistente, el cliente es redirigido a `/billing`.
+7. El dashboard no se renderiza hasta que la suscripcion vuelva a estar activa.
+
 Variables de entorno previstas para pagos:
 
 - Wompi: `WOMPI_PUBLIC_KEY`, `WOMPI_PRIVATE_KEY`, `WOMPI_EVENTS_SECRET`.
