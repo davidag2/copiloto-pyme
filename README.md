@@ -123,6 +123,16 @@ El Paso 9 agrega una base multi-pasarela para Colombia:
 
 La ruta privada `/billing` permite elegir plan y pasarela. El endpoint `POST /api/payments/checkout` registra la solicitud en PostgreSQL. Para cobrar dinero real faltan las credenciales de cada proveedor y los webhooks de confirmacion de pago.
 
+El Paso 10 agrega la base de facturacion electronica con SIIGO:
+
+- `billing_profiles` guarda los datos fiscales del cliente.
+- `siigo_invoices` guarda la trazabilidad de cada factura ligada a un pago.
+- `/api/billing/profile` crea o actualiza el perfil fiscal.
+- `/api/siigo/invoices` prepara o envia la factura a SIIGO.
+- `/billing` ahora permite guardar datos fiscales, elegir plan y preparar pago.
+
+La factura se prepara al crear el pago y se envia a SIIGO cuando el pago este confirmado como `paid`. Para emitir facturas reales se requieren credenciales SIIGO, IDs de documento, vendedor, medio de pago y producto/servicio.
+
 ### 2. Onboarding Guiado
 
 Permite configurar:

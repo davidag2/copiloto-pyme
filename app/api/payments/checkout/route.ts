@@ -2,6 +2,7 @@ import { fail, ok } from "@/lib/api";
 import { query } from "@/lib/db";
 import { getPlanById } from "@/lib/plans";
 import { createCheckoutReference, getPaymentProvider, isPaymentProviderConfigured } from "@/lib/payment-providers";
+import { getSiigoConfig } from "@/lib/siigo";
 import { validateRequestSession } from "@/lib/session";
 
 export async function POST(request: Request) {
@@ -70,9 +71,45 @@ export async function POST(request: Request) {
         })
       ]
     );
+    const paymentRow = payment.rows[0];
+    const billingProfile = await query(
+      `SELECT id
+       FROM billing_profiles
+       WHERE company_id = $1
+       LIMIT 1`,
+      [session.companyId]
+    );
+    const siigoStatus = !billingProfile.rows[0]
+      ? "billing_profile_required"
+      : getSiigoConfig()
+        ? "waiting_payment"
+        : "configuration_required";
+
+    await query(
+      `INSERT INTO siigo_invoices (company_id, payment_transaction_id, status, error_message)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (payment_transaction_id) DO UPDATE SET
+         status = EXCLUDED.status,
+         error_message = EXCLUDED.error_message,
+         updated_at = NOW()`,
+      [
+        session.companyId,
+        paymentRow.id,
+        siigoStatus,
+        siigoStatus === "billing_profile_required"
+          ? "Faltan datos fiscales del cliente para facturar en SIIGO."
+          : siigoStatus === "configuration_required"
+            ? "Faltan credenciales o IDs de SIIGO."
+            : "La factura se enviará a SIIGO cuando la pasarela confirme el pago."
+      ]
+    );
 
     return ok({
-      payment: payment.rows[0],
+      payment: paymentRow,
+      invoice: {
+        provider: "siigo",
+        status: siigoStatus
+      },
       provider: {
         id: provider.id,
         name: provider.name,

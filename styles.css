@@ -1457,7 +1457,8 @@ select:focus-visible {
 }
 
 .billing-plan-grid,
-.billing-provider-grid {
+.billing-provider-grid,
+.billing-profile-form {
   display: grid;
   gap: 12px;
   margin-bottom: 28px;
@@ -1465,6 +1466,43 @@ select:focus-visible {
 
 .billing-plan-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.billing-profile-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.billing-profile-form label {
+  display: grid;
+  gap: 8px;
+  color: #526179;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.billing-profile-form input,
+.billing-profile-form select {
+  width: 100%;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  color: #0a2540;
+  font: inherit;
+  min-height: 46px;
+  outline: none;
+  padding: 0 13px;
+}
+
+.billing-profile-form input:focus,
+.billing-profile-form select:focus {
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.billing-profile-form button {
+  align-self: end;
+  justify-content: center;
+  min-height: 46px;
 }
 
 .billing-plan-grid button,
@@ -1579,7 +1617,8 @@ select:focus-visible {
   }
 
   .billing-plan-grid,
-  .billing-provider-grid {
+  .billing-provider-grid,
+  .billing-profile-form {
     grid-template-columns: 1fr;
   }
 

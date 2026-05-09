@@ -19,6 +19,8 @@ const expectedTables = [
   "subscriptions",
   "payment_providers",
   "payment_transactions",
+  "billing_profiles",
+  "siigo_invoices",
   "sessions",
   "onboarding_progress"
 ];

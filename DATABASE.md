@@ -190,6 +190,30 @@ Variables de entorno previstas para pagos:
 - Mercado Pago: `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_PUBLIC_KEY`, `MERCADO_PAGO_WEBHOOK_SECRET`.
 - Efecty directo: `EFECTY_CONVENIO_ID`, `EFECTY_API_KEY`.
 
+Flujo SIIGO para factura electronica:
+
+1. El cliente guarda sus datos fiscales en `/billing`.
+2. `PUT /api/billing/profile` guarda el perfil en `billing_profiles`.
+3. Al crear un pago, `POST /api/payments/checkout` crea la transaccion y una fila relacionada en `siigo_invoices`.
+4. Si faltan datos fiscales, la factura queda en `billing_profile_required`.
+5. Si faltan credenciales o IDs de SIIGO, queda en `configuration_required`.
+6. Si todo esta configurado, queda en `waiting_payment`.
+7. Cuando una pasarela confirme el pago como `paid`, `POST /api/siigo/invoices` puede enviar la factura a SIIGO.
+8. La respuesta de SIIGO se guarda en `siigo_invoices` con numero, nombre, CUFE y estado.
+
+Variables de entorno previstas para SIIGO:
+
+- `SIIGO_USERNAME`
+- `SIIGO_ACCESS_KEY`
+- `SIIGO_PARTNER_ID`
+- `SIIGO_DOCUMENT_ID`
+- `SIIGO_SELLER_ID`
+- `SIIGO_PAYMENT_TYPE_ID`
+- `SIIGO_PRODUCT_CODE`
+- `SIIGO_BASE_URL`
+- `SIIGO_SEND_TO_DIAN`
+- `SIIGO_SEND_MAIL`
+
 Nota de seguridad para el siguiente endurecimiento: el login ya crea sesiones en PostgreSQL, pero el Paso 6 debe proteger rutas privadas con cookie segura o middleware de sesion.
 
 ## 6. Proteccion De Rutas Privadas

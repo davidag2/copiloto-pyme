@@ -120,6 +120,45 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS billing_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL UNIQUE REFERENCES companies(id) ON DELETE CASCADE,
+  person_type TEXT NOT NULL DEFAULT 'company' CHECK (person_type IN ('person', 'company')),
+  id_type TEXT NOT NULL DEFAULT '31',
+  identification TEXT NOT NULL DEFAULT '',
+  check_digit TEXT,
+  legal_name TEXT NOT NULL DEFAULT '',
+  address TEXT NOT NULL DEFAULT '',
+  country_code TEXT NOT NULL DEFAULT 'CO',
+  state_code TEXT NOT NULL DEFAULT '',
+  city_code TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
+  phone TEXT,
+  fiscal_responsibility_code TEXT NOT NULL DEFAULT 'R-99-PN',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS siigo_invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  payment_transaction_id UUID NOT NULL UNIQUE REFERENCES payment_transactions(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'waiting_payment' CHECK (status IN ('waiting_payment', 'configuration_required', 'billing_profile_required', 'ready', 'sent', 'accepted', 'rejected', 'failed')),
+  siigo_invoice_id TEXT,
+  siigo_invoice_name TEXT,
+  siigo_invoice_number TEXT,
+  siigo_cufe TEXT,
+  siigo_pdf_url TEXT,
+  siigo_xml_url TEXT,
+  request_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  response_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  error_message TEXT,
+  sent_at TIMESTAMPTZ,
+  accepted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_company_active
   ON subscriptions(company_id)
   WHERE status IN ('trial', 'active', 'past_due');
@@ -309,6 +348,8 @@ CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, sta
 CREATE INDEX IF NOT EXISTS idx_subscriptions_company_status ON subscriptions(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_company_status ON payment_transactions(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_provider_status ON payment_transactions(provider_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_billing_profiles_company ON billing_profiles(company_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_siigo_invoices_company_status ON siigo_invoices(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);
