@@ -63,6 +63,8 @@ prisma/schema.prisma
 - Reportes.
 - Planes.
 - Suscripciones.
+- Proveedores de pago.
+- Transacciones de pago.
 - Sesiones.
 - Progreso de onboarding.
 
@@ -171,6 +173,22 @@ Flujo actual de `/onboarding`:
 3. El cliente confirma tipo de negocio, fuente principal, meta mensual y stock minimo.
 4. `POST /api/onboarding` actualiza `companies` y marca `onboarding_progress` como `completed`.
 5. El cliente entra al dashboard.
+
+Flujo actual de `/billing`:
+
+1. Ruta privada protegida por cookie `copiloto_session`.
+2. `GET /api/payments/providers` lista Wompi, Bold, Mercado Pago y Efecty con sus capacidades.
+3. El cliente elige plan y pasarela para preparar el cobro despues del mes gratis.
+4. `POST /api/payments/checkout` crea una fila en `payment_transactions`.
+5. Si faltan credenciales, la transaccion queda en `configuration_required`.
+6. Cuando se configuren credenciales reales, el siguiente paso es conectar cada adaptador API y webhooks para marcar pagos como `paid`, `failed` o `expired`.
+
+Variables de entorno previstas para pagos:
+
+- Wompi: `WOMPI_PUBLIC_KEY`, `WOMPI_PRIVATE_KEY`, `WOMPI_EVENTS_SECRET`.
+- Bold: `BOLD_API_KEY`, `BOLD_WEBHOOK_SECRET`.
+- Mercado Pago: `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_PUBLIC_KEY`, `MERCADO_PAGO_WEBHOOK_SECRET`.
+- Efecty directo: `EFECTY_CONVENIO_ID`, `EFECTY_API_KEY`.
 
 Nota de seguridad para el siguiente endurecimiento: el login ya crea sesiones en PostgreSQL, pero el Paso 6 debe proteger rutas privadas con cookie segura o middleware de sesion.
 

@@ -68,6 +68,58 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS payment_providers (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'Colombia',
+  currency TEXT NOT NULL DEFAULT 'COP',
+  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'disabled')),
+  supports_recurring BOOLEAN NOT NULL DEFAULT FALSE,
+  supports_cash BOOLEAN NOT NULL DEFAULT FALSE,
+  supports_pse BOOLEAN NOT NULL DEFAULT FALSE,
+  supports_cards BOOLEAN NOT NULL DEFAULT FALSE,
+  description TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO payment_providers (id, name, category, supports_recurring, supports_cash, supports_pse, supports_cards, description)
+VALUES
+  ('wompi', 'Wompi', 'Pasarela principal Colombia', TRUE, TRUE, TRUE, TRUE, 'Pagos con tarjeta, PSE, Nequi, Bancolombia y efectivo en corresponsales. Recomendada como pasarela principal para Colombia.'),
+  ('bold', 'Bold', 'Links y API de pagos', FALSE, FALSE, TRUE, TRUE, 'Links de pago y API para cobrar con tarjetas, PSE, Nequi y otros medios locales. Útil como alternativa comercial.'),
+  ('mercado_pago', 'Mercado Pago', 'Checkout y billetera', TRUE, TRUE, TRUE, TRUE, 'Checkout Pro, Checkout API, pagos con tarjetas, PSE, Efecty y cuenta Mercado Pago. Buena pasarela de respaldo.'),
+  ('efecty', 'Efecty', 'Pago en efectivo', FALSE, TRUE, FALSE, FALSE, 'Pago offline para clientes que prefieren pagar en efectivo. Puede operar por convenio directo o como medio offline mediante Mercado Pago.')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  category = EXCLUDED.category,
+  supports_recurring = EXCLUDED.supports_recurring,
+  supports_cash = EXCLUDED.supports_cash,
+  supports_pse = EXCLUDED.supports_pse,
+  supports_cards = EXCLUDED.supports_cards,
+  description = EXCLUDED.description,
+  status = 'available',
+  updated_at = NOW();
+
+CREATE TABLE IF NOT EXISTS payment_transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+  plan_id TEXT NOT NULL REFERENCES plans(id),
+  provider_id TEXT NOT NULL REFERENCES payment_providers(id),
+  amount_cop INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'COP',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'configuration_required', 'redirect_created', 'paid', 'failed', 'expired', 'canceled')),
+  external_reference TEXT NOT NULL UNIQUE,
+  external_checkout_url TEXT,
+  provider_transaction_id TEXT,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  expires_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_company_active
   ON subscriptions(company_id)
   WHERE status IN ('trial', 'active', 'past_due');
@@ -255,6 +307,8 @@ CREATE INDEX IF NOT EXISTS idx_decisions_company_status ON decisions(company_id,
 CREATE INDEX IF NOT EXISTS idx_reports_company_created ON reports(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, status);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_company_status ON subscriptions(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_company_status ON payment_transactions(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_provider_status ON payment_transactions(provider_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);

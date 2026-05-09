@@ -1348,6 +1348,247 @@ select:focus-visible {
   opacity: 0.78;
 }
 
+.billing-route-page {
+  min-height: 100vh;
+  padding: 32px 5vw 72px;
+}
+
+.billing-route-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.1fr);
+  gap: 32px;
+  width: min(1180px, 100%);
+  margin: 48px auto 0;
+  align-items: start;
+}
+
+.billing-route-copy,
+.billing-route-panel {
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 24px 70px rgba(10, 37, 64, 0.1);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+}
+
+.billing-route-copy {
+  padding: 42px;
+  position: sticky;
+  top: 104px;
+}
+
+.billing-route-copy > span,
+.billing-section-heading span {
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.billing-route-copy h1 {
+  margin: 14px 0 18px;
+  color: #0a2540;
+  font-size: clamp(2.1rem, 4vw, 4.1rem);
+  line-height: 0.95;
+}
+
+.billing-route-copy p {
+  color: #526179;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.billing-trust-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.billing-trust-grid article,
+.billing-summary-card,
+.billing-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: rgba(248, 251, 255, 0.92);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.billing-trust-grid svg,
+.billing-status svg {
+  width: 22px;
+  height: 22px;
+  color: #2563eb;
+  flex: 0 0 auto;
+}
+
+.billing-trust-grid strong,
+.billing-summary-card strong {
+  display: block;
+  color: #0a2540;
+}
+
+.billing-trust-grid small,
+.billing-summary-card small {
+  display: block;
+  color: #667085;
+  margin-top: 3px;
+}
+
+.billing-route-panel {
+  padding: 28px;
+}
+
+.billing-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin: 6px 0 16px;
+}
+
+.billing-section-heading h2 {
+  margin: 0;
+  color: #0a2540;
+  font-size: 1.25rem;
+}
+
+.billing-plan-grid,
+.billing-provider-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.billing-plan-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.billing-plan-grid button,
+.billing-provider-grid button {
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.billing-plan-grid button:hover,
+.billing-provider-grid button:hover,
+.billing-plan-grid button.is-selected,
+.billing-provider-grid button.is-selected {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 18px 42px rgba(37, 99, 235, 0.12);
+}
+
+.billing-plan-grid span,
+.billing-provider-grid span {
+  display: block;
+  color: #526179;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.billing-plan-grid strong {
+  display: block;
+  color: #0a2540;
+  margin: 8px 0 4px;
+}
+
+.billing-plan-grid small,
+.billing-provider-grid small {
+  color: #667085;
+}
+
+.billing-provider-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.billing-provider-grid button > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.billing-provider-grid svg {
+  width: 20px;
+  height: 20px;
+  color: #2563eb;
+}
+
+.billing-provider-grid strong {
+  color: #0a2540;
+}
+
+.billing-provider-grid em {
+  margin-left: auto;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #12813e;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.billing-provider-grid p {
+  min-height: 62px;
+  margin: 10px 0;
+  color: #526179;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.billing-summary-card {
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.billing-status {
+  margin: 14px 0 0;
+  color: #526179;
+  font-weight: 800;
+}
+
+@media (max-width: 980px) {
+  .billing-route-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-route-copy {
+    position: static;
+  }
+}
+
+@media (max-width: 680px) {
+  .billing-route-page {
+    padding: 22px 4vw 52px;
+  }
+
+  .billing-route-copy,
+  .billing-route-panel {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .billing-plan-grid,
+  .billing-provider-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-summary-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 .simple-home-main {
   background:
     radial-gradient(circle at 18% 0%, rgba(37, 99, 235, 0.08), transparent 30%),

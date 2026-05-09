@@ -21,7 +21,7 @@ Incluye:
 
 - Portal comercial del producto.
 - Registro de cliente y empresa.
-- Pago de suscripcion simulado.
+- Preparacion de pagos con Wompi, Bold, Mercado Pago y Efecty.
 - Onboarding guiado.
 - Dashboard principal.
 - Importador real CSV.
@@ -47,6 +47,7 @@ Incluye:
 - Reportes automaticos simulados con descarga `.txt`.
 - API inicial con PostgreSQL para guardar empresas, usuarios, importaciones, alertas, integraciones, decisiones y reportes.
 - Frontend conectado a los endpoints con fallback local si PostgreSQL aun no esta configurado.
+- Modulo inicial de facturacion en `/billing` para registrar solicitudes de pago multi-pasarela antes de activar credenciales reales.
 
 ## Producto
 
@@ -108,8 +109,19 @@ El prototipo incluye una pagina inicial donde el cliente puede:
 - Elegir un plan.
 - Crear su usuario.
 - Registrar su empresa.
-- Simular el pago de la suscripcion.
+- Preparar el pago de la suscripcion con pasarelas para Colombia.
 - Entrar al onboarding.
+
+### Pagos Y Facturacion
+
+El Paso 9 agrega una base multi-pasarela para Colombia:
+
+- Wompi como pasarela recomendada.
+- Bold para links/API de pago.
+- Mercado Pago como alternativa con checkout, PSE y Efecty.
+- Efecty como opcion de pago en efectivo.
+
+La ruta privada `/billing` permite elegir plan y pasarela. El endpoint `POST /api/payments/checkout` registra la solicitud en PostgreSQL. Para cobrar dinero real faltan las credenciales de cada proveedor y los webhooks de confirmacion de pago.
 
 ### 2. Onboarding Guiado
 

@@ -17,6 +17,8 @@ const expectedTables = [
   "reports",
   "plans",
   "subscriptions",
+  "payment_providers",
+  "payment_transactions",
   "sessions",
   "onboarding_progress"
 ];

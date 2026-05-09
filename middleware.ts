@@ -4,7 +4,10 @@ import { sessionCookieName } from "./lib/session-constants";
 export function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get(sessionCookieName)?.value;
 
-  const isPrivateRoute = request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding");
+  const isPrivateRoute =
+    request.nextUrl.pathname.startsWith("/dashboard") ||
+    request.nextUrl.pathname.startsWith("/onboarding") ||
+    request.nextUrl.pathname.startsWith("/billing");
 
   if (isPrivateRoute && !sessionToken) {
     const loginUrl = new URL("/login", request.url);
@@ -16,5 +19,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*"]
+  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/billing/:path*"]
 };
