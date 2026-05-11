@@ -70,10 +70,9 @@ type Metrics = {
   criticalStock: number;
 };
 type ThemeMode = "light" | "dark";
-type MarketingPage = "inicio" | "ventajas" | "precios" | "contactanos";
-type ContactMode = "signup" | "login";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
-type NavItem = { label: string; icon: LucideIcon };
+type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "reportes" | "alertas" | "configuracion";
+type NavItem = { id: DashboardModule; label: string; icon: LucideIcon; sectionId: string };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
 type EntityResponse<T> = { [key: string]: T };
@@ -114,21 +113,14 @@ type ChartTooltipProps = {
 };
 
 const navItems: NavItem[] = [
-  { label: "Panel diario", icon: Target },
-  { label: "Ventas", icon: BarChart3 },
-  { label: "Caja", icon: WalletCards },
-  { label: "Inventario", icon: Boxes },
-  { label: "Clientes", icon: Bot },
-  { label: "Decisiones", icon: ClipboardCheck },
-  { label: "Integraciones", icon: Link2 },
-  { label: "Reportes", icon: FileText }
-];
-
-const marketingNavItems: Array<{ label: string; page: MarketingPage }> = [
-  { label: "Inicio", page: "inicio" },
-  { label: "Ventajas", page: "ventajas" },
-  { label: "Precio", page: "precios" },
-  { label: "Contactenos", page: "contactanos" }
+  { id: "inicio", label: "Inicio", icon: Target, sectionId: "dashboardInicio" },
+  { id: "ventas", label: "Ventas", icon: BarChart3, sectionId: "dashboardVentas" },
+  { id: "caja", label: "Caja", icon: WalletCards, sectionId: "dashboardCaja" },
+  { id: "inventario", label: "Inventario", icon: Boxes, sectionId: "dashboardInventario" },
+  { id: "clientes", label: "Clientes", icon: Users, sectionId: "dashboardClientes" },
+  { id: "reportes", label: "Reportes", icon: FileText, sectionId: "dashboardReportes" },
+  { id: "alertas", label: "Alertas", icon: AlertTriangle, sectionId: "dashboardAlertas" },
+  { id: "configuracion", label: "Configuración", icon: Settings2, sectionId: "dashboardConfiguracion" }
 ];
 
 async function apiJson<T>(path: string, options: RequestInit): Promise<ApiResult<T>> {
@@ -240,12 +232,6 @@ function statusClass(status: string) {
 }
 
 export default function Home() {
-  const [view, setView] = useState<"portal" | "app">(() => {
-    if (typeof window !== "undefined" && window.location.pathname.startsWith("/dashboard")) return "app";
-    return "portal";
-  });
-  const [marketingPage, setMarketingPage] = useState<MarketingPage>("inicio");
-  const [contactMode, setContactMode] = useState<ContactMode>("signup");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
   const [persistenceStatus, setPersistenceStatus] = useState("Modo demo: aun no hay empresa guardada en PostgreSQL.");
@@ -310,14 +296,7 @@ export default function Home() {
   const [microFeedback, setMicroFeedback] = useState("");
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
-
-  function openMarketingPage(page: MarketingPage, mode?: ContactMode) {
-    setMarketingPage(page);
-    if (mode) setContactMode(mode);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
+  const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
@@ -334,7 +313,6 @@ export default function Home() {
       try {
         setAuthUser(JSON.parse(savedAuthUser) as AuthUser);
         setAuthStatus("Sesion local restaurada.");
-        setView("app");
       } catch {
         window.localStorage.removeItem("copiloto-pyme-user");
       }
@@ -565,7 +543,6 @@ export default function Home() {
     applyAuthSession(result.data);
     await loadTeam(result.data.company.id);
     setAuthStatus(`Bienvenido ${result.data.user.name}. Rol: ${roleLabel(result.data.user.role)}.`);
-    setView("app");
   }
 
   async function recoverPassword(event: FormEvent<HTMLFormElement>) {
@@ -649,11 +626,6 @@ export default function Home() {
     }
     setRecommendation(`Bienvenido ${customer.ownerName || "equipo"}. Siguiente paso: cargar datos desde ${customer.dataSource}.`);
     setOnboardingReady(true);
-  }
-
-  function enterDashboardAfterOnboarding() {
-    setRecommendation(`Bienvenido ${customer.ownerName || "equipo"}. Tu panel inicial esta listo para ${customer.companyName}.`);
-    setView("app");
   }
 
   async function connectIntegration(id: string) {
@@ -916,6 +888,11 @@ ${recommendedAction()}`;
     await loadImportHistory(companyId);
   }
 
+  function navigateModule(item: NavItem) {
+    setActiveModule(item.id);
+    document.getElementById(item.sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <div id="appView" className={`app-shell theme-${theme}`}>
       <header className="mobile-app-bar">
@@ -929,10 +906,18 @@ ${recommendedAction()}`;
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>PYME Command Center</span></div></div>
         <nav className="nav-list" aria-label="Principal">
-          {navItems.map((item, index) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <button className={`nav-item ${index === 0 ? "active" : ""}`} type="button" key={item.label}><Icon aria-hidden="true" />{item.label}</button>
+              <button
+                aria-current={activeModule === item.id ? "page" : undefined}
+                className={`nav-item ${activeModule === item.id ? "active" : ""}`}
+                onClick={() => navigateModule(item)}
+                type="button"
+                key={item.id}
+              >
+                <Icon aria-hidden="true" />{item.label}
+              </button>
             );
           })}
         </nav>
@@ -951,7 +936,7 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <section id="kpiGrid" className="daily-summary" data-status={overallStatusTone} aria-label="Resumen ejecutivo del dia">
+        <section id="dashboardInicio" className="daily-summary dashboard-module-section" data-status={overallStatusTone} aria-label="Resumen ejecutivo del dia">
           <div className="summary-status">
             <span><Clock3 aria-hidden="true" />Resumen del dia</span>
             <strong>{overallStatus}</strong>
@@ -985,7 +970,7 @@ ${recommendedAction()}`;
           </div>
         )}
 
-        <section className="team-panel">
+        <section id="dashboardClientes" className="team-panel dashboard-module-section">
             <div className="panel-heading">
               <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
               <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
@@ -1051,7 +1036,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        <section className="customizer-panel">
+        <section id="dashboardConfiguracion" className="customizer-panel dashboard-module-section">
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
             <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Propietario / Gerencia</option><option value="admin">Administrador</option><option value="finance">Contador</option><option value="sales">Ventas</option></select>
           </div>
@@ -1085,7 +1070,7 @@ ${recommendedAction()}`;
         )}
 
         {visible.reports && (
-          <section id="mobileReportsAnchor" className="reports-panel">
+          <section id="dashboardReportes" className="reports-panel dashboard-module-section">
             <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
               <form className="report-settings">
@@ -1109,7 +1094,7 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section id="mobileGoalsAnchor" className="goals-panel">
+        <section id="dashboardCaja" className="goals-panel dashboard-module-section">
           <div className="panel-heading"><div><span><Target aria-hidden="true" />Metas y semaforos</span><h2>Avance contra objetivos</h2></div><button className="secondary-button" type="button"><RefreshCw aria-hidden="true" />Recalcular</button></div>
           <div className="goals-grid">
             {[
@@ -1126,7 +1111,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        <section className="rules-panel">
+        <section id="dashboardAlertas" className="rules-panel dashboard-module-section">
           <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }} disabled={!permissions.canManageRules}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
           <div className="rules-grid" data-motion={microAction === "rules" ? "active" : undefined}>
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
@@ -1137,7 +1122,7 @@ ${recommendedAction()}`;
         </section>
 
         {visible.importer && (
-          <section className="importer-panel">
+          <section id="dashboardInventario" className="importer-panel dashboard-module-section">
             <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
             <div className="importer-grid">
               <div>
@@ -1194,7 +1179,7 @@ ${recommendedAction()}`;
 
         <section className="content-grid">
           <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
-          <article className="panel chart-panel">
+          <article id="dashboardVentas" className="panel chart-panel dashboard-module-section">
             <div className="panel-heading">
               <div><span><BarChart3 aria-hidden="true" />Ventas recientes</span><h2>Tendencia y comparativo</h2></div>
               <div className="chart-summary"><strong className={weeklyVariation >= 0 ? "positive" : "danger"}>{weeklyVariation >= 0 ? "+" : ""}{weeklyVariation}%</strong><span>vs semana anterior</span></div>
@@ -1268,10 +1253,10 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav">
-        <a href="#kpiGrid"><Target aria-hidden="true" /><span>Resumen</span></a>
-        <a href="#mobileAlertsAnchor"><AlertTriangle aria-hidden="true" /><span>Alertas</span></a>
-        <a href="#mobileIntegrationsAnchor"><Database aria-hidden="true" /><span>Datos</span></a>
-        <a href="#mobileReportsAnchor"><FileText aria-hidden="true" /><span>Reporte</span></a>
+        <a href="#dashboardInicio"><Target aria-hidden="true" /><span>Inicio</span></a>
+        <a href="#dashboardVentas"><BarChart3 aria-hidden="true" /><span>Ventas</span></a>
+        <a href="#dashboardInventario"><Database aria-hidden="true" /><span>Datos</span></a>
+        <a href="#dashboardReportes"><FileText aria-hidden="true" /><span>Reportes</span></a>
       </nav>
     </div>
   );

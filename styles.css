@@ -5396,6 +5396,14 @@ select:focus-visible {
   color: #ffffff;
 }
 
+.nav-item[aria-current="page"] {
+  box-shadow: inset 3px 0 0 #6d5dfc;
+}
+
+.dashboard-module-section {
+  scroll-margin-top: 112px;
+}
+
 .tenant-card {
   margin-top: auto;
   padding: 16px;
