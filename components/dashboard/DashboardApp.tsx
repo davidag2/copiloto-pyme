@@ -42,7 +42,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { MarketingLanding } from "@/components/marketing/MarketingLanding";
 import { Button } from "@/components/ui/button";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
@@ -917,17 +916,13 @@ ${recommendedAction()}`;
     await loadImportHistory(companyId);
   }
 
-  if (view === "portal") {
-    return <MarketingLanding activePage="inicio" theme={theme} onToggleTheme={toggleTheme} />;
-  }
-
   return (
     <div id="appView" className={`app-shell theme-${theme}`}>
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
           <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
-          <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
+          <a className="secondary-button" href="/">Portal</a>
         </div>
       </header>
 
@@ -952,7 +947,7 @@ ${recommendedAction()}`;
             <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
             <button className="primary-button" type="button" onClick={refreshMetrics} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
-            <button className="secondary-button" type="button" onClick={() => setView("portal")}>Portal</button>
+            <a className="secondary-button" href="/">Portal</a>
           </div>
         </header>
 
@@ -1253,6 +1248,23 @@ ${recommendedAction()}`;
           )}
           {visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
+
+        <footer className="app-context-bar" aria-label="Acciones contextuales del dashboard">
+          <div>
+            <span>Copiloto activo</span>
+            <strong>{criticalAlerts.length ? `${criticalAlerts.length} alerta(s) por revisar` : "Operación bajo control"}</strong>
+          </div>
+          <div>
+            <span>Datos conectados</span>
+            <strong>{connectedIntegrations}/{integrations.length} integraciones</strong>
+          </div>
+          <div>
+            <span>Siguiente acción</span>
+            <strong>{recommendedAction()}</strong>
+          </div>
+          <a className="secondary-button" href="/billing"><FileText aria-hidden="true" />Facturación</a>
+          <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Sparkles aria-hidden="true" />Generar brief</button>
+        </footer>
       </main>
 
       <nav className="mobile-quick-nav">
