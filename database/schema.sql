@@ -328,6 +328,32 @@ CREATE TABLE IF NOT EXISTS decisions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS ai_suggestions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  related_alert_id UUID REFERENCES alerts(id) ON DELETE SET NULL,
+  related_decision_id UUID REFERENCES decisions(id) ON DELETE SET NULL,
+  assigned_to UUID REFERENCES users(id) ON DELETE SET NULL,
+  source TEXT NOT NULL DEFAULT 'copiloto_ai',
+  category TEXT NOT NULL CHECK (category IN ('ventas', 'caja', 'inventario', 'precios', 'costos', 'clientes', 'reportes', 'integraciones', 'general')),
+  priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'critical')),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  recommendation TEXT NOT NULL,
+  impact_label TEXT NOT NULL DEFAULT '',
+  impact_value_cop NUMERIC(14, 2),
+  confidence NUMERIC(5, 2) NOT NULL DEFAULT 0 CHECK (confidence >= 0 AND confidence <= 100),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'accepted', 'dismissed', 'converted', 'archived')),
+  evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  suggested_for_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ,
+  dismissed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
@@ -342,6 +368,9 @@ CREATE TABLE IF NOT EXISTS reports (
 
 CREATE INDEX IF NOT EXISTS idx_imported_rows_company_date ON imported_data_rows(company_id, sale_date DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_company_status ON alerts(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_suggestions_company_status ON ai_suggestions(company_id, status, priority, suggested_for_date DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_suggestions_company_category ON ai_suggestions(company_id, category, generated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_suggestions_assigned_to ON ai_suggestions(assigned_to, status, suggested_for_date DESC);
 CREATE INDEX IF NOT EXISTS idx_decisions_company_status ON decisions(company_id, status, decision_date DESC);
 CREATE INDEX IF NOT EXISTS idx_reports_company_created ON reports(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, status);

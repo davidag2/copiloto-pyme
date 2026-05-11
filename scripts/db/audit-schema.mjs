@@ -14,6 +14,7 @@ const expectedTables = [
   "alerts",
   "integrations",
   "decisions",
+  "ai_suggestions",
   "reports",
   "plans",
   "subscriptions",
