@@ -1,6 +1,6 @@
-import Home from "../page";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import DashboardApp from "@/components/dashboard/DashboardApp";
 import { validateRequestSession } from "@/lib/session";
 import { getSubscriptionAccess } from "@/lib/subscription-access";
 
@@ -14,5 +14,5 @@ export default async function DashboardPage() {
   const access = await getSubscriptionAccess(session.companyId);
   if (!access.allowed) redirect(access.redirectTo || "/billing");
 
-  return <Home />;
+  return <DashboardApp />;
 }
