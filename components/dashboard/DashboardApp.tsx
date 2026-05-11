@@ -520,6 +520,23 @@ export default function Home() {
     { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red", trend: [7, 6, 6, 5, 6, 5, metrics.criticalStock], delta: "Comprar antes de quiebre" },
     { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple", trend: [2, 3, 4, 3, 5, 6, openDecisions + criticalAlerts.length], delta: "Priorizadas por IA" }
   ];
+  const aiImpactData = chartData.map((item, index) => ({
+    day: item.day,
+    actual: item.actual,
+    withAi: Number((item.actual * (1.08 + index * 0.012)).toFixed(1))
+  }));
+  const aiImpactLift = Math.max(0, Math.round((aiImpactData.reduce((total, item) => total + item.withAi, 0) - weeklyTotal) * 1_000_000));
+  const aiImpactCategories = [
+    { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", icon: PackageCheck, tone: "red" },
+    { label: "Precios", count: 2, tag: "Oportunidad", icon: TrendingUp, tone: "green" },
+    { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", icon: BarChart3, tone: "blue" },
+    { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", icon: WalletCards, tone: "purple" }
+  ];
+  const aiActivity = [
+    { title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
+    { title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
+    { title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
+  ];
 
   function recommendedAction() {
     if (metrics.criticalStock > rules.stock) return `Reponer los SKU criticos antes de lanzar promociones. Hay ${metrics.criticalStock} SKU en riesgo.`;
@@ -1167,6 +1184,76 @@ ${recommendedAction()}`;
               );
             })}
           </div>
+        </section>
+
+        <section className="ai-impact-section" aria-label="Impacto de las sugerencias AI">
+          <article className="ai-impact-chart-card">
+            <div className="panel-heading">
+              <div>
+                <span><Sparkles aria-hidden="true" />Impacto de las sugerencias AI</span>
+                <h2>Si aplicas las sugerencias de alta prioridad, podrías lograr:</h2>
+              </div>
+            </div>
+            <div className="ai-impact-summary">
+              <div><strong>+ {formatMoney(aiImpactLift / 1_000_000)}</strong><span>en ventas adicionales</span></div>
+              <div><strong>+ 23%</strong><span>mejora estimada en margen</span></div>
+            </div>
+            <div className="ai-impact-chart">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={aiImpactData} margin={{ top: 8, right: 18, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="day" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}M`} />
+                  <Tooltip content={<SalesTooltip />} />
+                  <Line type="monotone" dataKey="actual" name="Ventas actuales" stroke="#6d5dfc" strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="withAi" name="Con sugerencias AI" stroke="#22c55e" strokeWidth={3} strokeDasharray="6 6" dot={false} />
+                  <Legend />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="ai-impact-side-card">
+            <div className="panel-heading">
+              <div><span><Target aria-hidden="true" />Sugerencias por categoría</span><h2>Prioriza dónde actuar</h2></div>
+              <button className="ghost-button" type="button" onClick={() => setAnswer(`Sugerencias por categoria: ${aiImpactCategories.map((category) => `${category.label} ${category.count}`).join(", ")}.`)}>Ver todas</button>
+            </div>
+            <div className="ai-category-list">
+              {aiImpactCategories.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <div className="ai-category-row" data-tone={category.tone} key={category.label}>
+                    <span><Icon aria-hidden="true" />{category.label}</span>
+                    <strong>{category.count}</strong>
+                    <em>{category.tag}</em>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="ai-impact-footnote">
+              <Sparkles aria-hidden="true" />
+              <span>{aiImpactCategories.reduce((total, item) => total + item.count, 0)} sugerencias activas</span>
+              <small>Actualizadas hoy a las 8:30 a. m.</small>
+            </div>
+          </article>
+
+          <article className="ai-impact-side-card">
+            <div className="panel-heading">
+              <div><span><Clock3 aria-hidden="true" />Actividad reciente de AI</span><h2>Últimas señales</h2></div>
+            </div>
+            <div className="ai-activity-list">
+              {aiActivity.map((activity) => {
+                const Icon = activity.icon;
+                return (
+                  <div className="ai-activity-item" data-tone={activity.tone} key={activity.title}>
+                    <span><Icon aria-hidden="true" /></span>
+                    <div><strong>{activity.title}</strong><small>{activity.text}</small></div>
+                    <time>{activity.time}</time>
+                  </div>
+                );
+              })}
+            </div>
+          </article>
         </section>
 
         <section className="setup-summary">
