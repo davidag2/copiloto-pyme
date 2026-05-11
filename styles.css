@@ -5638,6 +5638,7 @@ h2 {
 }
 
 .topbar-range-control,
+.custom-date-range,
 .notification-button,
 .topbar-profile {
   align-items: center;
@@ -5652,6 +5653,11 @@ h2 {
 .topbar-range-control {
   gap: 8px;
   padding: 0 12px;
+}
+
+.custom-date-range {
+  gap: 8px;
+  padding: 5px 8px;
 }
 
 .topbar-range-control svg {
@@ -5671,6 +5677,24 @@ h2 {
   font-weight: 900;
   outline: 0;
   padding: 0;
+}
+
+.custom-date-range input {
+  background: color-mix(in srgb, var(--surface-strong) 72%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 32px;
+  outline: 0;
+  padding: 0 8px;
+}
+
+.custom-date-range input:focus {
+  border-color: color-mix(in srgb, var(--brand-blue) 56%, var(--line));
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .notification-button {

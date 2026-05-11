@@ -74,6 +74,7 @@ type Metrics = {
   criticalStock: number;
 };
 type ThemeMode = "light" | "dark";
+type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
 type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "reportes" | "alertas" | "configuracion";
 type NavItem = { id: DashboardModule; label: string; icon: LucideIcon; sectionId: string };
@@ -235,6 +236,46 @@ function statusClass(status: string) {
   return status === "green" ? "positive" : status === "yellow" ? "warning" : "danger";
 }
 
+function toInputDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function rangeLabel(range: DateRangeMode, customRange: { start: string; end: string }) {
+  if (range === "today") return "Hoy";
+  if (range === "7d") return "Últimos 7 días";
+  if (range === "30d") return "Últimos 30 días";
+  if (range === "month") return "Mes actual";
+  return `${formatShortDate(customRange.start)} - ${formatShortDate(customRange.end)}`;
+}
+
+function formatShortDate(value: string) {
+  if (!value) return "Sin fecha";
+  return new Date(`${value}T00:00:00`).toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+}
+
+function salesForRange(source: SalePoint[], range: DateRangeMode, customRange: { start: string; end: string }) {
+  if (range === "today") return source.slice(-1);
+  if (range === "7d") return source;
+
+  const days = range === "30d" ? 30 : range === "month" ? new Date().getDate() : customDayCount(customRange.start, customRange.end);
+  const labels = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+  return Array.from({ length: Math.max(days, 1) }, (_, index) => {
+    const base = source[index % source.length] ?? source[0];
+    const wave = 0.92 + ((index % 6) * 0.035);
+    return {
+      day: days > 10 ? `${index + 1}` : labels[index % labels.length],
+      value: Number((base.value * wave).toFixed(1))
+    };
+  });
+}
+
+function customDayCount(start: string, end: string) {
+  const startDate = new Date(`${start}T00:00:00`).getTime();
+  const endDate = new Date(`${end}T00:00:00`).getTime();
+  if (!Number.isFinite(startDate) || !Number.isFinite(endDate) || endDate < startDate) return 7;
+  return Math.min(Math.round((endDate - startDate) / 86_400_000) + 1, 60);
+}
+
 export default function Home() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
@@ -301,7 +342,16 @@ export default function Home() {
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
-  const [dateRange, setDateRange] = useState("7d");
+  const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
+  const [customRange, setCustomRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 6);
+    return {
+      start: toInputDate(start),
+      end: toInputDate(end)
+    };
+  });
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
@@ -402,10 +452,12 @@ export default function Home() {
   const userInitials = userDisplayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CP";
   const notificationCount = criticalAlerts.length + openDecisions;
 
-  const bestDay = weeklySales.reduce((best, item) => (item.value > best.value ? item : best), weeklySales[0]);
-  const chartData = weeklySales.map((item, index) => {
+  const selectedSales = useMemo(() => salesForRange(weeklySales, dateRange, customRange), [weeklySales, dateRange, customRange]);
+  const dateRangeLabel = rangeLabel(dateRange, customRange);
+  const bestDay = selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]);
+  const chartData = selectedSales.map((item, index) => {
     const previous = Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
-    const target = Number(((customer.monthlyGoal / 1_000_000) / 7).toFixed(1));
+    const target = Number(((customer.monthlyGoal / 1_000_000) / Math.max(selectedSales.length, 1)).toFixed(1));
     return {
       day: item.day,
       actual: Number(item.value.toFixed(1)),
@@ -414,7 +466,7 @@ export default function Home() {
       variation: Number((((item.value - previous) / previous) * 100).toFixed(1))
     };
   });
-  const weeklyTotal = weeklySales.reduce((total, item) => total + item.value, 0);
+  const weeklyTotal = selectedSales.reduce((total, item) => total + item.value, 0);
   const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
 
@@ -973,14 +1025,31 @@ ${recommendedAction()}`;
           <div className="topbar-actions">
             <label className="topbar-range-control">
               <CalendarDays aria-hidden="true" />
-              <select value={dateRange} onChange={(event) => setDateRange(event.target.value)} aria-label="Rango de fechas">
+              <select value={dateRange} onChange={(event) => setDateRange(event.target.value as DateRangeMode)} aria-label="Rango de fechas">
                 <option value="today">Hoy</option>
                 <option value="7d">Últimos 7 días</option>
                 <option value="30d">Últimos 30 días</option>
                 <option value="month">Mes actual</option>
+                <option value="custom">Personalizado</option>
               </select>
               <ChevronDown aria-hidden="true" />
             </label>
+            {dateRange === "custom" && (
+              <div className="custom-date-range" aria-label="Rango personalizado">
+                <input
+                  aria-label="Fecha inicial"
+                  type="date"
+                  value={customRange.start}
+                  onChange={(event) => setCustomRange((current) => ({ ...current, start: event.target.value }))}
+                />
+                <input
+                  aria-label="Fecha final"
+                  type="date"
+                  value={customRange.end}
+                  onChange={(event) => setCustomRange((current) => ({ ...current, end: event.target.value }))}
+                />
+              </div>
+            )}
             <button className="notification-button" type="button" aria-label={`${notificationCount} notificaciones`}>
               <Bell aria-hidden="true" />
               {notificationCount ? <span>{notificationCount}</span> : null}
@@ -1002,7 +1071,7 @@ ${recommendedAction()}`;
           <div className="summary-status">
             <span><Clock3 aria-hidden="true" />Resumen del dia</span>
             <strong>{overallStatus}</strong>
-            <small>{new Date().toLocaleDateString("es-CO", { weekday: "long", month: "short", day: "numeric" })}</small>
+            <small>{dateRangeLabel}</small>
           </div>
           <div className="summary-main">
             <span><ClipboardCheck aria-hidden="true" />Decision en 10 segundos</span>
@@ -1249,7 +1318,7 @@ ${recommendedAction()}`;
             <div className="trend-metrics">
               <div><span>Total semana</span><strong>{formatMoney(weeklyTotal)}</strong></div>
               <div><span>Mejor dia</span><strong>{bestDay.day}</strong></div>
-              <div><span>Promedio diario</span><strong>{formatMoney(weeklyTotal / weeklySales.length)}</strong></div>
+              <div><span>Promedio diario</span><strong>{formatMoney(weeklyTotal / Math.max(selectedSales.length, 1))}</strong></div>
             </div>
             <div className="trend-chart" aria-label="Grafica de tendencia semanal de ventas">
               <ResponsiveContainer width="100%" height="100%">
