@@ -6926,6 +6926,122 @@ h2 {
   gap: 14px;
 }
 
+.sales-command-header {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.sales-command-header span,
+.sales-action-row span {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.sales-command-header span svg,
+.sales-action-row span svg {
+  color: var(--brand-blue);
+}
+
+.sales-command-header h2 {
+  color: var(--ink);
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.1;
+  margin: 8px 0;
+}
+
+.sales-command-header p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 640px;
+}
+
+.sales-insight-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sales-insight-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.sales-insight-card span {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.sales-insight-card span svg {
+  color: var(--brand-blue);
+  height: 17px;
+  width: 17px;
+}
+
+.sales-insight-card strong {
+  color: var(--ink);
+  font-size: clamp(19px, 2vw, 26px);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.sales-insight-card small {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.sales-insight-card[data-tone="green"] {
+  border-color: rgba(34, 197, 94, 0.24);
+}
+
+.sales-insight-card[data-tone="green"] span svg {
+  color: var(--green);
+}
+
+.sales-insight-card[data-tone="red"] {
+  border-color: rgba(239, 68, 68, 0.24);
+}
+
+.sales-insight-card[data-tone="red"] span svg {
+  color: var(--red);
+}
+
+.sales-insight-card[data-tone="purple"] span svg {
+  color: #6d5dfc;
+}
+
+.sales-action-row {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 14px;
+}
+
+.sales-action-row strong {
+  color: var(--ink);
+  line-height: 1.35;
+}
+
 .panel-heading {
   align-items: center;
   display: flex;
@@ -7647,11 +7763,22 @@ select,
   .ai-category-row,
   .ai-activity-item,
   .ai-automation-actions,
-  .ai-automation-card {
+  .ai-automation-card,
+  .sales-command-header,
+  .sales-insight-grid,
+  .sales-action-row {
     grid-template-columns: 1fr;
   }
 
+  .sales-command-header {
+    display: grid;
+  }
+
   .ai-automation-card .secondary-button {
+    width: 100%;
+  }
+
+  .sales-action-row .secondary-button {
     width: 100%;
   }
 

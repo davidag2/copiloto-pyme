@@ -553,6 +553,30 @@ export default function Home() {
       text: "Ajusta el pronóstico de caja con ingresos reales."
     }
   ];
+  const salesGoalGap = Math.max(0, (customer.monthlyGoal / 1_000_000) - metrics.sales);
+  const salesInsightCards = [
+    {
+      label: "Ritmo de ventas",
+      value: weeklyVariation >= 0 ? `+${weeklyVariation}%` : `${weeklyVariation}%`,
+      text: weeklyVariation >= 0 ? "El periodo actual viene por encima del anterior." : "El periodo actual necesita impulso comercial.",
+      icon: TrendingUp,
+      tone: weeklyVariation >= 0 ? "green" : "red"
+    },
+    {
+      label: "Brecha contra meta",
+      value: formatMoney(salesGoalGap),
+      text: salesGoalGap > 0 ? "Falta para cumplir la meta mensual configurada." : "Meta mensual cubierta con el ritmo actual.",
+      icon: Target,
+      tone: salesGoalGap > 0 ? "blue" : "green"
+    },
+    {
+      label: "Producto líder",
+      value: products[0]?.name ?? "Sin datos",
+      text: `${products[0]?.sales ?? "$0"} vendidos. Vigila inventario antes de impulsar campaña.`,
+      icon: PackageCheck,
+      tone: "purple"
+    }
+  ];
 
   function recommendedAction() {
     if (metrics.criticalStock > rules.stock) return `Reponer los SKU criticos antes de lanzar promociones. Hay ${metrics.criticalStock} SKU en riesgo.`;
@@ -1527,9 +1551,25 @@ ${recommendedAction()}`;
         <section className="content-grid">
           <article id="mobileAlertsAnchor" className="panel alerts-panel priority-panel"><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
           <article id="dashboardVentas" className="panel chart-panel dashboard-module-section">
-            <div className="panel-heading">
-              <div><span><BarChart3 aria-hidden="true" />Ventas recientes</span><h2>Tendencia y comparativo</h2></div>
+            <div className="sales-command-header">
+              <div>
+                <span><BarChart3 aria-hidden="true" />Ventas recientes</span>
+                <h2>Tendencia, meta y oportunidad comercial</h2>
+                <p>Copiloto compara el periodo seleccionado contra la semana anterior y marca dónde actuar para cerrar más ventas.</p>
+              </div>
               <div className="chart-summary"><strong className={weeklyVariation >= 0 ? "positive" : "danger"}>{weeklyVariation >= 0 ? "+" : ""}{weeklyVariation}%</strong><span>vs semana anterior</span></div>
+            </div>
+            <div className="sales-insight-grid">
+              {salesInsightCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <article className="sales-insight-card" data-tone={card.tone} key={card.label}>
+                    <span><Icon aria-hidden="true" />{card.label}</span>
+                    <strong>{card.value}</strong>
+                    <small>{card.text}</small>
+                  </article>
+                );
+              })}
             </div>
             <div className="trend-metrics">
               <div><span>Total semana</span><strong>{formatMoney(weeklyTotal)}</strong></div>
@@ -1550,6 +1590,11 @@ ${recommendedAction()}`;
                   <Line type="monotone" dataKey="actual" name="Actual" stroke="var(--brand-blue)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+            <div className="sales-action-row">
+              <span><Sparkles aria-hidden="true" />Acción recomendada</span>
+              <strong>{salesPercent < rules.sales ? `Impulsar ${products[0]?.name ?? "producto líder"} hoy para recuperar la meta.` : "Mantener seguimiento y preparar campaña sobre el producto líder."}</strong>
+              <button className="secondary-button" type="button" onClick={() => setAnswer(`Ventas: ${formatMoney(weeklyTotal)} en ${dateRangeLabel}. Mejor dia: ${bestDay.day}. ${recommendedAction()}`)}>Generar lectura</button>
             </div>
           </article>
           {visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
