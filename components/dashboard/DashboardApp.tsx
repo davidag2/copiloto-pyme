@@ -112,6 +112,29 @@ type ImportBatch = {
   reversedAt?: string | null;
 };
 type ImportValidation = { errors: Array<{ rowNumber: number; errors: string[]; raw: Record<string, string> }>; sample: Array<Record<string, unknown>> };
+type AiSuggestionRow = {
+  id: string;
+  companyId: string;
+  category: string;
+  priority: "low" | "medium" | "high" | "critical";
+  title: string;
+  description: string;
+  recommendation: string;
+  impactLabel: string;
+  impactValueCop: string | number | null;
+  confidence: string | number;
+  status: "open" | "accepted" | "dismissed" | "converted" | "archived";
+  generatedAt: string;
+};
+type AiSuggestionCard = {
+  id?: string;
+  tone: string;
+  label: string;
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  impact: string;
+};
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -205,6 +228,41 @@ function MiniSparkline({ data, tone }: { data: number[]; tone: string }) {
       <circle cx={points.split(" ").at(-1)?.split(",")[0] ?? width} cy={points.split(" ").at(-1)?.split(",")[1] ?? height / 2} r="3.5" fill="currentColor" />
     </svg>
   );
+}
+
+function suggestionLabel(priority: AiSuggestionRow["priority"]) {
+  if (priority === "critical") return "Prioridad alta";
+  if (priority === "high") return "Oportunidad";
+  if (priority === "medium") return "Atención";
+  return "Seguimiento";
+}
+
+function suggestionTone(priority: AiSuggestionRow["priority"]) {
+  if (priority === "critical") return "high";
+  if (priority === "high") return "opportunity";
+  if (priority === "medium") return "warning";
+  return "neutral";
+}
+
+function suggestionIcon(category: string) {
+  if (category === "inventario") return PackageCheck;
+  if (category === "precios" || category === "ventas") return TrendingUp;
+  if (category === "caja" || category === "costos") return WalletCards;
+  if (category === "integraciones") return Link2;
+  if (category === "reportes") return FileText;
+  return Sparkles;
+}
+
+function mapSuggestionCard(suggestion: AiSuggestionRow): AiSuggestionCard {
+  return {
+    id: suggestion.id,
+    tone: suggestionTone(suggestion.priority),
+    label: suggestionLabel(suggestion.priority),
+    icon: suggestionIcon(suggestion.category),
+    title: suggestion.title,
+    text: suggestion.description,
+    impact: suggestion.impactLabel || suggestion.recommendation
+  };
 }
 
 function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: string; action?: ReactNode }) {
@@ -362,6 +420,8 @@ export default function Home() {
   const [microFeedback, setMicroFeedback] = useState("");
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
+  const [aiSuggestionRows, setAiSuggestionRows] = useState<AiSuggestionRow[]>([]);
+  const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sugerencias demo listas.");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
@@ -427,6 +487,7 @@ export default function Home() {
     if (companyId && authUser) {
       void loadTeam(companyId);
       void loadImportHistory(companyId);
+      void loadAiSuggestions(companyId);
     }
   }, [companyId, authUser]);
 
@@ -490,7 +551,7 @@ export default function Home() {
   const weeklyTotal = selectedSales.reduce((total, item) => total + item.value, 0);
   const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
-  const aiSuggestions = [
+  const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
       label: "Prioridad alta",
@@ -516,6 +577,7 @@ export default function Home() {
       impact: "Revisar compras hoy"
     }
   ];
+  const aiSuggestions = aiSuggestionRows.length ? aiSuggestionRows.slice(0, 3).map(mapSuggestionCard) : fallbackAiSuggestions;
   const aiHomeKpis = [
     { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue", trend: selectedSales.map((item) => item.value), delta: weeklyVariation >= 0 ? `+${weeklyVariation}% vs periodo anterior` : `${weeklyVariation}% vs periodo anterior` },
     { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green", trend: [18, 18.5, 18.1, 19.2, 20.1, 21.4, cashDays(metrics.cash)], delta: "Suficiente para operar" },
@@ -626,6 +688,17 @@ export default function Home() {
     if (!activeCompanyId) return;
     const result = await apiJson<{ batches: ImportBatch[] }>(`/api/imports?companyId=${activeCompanyId}`, { method: "GET" });
     if (result.ok) setImportHistory(result.data.batches);
+  }
+
+  async function loadAiSuggestions(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<{ suggestions: AiSuggestionRow[] }>(`/api/ai-suggestions?companyId=${activeCompanyId}`, { method: "GET" });
+    if (!result.ok) {
+      setAiSuggestionsStatus(`Modo demo local: ${result.error}`);
+      return;
+    }
+    setAiSuggestionRows(result.data.suggestions);
+    setAiSuggestionsStatus(`${result.data.suggestions.length} sugerencia(s) cargadas desde PostgreSQL.`);
   }
 
   function refreshMetrics() {
@@ -1184,9 +1257,10 @@ ${recommendedAction()}`;
             <div className="ai-home-meta">
               <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
               <span data-status={overallStatusTone}>{overallStatus}</span>
+              <span><Database aria-hidden="true" />{aiSuggestionsStatus}</span>
             </div>
-            <button className="primary-button ai-home-action" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>
-              <Sparkles aria-hidden="true" />Ver todas las sugerencias <ArrowRight aria-hidden="true" />
+            <button className="primary-button ai-home-action" type="button" onClick={() => { void loadAiSuggestions(); setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`); }}>
+              <Sparkles aria-hidden="true" />Actualizar sugerencias <ArrowRight aria-hidden="true" />
             </button>
           </div>
           <div className="ai-suggestion-grid">

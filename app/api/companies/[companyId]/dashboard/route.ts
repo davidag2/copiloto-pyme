@@ -11,7 +11,7 @@ export async function GET(request: Request, context: RouteContext) {
     const { companyId } = await context.params;
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const [company, users, latestImports, alertRules, alerts, integrations, decisions, reports] = await Promise.all([
+    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports] = await Promise.all([
       query(`SELECT * FROM companies WHERE id = $1`, [companyId]),
       query(`SELECT id, name, email, role, created_at AS "createdAt" FROM users WHERE company_id = $1 ORDER BY created_at DESC`, [companyId]),
       query(
@@ -26,6 +26,7 @@ export async function GET(request: Request, context: RouteContext) {
       query(`SELECT * FROM alerts WHERE company_id = $1 ORDER BY created_at DESC LIMIT 20`, [companyId]),
       query(`SELECT * FROM integrations WHERE company_id = $1 ORDER BY provider ASC`, [companyId]),
       query(`SELECT * FROM decisions WHERE company_id = $1 ORDER BY decision_date DESC, created_at DESC LIMIT 50`, [companyId]),
+      query(`SELECT * FROM ai_suggestions WHERE company_id = $1 AND status <> 'archived' ORDER BY generated_at DESC LIMIT 20`, [companyId]),
       query(`SELECT * FROM reports WHERE company_id = $1 ORDER BY created_at DESC LIMIT 20`, [companyId])
     ]);
 
@@ -41,6 +42,7 @@ export async function GET(request: Request, context: RouteContext) {
       alerts: alerts.rows,
       integrations: integrations.rows,
       decisions: decisions.rows,
+      aiSuggestions: aiSuggestions.rows,
       reports: reports.rows
     });
   } catch (error) {
