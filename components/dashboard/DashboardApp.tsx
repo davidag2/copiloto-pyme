@@ -31,7 +31,8 @@ import {
   Upload,
   UserCircle,
   Users,
-  WalletCards
+  WalletCards,
+  X
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
@@ -362,6 +363,7 @@ export default function Home() {
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
+  const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
   const [customRange, setCustomRange] = useState(() => {
     const end = new Date();
@@ -536,6 +538,20 @@ export default function Home() {
     { title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
     { title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
     { title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
+  ];
+  const automationActions = [
+    {
+      id: "siigo",
+      icon: FileText,
+      title: "Conecta tu facturación electrónica",
+      text: "Mejora la precisión de ventas, cartera e impuestos."
+    },
+    {
+      id: "mercadopago",
+      icon: Banknote,
+      title: "Sincroniza tus pagos digitales",
+      text: "Ajusta el pronóstico de caja con ingresos reales."
+    }
   ];
 
   function recommendedAction() {
@@ -1255,6 +1271,37 @@ ${recommendedAction()}`;
             </div>
           </article>
         </section>
+
+        {showAutomationStrip && (
+          <section className="ai-automation-strip" aria-label="Acciones para mejorar precision de AI">
+            <div className="ai-automation-intro">
+              <span><Sparkles aria-hidden="true" /></span>
+              <div>
+                <strong>Deja que la IA trabaje para ti</strong>
+                <p>Conecta más datos y Copiloto Pyme generará sugerencias más precisas para ventas, caja e inventario.</p>
+              </div>
+            </div>
+            <div className="ai-automation-actions">
+              {automationActions.map((action) => {
+                const Icon = action.icon;
+                const integration = integrations.find((item) => item.id === action.id);
+                const isConnected = integration?.status === "Conectado";
+                return (
+                  <article className="ai-automation-card" data-connected={isConnected} key={action.id}>
+                    <Icon aria-hidden="true" />
+                    <div><strong>{action.title}</strong><small>{isConnected ? "Conectado y sincronizado" : action.text}</small></div>
+                    <button className="secondary-button micro-button" data-motion={activeIntegrationId === action.id ? "active" : undefined} type="button" onClick={() => connectIntegration(action.id)} disabled={!permissions.canManageIntegrations}>
+                      {isConnected ? "Reconectar" : "Conectar"}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+            <button className="ai-automation-close" type="button" onClick={() => setShowAutomationStrip(false)} aria-label="Ocultar sugerencia de integraciones">
+              <X aria-hidden="true" />
+            </button>
+          </section>
+        )}
 
         <section className="setup-summary">
           <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
