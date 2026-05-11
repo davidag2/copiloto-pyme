@@ -445,7 +445,6 @@ export default function Home() {
       ? "Atencion"
       : "Controlado";
   const overallStatusTone = overallStatus === "Riesgo alto" ? "red" : overallStatus === "Atencion" ? "yellow" : "green";
-  const topAlert = criticalAlerts[0] ?? alerts[0];
   const currentDateLabel = new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const userDisplayName = authUser?.name || customer.ownerName || "Andrés Vélez";
   const userFirstName = userDisplayName.split(" ")[0] || "Equipo";
@@ -469,6 +468,38 @@ export default function Home() {
   const weeklyTotal = selectedSales.reduce((total, item) => total + item.value, 0);
   const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
+  const aiSuggestions = [
+    {
+      tone: "high",
+      label: "Prioridad alta",
+      icon: PackageCheck,
+      title: "Reponer Panela Orgánica",
+      text: "Quedan pocas unidades y las ventas subieron 12% esta semana.",
+      impact: "+ $1.250.000 en ventas"
+    },
+    {
+      tone: "opportunity",
+      label: "Oportunidad",
+      icon: TrendingUp,
+      title: "Aumentar precio en Café Premium",
+      text: "Tu margen está 18% menor que el promedio del mercado.",
+      impact: "+ $890.000 en margen"
+    },
+    {
+      tone: "warning",
+      label: "Atención",
+      icon: AlertTriangle,
+      title: "Stock bajo en 2 productos",
+      text: "Riesgo de quiebre de inventario en los próximos 5 días.",
+      impact: "Revisar compras hoy"
+    }
+  ];
+  const aiHomeKpis = [
+    { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue" },
+    { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green" },
+    { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red" },
+    { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple" }
+  ];
 
   function recommendedAction() {
     if (metrics.criticalStock > rules.stock) return `Reponer los SKU criticos antes de lanzar promociones. Hay ${metrics.criticalStock} SKU en riesgo.`;
@@ -1067,24 +1098,53 @@ ${recommendedAction()}`;
           </div>
         </header>
 
-        <section id="dashboardInicio" className="daily-summary dashboard-module-section" data-status={overallStatusTone} aria-label="Resumen ejecutivo del dia">
-          <div className="summary-status">
-            <span><Clock3 aria-hidden="true" />Resumen del dia</span>
-            <strong>{overallStatus}</strong>
-            <small>{dateRangeLabel}</small>
+        <section id="dashboardInicio" className="ai-home-hero dashboard-module-section" data-status={overallStatusTone} aria-label="Inicio Copiloto AI">
+          <div className="ai-home-copy">
+            <span className="ai-home-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
+            <h2>Tu negocio, mejor cada día.</h2>
+            <strong>Sugerencias inteligentes para hoy</strong>
+            <p>Analizamos ventas, caja e inventario para mostrarte la prioridad del día, el impacto esperado y la acción exacta que debe ejecutar tu equipo.</p>
+            <div className="ai-home-meta">
+              <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
+              <span data-status={overallStatusTone}>{overallStatus}</span>
+            </div>
+            <button className="primary-button ai-home-action" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}>
+              <Sparkles aria-hidden="true" />Ver todas las sugerencias <ArrowRight aria-hidden="true" />
+            </button>
           </div>
-          <div className="summary-main">
-            <span><ClipboardCheck aria-hidden="true" />Decision en 10 segundos</span>
-            <h2>{recommendation}</h2>
-            <p>{topAlert ? topAlert.text : "No hay bloqueos criticos para revisar ahora."}</p>
+          <div className="ai-suggestion-grid">
+            {aiSuggestions.map((suggestion) => {
+              const Icon = suggestion.icon;
+              return (
+                <article className="ai-suggestion-card" data-tone={suggestion.tone} key={suggestion.title}>
+                  <div className="ai-suggestion-top">
+                    <span className="ai-suggestion-icon"><Icon aria-hidden="true" /></span>
+                    <span className="ai-suggestion-label">{suggestion.label}</span>
+                    <ArrowRight aria-hidden="true" />
+                  </div>
+                  <strong>{suggestion.title}</strong>
+                  <p>{suggestion.text}</p>
+                  <small>Impacto estimado</small>
+                  <b>{suggestion.impact}</b>
+                </article>
+              );
+            })}
           </div>
-          <div className="summary-metrics">
-            {visible.sales && <div><span><BarChart3 aria-hidden="true" />Ventas</span><strong>{formatMoney(metrics.sales)}</strong><small>{salesPercent}% meta</small></div>}
-            {visible.cash && <div><span><WalletCards aria-hidden="true" />Caja</span><strong>{cashDays(metrics.cash)} dias</strong><small>{formatMoney(metrics.cash)}</small></div>}
-            <div><span><AlertTriangle aria-hidden="true" />Alertas</span><strong>{criticalAlerts.length}</strong><small>{criticalAlerts.length ? "revisar" : "ok"}</small></div>
-            {visible.decisions && <div><span><ClipboardCheck aria-hidden="true" />Pendientes</span><strong>{openDecisions}</strong><small>acciones</small></div>}
+          <div className="ai-home-kpi-row" aria-label="Datos rápidos de Inicio">
+            {aiHomeKpis.map((item) => {
+              const Icon = item.icon;
+              return (
+                <article className="ai-home-kpi-card" data-tone={item.tone} key={item.label}>
+                  <div>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                    <small>{item.helper}</small>
+                  </div>
+                  <Icon aria-hidden="true" />
+                </article>
+              );
+            })}
           </div>
-          <button className="primary-button summary-action" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Brief</button>
         </section>
 
         <section className="setup-summary">
