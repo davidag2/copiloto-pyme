@@ -6,10 +6,13 @@ import {
   ArrowRight,
   Banknote,
   BarChart3,
+  Bell,
   Boxes,
   Bot,
   Building2,
+  CalendarDays,
   CheckCircle2,
+  ChevronDown,
   ClipboardCheck,
   Clock3,
   Database,
@@ -26,6 +29,7 @@ import {
   Target,
   TrendingUp,
   Upload,
+  UserCircle,
   Users,
   WalletCards
 } from "lucide-react";
@@ -297,6 +301,7 @@ export default function Home() {
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
+  const [dateRange, setDateRange] = useState("7d");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("copiloto-pyme-theme");
@@ -391,6 +396,11 @@ export default function Home() {
       : "Controlado";
   const overallStatusTone = overallStatus === "Riesgo alto" ? "red" : overallStatus === "Atencion" ? "yellow" : "green";
   const topAlert = criticalAlerts[0] ?? alerts[0];
+  const currentDateLabel = new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const userDisplayName = authUser?.name || customer.ownerName || "Andrés Vélez";
+  const userFirstName = userDisplayName.split(" ")[0] || "Equipo";
+  const userInitials = userDisplayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CP";
+  const notificationCount = criticalAlerts.length + openDecisions;
 
   const bestDay = weeklySales.reduce((best, item) => (item.value > best.value ? item : best), weeklySales[0]);
   const chartData = weeklySales.map((item, index) => {
@@ -956,8 +966,30 @@ ${recommendedAction()}`;
 
       <main className="main-panel">
         <header className="topbar">
-          <div><p className="eyebrow">Panel de decisiones en tiempo real</p><h1>Que debe revisar <span>{customer.companyName}</span> hoy</h1></div>
+          <div className="topbar-greeting">
+            <h1>¡Hola, {userFirstName}! <Sparkles aria-hidden="true" /></h1>
+            <p>{currentDateLabel}</p>
+          </div>
           <div className="topbar-actions">
+            <label className="topbar-range-control">
+              <CalendarDays aria-hidden="true" />
+              <select value={dateRange} onChange={(event) => setDateRange(event.target.value)} aria-label="Rango de fechas">
+                <option value="today">Hoy</option>
+                <option value="7d">Últimos 7 días</option>
+                <option value="30d">Últimos 30 días</option>
+                <option value="month">Mes actual</option>
+              </select>
+              <ChevronDown aria-hidden="true" />
+            </label>
+            <button className="notification-button" type="button" aria-label={`${notificationCount} notificaciones`}>
+              <Bell aria-hidden="true" />
+              {notificationCount ? <span>{notificationCount}</span> : null}
+            </button>
+            <button className="topbar-profile" type="button" aria-label="Perfil de usuario">
+              <span>{userInitials}</span>
+              <div><strong>{userDisplayName}</strong><small>{activeRoleLabel}</small></div>
+              <UserCircle aria-hidden="true" />
+            </button>
             <label className="upload-button" aria-disabled={!permissions.canImportData}><input type="file" accept=".csv" disabled={!permissions.canImportData} onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
             <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
             <button className="primary-button" type="button" onClick={refreshMetrics} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
