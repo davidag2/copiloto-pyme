@@ -186,6 +186,26 @@ function SalesTooltip({ active, payload, label }: ChartTooltipProps) {
   );
 }
 
+function MiniSparkline({ data, tone }: { data: number[]; tone: string }) {
+  const width = 112;
+  const height = 42;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const points = data.map((value, index) => {
+    const x = (index / Math.max(data.length - 1, 1)) * width;
+    const y = height - ((value - min) / range) * (height - 8) - 4;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+
+  return (
+    <svg className="mini-sparkline" data-tone={tone} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Tendencia del indicador">
+      <polyline points={points} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+      <circle cx={points.split(" ").at(-1)?.split(",")[0] ?? width} cy={points.split(" ").at(-1)?.split(",")[1] ?? height / 2} r="3.5" fill="currentColor" />
+    </svg>
+  );
+}
+
 function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: string; action?: ReactNode }) {
   return (
     <div className="empty-state">
@@ -495,10 +515,10 @@ export default function Home() {
     }
   ];
   const aiHomeKpis = [
-    { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue" },
-    { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green" },
-    { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red" },
-    { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple" }
+    { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue", trend: selectedSales.map((item) => item.value), delta: weeklyVariation >= 0 ? `+${weeklyVariation}% vs periodo anterior` : `${weeklyVariation}% vs periodo anterior` },
+    { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green", trend: [18, 18.5, 18.1, 19.2, 20.1, 21.4, cashDays(metrics.cash)], delta: "Suficiente para operar" },
+    { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red", trend: [7, 6, 6, 5, 6, 5, metrics.criticalStock], delta: "Comprar antes de quiebre" },
+    { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple", trend: [2, 3, 4, 3, 5, 6, openDecisions + criticalAlerts.length], delta: "Priorizadas por IA" }
   ];
 
   function recommendedAction() {
@@ -1139,8 +1159,10 @@ ${recommendedAction()}`;
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
                     <small>{item.helper}</small>
+                    <em>{item.delta}</em>
                   </div>
                   <Icon aria-hidden="true" />
+                  <MiniSparkline data={item.trend} tone={item.tone} />
                 </article>
               );
             })}
