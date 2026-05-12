@@ -612,17 +612,22 @@ export default function Home() {
   const aiImpactCategories = aiSuggestionRows.length
     ? (["inventario", "precios", "ventas", "caja"] as const).map((category) => {
       const rows = aiSuggestionRows.filter((suggestion) => suggestion.category === category);
+      const impactTotal = rows.reduce((total, suggestion) => {
+        const value = Number(suggestion.impactValueCop || 0);
+        return total + (Number.isFinite(value) ? value : 0);
+      }, 0);
       const tone = category === "inventario" ? "red" : category === "precios" ? "green" : category === "ventas" ? "blue" : "purple";
       const icon = category === "inventario" ? PackageCheck : category === "precios" ? TrendingUp : category === "ventas" ? BarChart3 : WalletCards;
       const label = category === "inventario" ? "Inventario" : category === "precios" ? "Precios" : category === "ventas" ? "Ventas" : "Caja";
-      return { label, count: rows.length, tag: rows[0]?.impactLabel || "Sin impacto activo", icon, tone };
+      return { label, count: rows.length, tag: rows[0]?.impactLabel || "Sin impacto activo", impactTotal, firstSuggestionId: rows[0]?.id, icon, tone };
     }).filter((category) => category.count > 0)
     : [
-      { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", icon: PackageCheck, tone: "red" },
-      { label: "Precios", count: 2, tag: "Oportunidad", icon: TrendingUp, tone: "green" },
-      { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", icon: BarChart3, tone: "blue" },
-      { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", icon: WalletCards, tone: "purple" }
+      { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", impactTotal: Math.round(fallbackAiImpactLift * 0.34), firstSuggestionId: "", icon: PackageCheck, tone: "red" },
+      { label: "Precios", count: 2, tag: "Oportunidad", impactTotal: Math.round(fallbackAiImpactLift * 0.24), firstSuggestionId: "", icon: TrendingUp, tone: "green" },
+      { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", impactTotal: Math.round(fallbackAiImpactLift * 0.3), firstSuggestionId: "", icon: BarChart3, tone: "blue" },
+      { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", impactTotal: Math.round(fallbackAiImpactLift * 0.12), firstSuggestionId: "", icon: WalletCards, tone: "purple" }
     ];
+  const aiCategoryMaxImpact = Math.max(...aiImpactCategories.map((category) => category.impactTotal), 1);
   const aiActivity = [
     { title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
     { title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
@@ -1374,14 +1379,29 @@ ${recommendedAction()}`;
               <div><span><Target aria-hidden="true" />Sugerencias por categoría</span><h2>Prioriza dónde actuar</h2></div>
               <button className="ghost-button" type="button" onClick={() => setAnswer(`Sugerencias por categoria: ${aiImpactCategories.map((category) => `${category.label} ${category.count}`).join(", ")}.`)}>Ver todas</button>
             </div>
-            <div className="ai-category-list">
+            <div className="ai-category-panel-summary">
+              <strong>{aiImpactCategories.reduce((total, item) => total + item.count, 0)}</strong>
+              <span>categorías con sugerencias activas</span>
+              <small>{aiSuggestionRows.length ? "Datos desde PostgreSQL" : "Vista demo sin datos cargados"}</small>
+            </div>
+            <div className="ai-category-list" aria-label="Sugerencias agrupadas por categoría">
               {aiImpactCategories.map((category) => {
                 const Icon = category.icon;
                 return (
                   <div className="ai-category-row" data-tone={category.tone} key={category.label}>
-                    <span><Icon aria-hidden="true" />{category.label}</span>
-                    <strong>{category.count}</strong>
-                    <em>{category.tag}</em>
+                    <div className="ai-category-main">
+                      <span><Icon aria-hidden="true" />{category.label}</span>
+                      <strong>{category.count} sugerencia(s)</strong>
+                      <small>{category.tag}</small>
+                    </div>
+                    <div className="ai-category-impact">
+                      <strong>{formatCopCompact(category.impactTotal)}</strong>
+                      <em>impacto</em>
+                    </div>
+                    <div className="ai-category-progress" aria-hidden="true">
+                      <span style={{ width: `${Math.max(8, (category.impactTotal / aiCategoryMaxImpact) * 100)}%` }} />
+                    </div>
+                    {category.firstSuggestionId ? <a href={`/dashboard/suggestions/${category.firstSuggestionId}`}>Abrir</a> : null}
                   </div>
                 );
               })}
