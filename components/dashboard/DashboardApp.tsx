@@ -123,7 +123,7 @@ type AiSuggestionRow = {
   impactLabel: string;
   impactValueCop: string | number | null;
   confidence: string | number;
-  status: "open" | "accepted" | "dismissed" | "converted" | "archived";
+  status: "nueva" | "vista" | "asignada" | "en_progreso" | "aplicada" | "descartada";
   generatedAt: string;
 };
 type AiSuggestionCard = {

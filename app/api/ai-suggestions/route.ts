@@ -54,7 +54,7 @@ async function getSuggestions(companyId: string) {
             generated_at AS "generatedAt"
      FROM ai_suggestions
      WHERE company_id = $1
-       AND status <> 'archived'
+       AND status <> 'descartada'
      ORDER BY
        CASE priority
          WHEN 'critical' THEN 1
@@ -153,10 +153,11 @@ export async function POST(request: Request) {
          impact_label,
          impact_value_cop,
          confidence,
+         status,
          evidence,
          metadata
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb)
        RETURNING *`,
       [
         companyId,
@@ -168,6 +169,7 @@ export async function POST(request: Request) {
         body.impactLabel || "",
         body.impactValueCop || null,
         body.confidence || 0,
+        body.status || "nueva",
         JSON.stringify(body.evidence || {}),
         JSON.stringify(body.metadata || {})
       ]

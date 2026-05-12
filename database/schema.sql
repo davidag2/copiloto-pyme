@@ -343,7 +343,7 @@ CREATE TABLE IF NOT EXISTS ai_suggestions (
   impact_label TEXT NOT NULL DEFAULT '',
   impact_value_cop NUMERIC(14, 2),
   confidence NUMERIC(5, 2) NOT NULL DEFAULT 0 CHECK (confidence >= 0 AND confidence <= 100),
-  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'accepted', 'dismissed', 'converted', 'archived')),
+  status TEXT NOT NULL DEFAULT 'nueva' CHECK (status IN ('nueva', 'vista', 'asignada', 'en_progreso', 'aplicada', 'descartada')),
   evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
   metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
   suggested_for_date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -353,6 +353,19 @@ CREATE TABLE IF NOT EXISTS ai_suggestions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE ai_suggestions ALTER COLUMN status SET DEFAULT 'nueva';
+ALTER TABLE ai_suggestions DROP CONSTRAINT IF EXISTS ai_suggestions_status_check;
+UPDATE ai_suggestions SET status = CASE status
+  WHEN 'open' THEN 'nueva'
+  WHEN 'accepted' THEN 'aplicada'
+  WHEN 'dismissed' THEN 'descartada'
+  WHEN 'converted' THEN 'asignada'
+  WHEN 'archived' THEN 'descartada'
+  ELSE status
+END;
+ALTER TABLE ai_suggestions ADD CONSTRAINT ai_suggestions_status_check
+  CHECK (status IN ('nueva', 'vista', 'asignada', 'en_progreso', 'aplicada', 'descartada'));
 
 CREATE TABLE IF NOT EXISTS reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
