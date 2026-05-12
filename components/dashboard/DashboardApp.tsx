@@ -1277,6 +1277,7 @@ ${recommendedAction()}`;
                   <p>{suggestion.text}</p>
                   <small>Impacto estimado</small>
                   <b>{suggestion.impact}</b>
+                  {suggestion.id ? <a className="ai-suggestion-detail-link" href={`/dashboard/suggestions/${suggestion.id}`}>Ver detalle</a> : null}
                 </article>
               );
             })}
