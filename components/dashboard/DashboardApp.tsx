@@ -175,6 +175,15 @@ type AiActivityItem = {
   tone: string;
   href?: string;
 };
+type SmartAction = {
+  id: string;
+  kind: "integration" | "future" | "dismiss";
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  buttonLabel: string;
+  featured?: boolean;
+};
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -395,6 +404,7 @@ const initialIntegrations: Integration[] = [
   { id: "sheets", name: "Google Sheets", category: "Hojas de calculo", status: "Disponible", sync: "Manual" },
   { id: "siigo", name: "Siigo", category: "Facturacion y contabilidad", status: "Disponible", sync: "Cada 6 horas" },
   { id: "alegra", name: "Alegra", category: "Facturacion y contabilidad", status: "Disponible", sync: "Cada 6 horas" },
+  { id: "banking", name: "Conexion bancaria", category: "Banca y caja", status: "Disponible", sync: "Proximamente" },
   { id: "mercadopago", name: "Mercado Pago", category: "Pagos", status: "Disponible", sync: "Cada hora" },
   { id: "shopify", name: "Shopify", category: "Ecommerce", status: "Disponible", sync: "Cada hora" },
   { id: "woocommerce", name: "WooCommerce", category: "Ecommerce", status: "Disponible", sync: "Cada hora" }
@@ -772,18 +782,31 @@ export default function Home() {
     { id: "demo-alert", title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
   ];
   const aiActivity = activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity;
-  const automationActions = [
+  const automationActions: SmartAction[] = [
     {
       id: "siigo",
+      kind: "integration",
       icon: FileText,
       title: "Conecta tu facturación electrónica",
-      text: "Mejora la precisión de ventas, cartera e impuestos."
+      text: "Acción destacada: conecta SIIGO para traer ventas, facturas, cartera e impuestos al resumen diario.",
+      buttonLabel: "Conectar SIIGO",
+      featured: true
     },
     {
-      id: "mercadopago",
+      id: "banking",
+      kind: "future",
       icon: Banknote,
-      title: "Sincroniza tus pagos digitales",
-      text: "Ajusta el pronóstico de caja con ingresos reales."
+      title: "Sincroniza tu banco",
+      text: "Módulo futuro para conectar movimientos bancarios y mejorar la proyección de caja.",
+      buttonLabel: "Próximamente"
+    },
+    {
+      id: "dismiss-suggestion",
+      kind: "dismiss",
+      icon: X,
+      title: "Cerrar esta sugerencia",
+      text: "Oculta esta barra cuando el equipo ya tenga claro el siguiente paso.",
+      buttonLabel: "Cerrar"
     }
   ];
   const salesGoalGap = Math.max(0, (customer.monthlyGoal / 1_000_000) - metrics.sales);
@@ -1088,6 +1111,12 @@ export default function Home() {
   async function connectIntegration(id: string) {
     const selected = integrations.find((integration) => integration.id === id);
     if (!selected) return;
+    if (id === "banking") {
+      setActiveIntegrationId(id);
+      triggerMicroInteraction("integration", "Conexión bancaria marcada como integración futura.");
+      setRecommendation("La conexión bancaria queda en cola de producto. Servirá para proyectar caja con movimientos reales.");
+      return;
+    }
     setActiveIntegrationId(id);
     triggerMicroInteraction("integration", `Conectando ${selected.name}...`);
     setIntegrations((current) => current.map((integration) => (integration.id === id ? { ...integration, status: "Conectado", sync: "Sincronizado ahora" } : integration)));
@@ -1134,6 +1163,12 @@ export default function Home() {
     }
     triggerMicroInteraction("sync", `${connected.length} fuente(s) actualizadas.`);
     setRecommendation(`${connected.length} integracion(es) sincronizadas. Revisa alertas y decisiones sugeridas.`);
+  }
+
+  function dismissSmartSuggestion() {
+    setShowAutomationStrip(false);
+    triggerMicroInteraction("decision", "Sugerencia cerrada. Puedes seguir trabajando en el dashboard.");
+    setRecommendation("Barra de acciones inteligentes cerrada. SIIGO y banco siguen disponibles en Integraciones.");
   }
 
   async function addDecision(event: FormEvent<HTMLFormElement>) {
@@ -1664,12 +1699,12 @@ ${recommendedAction()}`;
         </section>
 
         {showAutomationStrip && (
-          <section className="ai-automation-strip" aria-label="Acciones para mejorar precision de AI">
+          <section className="ai-automation-strip smart-actions-bar" aria-label="Acciones inteligentes del dashboard">
             <div className="ai-automation-intro">
               <span><Sparkles aria-hidden="true" /></span>
               <div>
-                <strong>Deja que la IA trabaje para ti</strong>
-                <p>Conecta más datos y Copiloto Pyme generará sugerencias más precisas para ventas, caja e inventario.</p>
+                <strong>Acciones inteligentes</strong>
+                <p>Conecta datos clave, mejora la lectura diaria y cierra esta sugerencia cuando ya no la necesites.</p>
               </div>
             </div>
             <div className="ai-automation-actions">
@@ -1677,12 +1712,23 @@ ${recommendedAction()}`;
                 const Icon = action.icon;
                 const integration = integrations.find((item) => item.id === action.id);
                 const isConnected = integration?.status === "Conectado";
+                const isFuture = action.kind === "future";
+                const isDismiss = action.kind === "dismiss";
                 return (
-                  <article className="ai-automation-card" data-connected={isConnected} key={action.id}>
+                  <article className="ai-automation-card" data-connected={isConnected} data-featured={action.featured} data-future={isFuture} key={action.id}>
                     <Icon aria-hidden="true" />
                     <div><strong>{action.title}</strong><small>{isConnected ? "Conectado y sincronizado" : action.text}</small></div>
-                    <button className="secondary-button micro-button" data-motion={activeIntegrationId === action.id ? "active" : undefined} type="button" onClick={() => connectIntegration(action.id)} disabled={!permissions.canManageIntegrations}>
-                      {isConnected ? "Reconectar" : "Conectar"}
+                    <button
+                      className={action.featured ? "primary-button micro-button" : "secondary-button micro-button"}
+                      data-motion={activeIntegrationId === action.id ? "active" : undefined}
+                      type="button"
+                      onClick={() => {
+                        if (isDismiss) dismissSmartSuggestion();
+                        else void connectIntegration(action.id);
+                      }}
+                      disabled={isFuture || (!isDismiss && !permissions.canManageIntegrations)}
+                    >
+                      {isConnected ? "Reconectar" : action.buttonLabel}
                     </button>
                   </article>
                 );
@@ -1798,9 +1844,9 @@ ${recommendedAction()}`;
             )}
             <div className="integrations-grid">
               {integrations.map((integration) => (
-                <article className="integration-card" data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
+                <article className="integration-card" data-future={integration.id === "banking"} data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
                   <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
-                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)} disabled={!permissions.canManageIntegrations}>{integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
+                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)} disabled={integration.id === "banking" || !permissions.canManageIntegrations}>{integration.id === "banking" ? "Próximamente" : integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
                 </article>
               ))}
             </div>
