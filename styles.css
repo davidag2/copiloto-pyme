@@ -6462,11 +6462,10 @@ h2 {
 .ai-impact-summary {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .ai-impact-summary div {
-  align-items: center;
   background: var(--surface-strong);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -6475,16 +6474,70 @@ h2 {
   padding: 14px;
 }
 
+.ai-impact-summary div > svg {
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+  color: var(--brand-blue);
+  height: 36px;
+  margin-bottom: 4px;
+  padding: 9px;
+  width: 36px;
+}
+
+.ai-impact-summary div[data-tone="green"] > svg {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.ai-impact-summary div[data-tone="purple"] > svg {
+  background: rgba(109, 93, 252, 0.12);
+  color: #6d5dfc;
+}
+
+.ai-impact-summary div[data-tone="red"] > svg {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--red);
+}
+
 .ai-impact-summary strong {
   color: var(--ink);
-  font-size: clamp(22px, 2.3vw, 34px);
+  font-size: clamp(18px, 1.8vw, 28px);
   line-height: 1;
 }
 
-.ai-impact-summary span {
+.ai-impact-summary span,
+.ai-impact-summary small {
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
+}
+
+.ai-impact-summary small {
+  font-size: 12px;
+}
+
+.ai-impact-total {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.09), rgba(34, 197, 94, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 16px;
+  display: grid;
+  gap: 4px 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 14px;
+}
+
+.ai-impact-total span,
+.ai-impact-total small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ai-impact-total strong {
+  color: var(--ink);
+  font-size: clamp(22px, 2.2vw, 34px);
+  grid-row: span 2;
 }
 
 .ai-impact-chart {

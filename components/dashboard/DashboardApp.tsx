@@ -306,6 +306,11 @@ const initialIntegrations: Integration[] = [
 const formatMoney = (value: number) => `$${value.toFixed(1)}M`;
 const formatGoal = (value: number) => `$${(value / 1_000_000).toFixed(1)}M`;
 const cashDays = (cash: number) => Math.round(cash / 1.55);
+const formatCopCompact = (value: number) => {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
+  return `$${Math.round(value)}`;
+};
 
 function statusForSales(sales: number, goal: number) {
   const percent = goal ? (sales / (goal / 1_000_000)) * 100 : 0;
@@ -590,13 +595,34 @@ export default function Home() {
     actual: item.actual,
     withAi: Number((item.actual * (1.08 + index * 0.012)).toFixed(1))
   }));
-  const aiImpactLift = Math.max(0, Math.round((aiImpactData.reduce((total, item) => total + item.withAi, 0) - weeklyTotal) * 1_000_000));
-  const aiImpactCategories = [
-    { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", icon: PackageCheck, tone: "red" },
-    { label: "Precios", count: 2, tag: "Oportunidad", icon: TrendingUp, tone: "green" },
-    { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", icon: BarChart3, tone: "blue" },
-    { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", icon: WalletCards, tone: "purple" }
+  const fallbackAiImpactLift = Math.max(0, Math.round((aiImpactData.reduce((total, item) => total + item.withAi, 0) - weeklyTotal) * 1_000_000));
+  const impactValueByType = aiSuggestionRows.reduce<Record<AiSuggestionRow["impactType"], number>>((totals, suggestion) => {
+    const value = Number(suggestion.impactValueCop || 0);
+    totals[suggestion.impactType] += Number.isFinite(value) ? value : 0;
+    return totals;
+  }, { ventas_adicionales: 0, margen: 0, ahorro: 0, riesgo_evitado: 0 });
+  const totalRealAiImpact = Object.values(impactValueByType).reduce((total, value) => total + value, 0);
+  const aiImpactLift = totalRealAiImpact || fallbackAiImpactLift;
+  const aiImpactSummaryCards = [
+    { type: "ventas_adicionales" as const, label: "Ventas adicionales", value: impactValueByType.ventas_adicionales || fallbackAiImpactLift, helper: "ingreso potencial", icon: BarChart3, tone: "blue" },
+    { type: "margen" as const, label: "Margen", value: impactValueByType.margen, helper: "mejora por precios", icon: TrendingUp, tone: "green" },
+    { type: "ahorro" as const, label: "Ahorro", value: impactValueByType.ahorro, helper: "costos evitables", icon: WalletCards, tone: "purple" },
+    { type: "riesgo_evitado" as const, label: "Riesgo evitado", value: impactValueByType.riesgo_evitado, helper: "inventario y caja", icon: ShieldCheck, tone: "red" }
   ];
+  const aiImpactCategories = aiSuggestionRows.length
+    ? (["inventario", "precios", "ventas", "caja"] as const).map((category) => {
+      const rows = aiSuggestionRows.filter((suggestion) => suggestion.category === category);
+      const tone = category === "inventario" ? "red" : category === "precios" ? "green" : category === "ventas" ? "blue" : "purple";
+      const icon = category === "inventario" ? PackageCheck : category === "precios" ? TrendingUp : category === "ventas" ? BarChart3 : WalletCards;
+      const label = category === "inventario" ? "Inventario" : category === "precios" ? "Precios" : category === "ventas" ? "Ventas" : "Caja";
+      return { label, count: rows.length, tag: rows[0]?.impactLabel || "Sin impacto activo", icon, tone };
+    }).filter((category) => category.count > 0)
+    : [
+      { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", icon: PackageCheck, tone: "red" },
+      { label: "Precios", count: 2, tag: "Oportunidad", icon: TrendingUp, tone: "green" },
+      { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", icon: BarChart3, tone: "blue" },
+      { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", icon: WalletCards, tone: "purple" }
+    ];
   const aiActivity = [
     { title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
     { title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
@@ -1311,8 +1337,22 @@ ${recommendedAction()}`;
               </div>
             </div>
             <div className="ai-impact-summary">
-              <div><strong>+ {formatMoney(aiImpactLift / 1_000_000)}</strong><span>en ventas adicionales</span></div>
-              <div><strong>+ 23%</strong><span>mejora estimada en margen</span></div>
+              {aiImpactSummaryCards.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div data-tone={item.tone} key={item.type}>
+                    <Icon aria-hidden="true" />
+                    <strong>{item.value ? formatCopCompact(item.value) : "$0"}</strong>
+                    <span>{item.label}</span>
+                    <small>{item.helper}</small>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="ai-impact-total">
+              <span>Impacto total estimado</span>
+              <strong>{formatCopCompact(aiImpactLift)}</strong>
+              <small>{aiSuggestionRows.length ? "Calculado desde PostgreSQL" : "Estimado demo hasta conectar datos"}</small>
             </div>
             <div className="ai-impact-chart">
               <ResponsiveContainer width="100%" height="100%">
