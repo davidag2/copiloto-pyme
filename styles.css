@@ -410,6 +410,17 @@ select:focus-visible {
   color: var(--ink);
 }
 
+.compact-button {
+  font-size: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+}
+
+.compact-button svg {
+  height: 14px;
+  width: 14px;
+}
+
 .ghost-button {
   background: transparent;
   color: var(--ink);
@@ -6747,6 +6758,11 @@ h2 {
   color: var(--green);
 }
 
+.ai-activity-item[data-tone="warning"] > span {
+  background: rgba(245, 158, 11, 0.13);
+  color: var(--amber);
+}
+
 .ai-activity-item[data-tone="red"] > span {
   background: rgba(239, 68, 68, 0.11);
   color: var(--red);
@@ -6773,6 +6789,31 @@ h2 {
 .ai-activity-item time {
   text-align: right;
   white-space: nowrap;
+}
+
+.ai-activity-meta {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-activity-meta a {
+  color: var(--brand-blue);
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.ai-activity-meta a:hover {
+  text-decoration: underline;
+}
+
+.ai-activity-status {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin: 10px 0 0;
 }
 
 .ai-automation-strip {

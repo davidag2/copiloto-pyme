@@ -127,6 +127,21 @@ type AiSuggestionRow = {
   status: "nueva" | "vista" | "asignada" | "en_progreso" | "aplicada" | "descartada";
   generatedAt: string;
 };
+type ActivityEventRow = {
+  id: string;
+  companyId: string;
+  actorUserId: string | null;
+  actorName?: string | null;
+  eventType: string;
+  entityType: string;
+  entityId: string | null;
+  title: string;
+  description: string;
+  severity: "info" | "success" | "warning" | "danger";
+  metadata: Record<string, unknown> | null;
+  occurredAt: string;
+  createdAt: string;
+};
 type AiSuggestionCard = {
   id?: string;
   tone: string;
@@ -135,6 +150,15 @@ type AiSuggestionCard = {
   title: string;
   text: string;
   impact: string;
+};
+type AiActivityItem = {
+  id: string;
+  title: string;
+  text: string;
+  time: string;
+  icon: LucideIcon;
+  tone: string;
+  href?: string;
 };
 type ChartTooltipProps = {
   active?: boolean;
@@ -263,6 +287,46 @@ function mapSuggestionCard(suggestion: AiSuggestionRow): AiSuggestionCard {
     title: suggestion.title,
     text: suggestion.description,
     impact: suggestion.impactLabel || suggestion.recommendation
+  };
+}
+
+function activityIcon(eventType: string, severity: ActivityEventRow["severity"]) {
+  if (eventType.startsWith("ai_suggestion")) return Sparkles;
+  if (eventType.startsWith("alert") || severity === "danger" || severity === "warning") return AlertTriangle;
+  if (eventType.startsWith("integration")) return Link2;
+  if (eventType.startsWith("report")) return FileText;
+  if (eventType.startsWith("payment")) return WalletCards;
+  if (eventType.startsWith("user")) return Users;
+  if (eventType.startsWith("onboarding")) return CheckCircle2;
+  return Clock3;
+}
+
+function activityTone(severity: ActivityEventRow["severity"]) {
+  if (severity === "success") return "green";
+  if (severity === "warning") return "warning";
+  if (severity === "danger") return "red";
+  return "purple";
+}
+
+function formatActivityTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Ahora";
+  const today = new Date();
+  const sameDay = date.toDateString() === today.toDateString();
+  return date.toLocaleString("es-CO", sameDay
+    ? { hour: "numeric", minute: "2-digit" }
+    : { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+}
+
+function mapActivityEvent(event: ActivityEventRow): AiActivityItem {
+  return {
+    id: event.id,
+    title: event.title,
+    text: event.description || event.eventType.replaceAll("_", " "),
+    time: formatActivityTime(event.occurredAt),
+    icon: activityIcon(event.eventType, event.severity),
+    tone: activityTone(event.severity),
+    href: event.entityType === "ai_suggestions" && event.entityId ? `/dashboard/suggestions/${event.entityId}` : undefined
   };
 }
 
@@ -428,6 +492,8 @@ export default function Home() {
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [aiSuggestionRows, setAiSuggestionRows] = useState<AiSuggestionRow[]>([]);
   const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sugerencias demo listas.");
+  const [activityRows, setActivityRows] = useState<ActivityEventRow[]>([]);
+  const [activityStatus, setActivityStatus] = useState("Actividad demo lista.");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
@@ -494,6 +560,7 @@ export default function Home() {
       void loadTeam(companyId);
       void loadImportHistory(companyId);
       void loadAiSuggestions(companyId);
+      void loadActivity(companyId);
     }
   }, [companyId, authUser]);
 
@@ -628,11 +695,12 @@ export default function Home() {
       { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", impactTotal: Math.round(fallbackAiImpactLift * 0.12), firstSuggestionId: "", icon: WalletCards, tone: "purple" }
     ];
   const aiCategoryMaxImpact = Math.max(...aiImpactCategories.map((category) => category.impactTotal), 1);
-  const aiActivity = [
-    { title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
-    { title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
-    { title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
+  const fallbackAiActivity: AiActivityItem[] = [
+    { id: "demo-suggestion", title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
+    { id: "demo-opportunity", title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
+    { id: "demo-alert", title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
   ];
+  const aiActivity = activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity;
   const automationActions = [
     {
       id: "siigo",
@@ -731,6 +799,19 @@ export default function Home() {
     }
     setAiSuggestionRows(result.data.suggestions);
     setAiSuggestionsStatus(`${result.data.suggestions.length} sugerencia(s) cargadas desde PostgreSQL.`);
+  }
+
+  async function loadActivity(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<{ activity: ActivityEventRow[] }>(`/api/activity?companyId=${activeCompanyId}&limit=6`, { method: "GET" });
+    if (!result.ok) {
+      setActivityStatus(`Modo demo local: ${result.error}`);
+      return;
+    }
+    setActivityRows(result.data.activity);
+    setActivityStatus(result.data.activity.length
+      ? `${result.data.activity.length} evento(s) cargados desde PostgreSQL.`
+      : "Sin eventos reales todavía. Mostrando ejemplo de actividad AI.");
   }
 
   function refreshMetrics() {
@@ -1416,19 +1497,26 @@ ${recommendedAction()}`;
           <article className="ai-impact-side-card">
             <div className="panel-heading">
               <div><span><Clock3 aria-hidden="true" />Actividad reciente de AI</span><h2>Últimas señales</h2></div>
+              <button className="secondary-button compact-button" type="button" onClick={() => { void loadActivity(); }}>
+                <RefreshCw aria-hidden="true" />Actualizar
+              </button>
             </div>
             <div className="ai-activity-list">
               {aiActivity.map((activity) => {
                 const Icon = activity.icon;
                 return (
-                  <div className="ai-activity-item" data-tone={activity.tone} key={activity.title}>
+                  <div className="ai-activity-item" data-tone={activity.tone} key={activity.id}>
                     <span><Icon aria-hidden="true" /></span>
                     <div><strong>{activity.title}</strong><small>{activity.text}</small></div>
-                    <time>{activity.time}</time>
+                    <div className="ai-activity-meta">
+                      <time>{activity.time}</time>
+                      {activity.href ? <a href={activity.href}>Ver</a> : null}
+                    </div>
                   </div>
                 );
               })}
             </div>
+            <p className="ai-activity-status">{activityStatus}</p>
           </article>
         </section>
 
