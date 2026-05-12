@@ -692,7 +692,7 @@ export default function Home() {
 
   async function loadAiSuggestions(activeCompanyId = companyId) {
     if (!activeCompanyId) return;
-    const result = await apiJson<{ suggestions: AiSuggestionRow[] }>(`/api/ai-suggestions?companyId=${activeCompanyId}`, { method: "GET" });
+    const result = await apiJson<{ suggestions: AiSuggestionRow[] }>(`/api/ai/suggestions?companyId=${activeCompanyId}`, { method: "GET" });
     if (!result.ok) {
       setAiSuggestionsStatus(`Modo demo local: ${result.error}`);
       return;
