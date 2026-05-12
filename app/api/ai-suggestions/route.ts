@@ -1,4 +1,5 @@
 import { fail, ok, requiredString } from "@/lib/api";
+import { calculateSuggestionImpact } from "@/lib/ai-impact";
 import { query } from "@/lib/db";
 import { requireCompanySession } from "@/lib/session";
 
@@ -44,6 +45,7 @@ async function getSuggestions(companyId: string) {
             title,
             description,
             recommendation,
+            impact_type AS "impactType",
             impact_label AS "impactLabel",
             impact_value_cop AS "impactValueCop",
             confidence,
@@ -80,8 +82,10 @@ async function seedDefaultSuggestions(companyId: string) {
 
   if (existing.rows.length) return;
 
-  await Promise.all(defaultSuggestions.map((suggestion) => query(
-    `INSERT INTO ai_suggestions (
+  await Promise.all(defaultSuggestions.map(async (suggestion) => {
+    const impact = await calculateSuggestionImpact(companyId, suggestion.category, suggestion.priority);
+    return query(
+      `INSERT INTO ai_suggestions (
        company_id,
        source,
        category,
@@ -89,27 +93,64 @@ async function seedDefaultSuggestions(companyId: string) {
        title,
        description,
        recommendation,
+       impact_type,
        impact_label,
        impact_value_cop,
        confidence,
        evidence,
        metadata
      )
-     VALUES ($1, 'copiloto_ai_demo_seed', $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb)`,
-    [
-      companyId,
-      suggestion.category,
-      suggestion.priority,
-      suggestion.title,
-      suggestion.description,
-      suggestion.recommendation,
-      suggestion.impactLabel,
-      suggestion.impactValueCop,
-      suggestion.confidence,
-      JSON.stringify({ generatedFrom: ["sales", "cash", "inventory"] }),
-      JSON.stringify({ seed: true, version: 1 })
-    ]
-  )));
+     VALUES ($1, 'copiloto_ai_demo_seed', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb)`,
+      [
+        companyId,
+        suggestion.category,
+        suggestion.priority,
+        suggestion.title,
+        suggestion.description,
+        suggestion.recommendation,
+        impact.impactType,
+        impact.impactLabel || suggestion.impactLabel,
+        impact.impactValueCop || suggestion.impactValueCop,
+        suggestion.confidence,
+        JSON.stringify({ generatedFrom: ["sales", "cash", "inventory"], impact: impact.evidence }),
+        JSON.stringify({ seed: true, version: 2 })
+      ]
+    );
+  }));
+}
+
+async function refreshSuggestionImpacts(companyId: string) {
+  const suggestions = await query<{ id: string; category: string; priority: string }>(
+    `SELECT id, category, priority
+     FROM ai_suggestions
+     WHERE company_id = $1
+       AND status <> 'descartada'
+     ORDER BY generated_at DESC
+     LIMIT 20`,
+    [companyId]
+  );
+
+  await Promise.all(suggestions.rows.map(async (suggestion) => {
+    const impact = await calculateSuggestionImpact(companyId, suggestion.category, suggestion.priority);
+    return query(
+      `UPDATE ai_suggestions
+       SET impact_type = $2,
+           impact_label = $3,
+           impact_value_cop = $4,
+           evidence = evidence || $5::jsonb,
+           updated_at = NOW()
+       WHERE id = $1
+         AND company_id = $6`,
+      [
+        suggestion.id,
+        impact.impactType,
+        impact.impactLabel,
+        impact.impactValueCop,
+        JSON.stringify({ impact: impact.evidence }),
+        companyId
+      ]
+    );
+  }));
 }
 
 export async function GET(request: Request) {
@@ -122,8 +163,9 @@ export async function GET(request: Request) {
     let suggestions = await getSuggestions(companyId);
     if (!suggestions.rows.length) {
       await seedDefaultSuggestions(companyId);
-      suggestions = await getSuggestions(companyId);
     }
+    await refreshSuggestionImpacts(companyId);
+    suggestions = await getSuggestions(companyId);
 
     return ok({ suggestions: suggestions.rows });
   } catch (error) {
@@ -141,6 +183,9 @@ export async function POST(request: Request) {
     const title = requiredString(body.title, "title");
     const description = requiredString(body.description, "description");
     const recommendation = requiredString(body.recommendation, "recommendation");
+    const category = body.category || "general";
+    const priority = body.priority || "medium";
+    const impact = await calculateSuggestionImpact(companyId, category, priority);
 
     const suggestion = await query(
       `INSERT INTO ai_suggestions (
@@ -150,6 +195,7 @@ export async function POST(request: Request) {
          title,
          description,
          recommendation,
+         impact_type,
          impact_label,
          impact_value_cop,
          confidence,
@@ -157,20 +203,21 @@ export async function POST(request: Request) {
          evidence,
          metadata
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13::jsonb)
        RETURNING *`,
       [
         companyId,
-        body.category || "general",
-        body.priority || "medium",
+        category,
+        priority,
         title,
         description,
         recommendation,
-        body.impactLabel || "",
-        body.impactValueCop || null,
+        body.impactType || impact.impactType,
+        body.impactLabel || impact.impactLabel,
+        body.impactValueCop || impact.impactValueCop,
         body.confidence || 0,
         body.status || "nueva",
-        JSON.stringify(body.evidence || {}),
+        JSON.stringify({ ...(body.evidence || {}), impact: impact.evidence }),
         JSON.stringify(body.metadata || {})
       ]
     );

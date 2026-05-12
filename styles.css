@@ -6856,10 +6856,16 @@ h2 {
 }
 
 .suggestion-detail-hero aside span,
+.suggestion-detail-hero aside em,
 .suggestion-detail-hero aside small {
   color: var(--muted);
   font-size: 13px;
   font-weight: 900;
+}
+
+.suggestion-detail-hero aside em {
+  font-style: normal;
+  text-transform: capitalize;
 }
 
 .suggestion-detail-hero aside strong {

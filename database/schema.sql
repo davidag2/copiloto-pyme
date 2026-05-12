@@ -340,6 +340,7 @@ CREATE TABLE IF NOT EXISTS ai_suggestions (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   recommendation TEXT NOT NULL,
+  impact_type TEXT NOT NULL DEFAULT 'ventas_adicionales' CHECK (impact_type IN ('ventas_adicionales', 'margen', 'ahorro', 'riesgo_evitado')),
   impact_label TEXT NOT NULL DEFAULT '',
   impact_value_cop NUMERIC(14, 2),
   confidence NUMERIC(5, 2) NOT NULL DEFAULT 0 CHECK (confidence >= 0 AND confidence <= 100),
@@ -355,6 +356,17 @@ CREATE TABLE IF NOT EXISTS ai_suggestions (
 );
 
 ALTER TABLE ai_suggestions ALTER COLUMN status SET DEFAULT 'nueva';
+ALTER TABLE ai_suggestions ADD COLUMN IF NOT EXISTS impact_type TEXT NOT NULL DEFAULT 'ventas_adicionales';
+ALTER TABLE ai_suggestions DROP CONSTRAINT IF EXISTS ai_suggestions_impact_type_check;
+UPDATE ai_suggestions SET impact_type = CASE
+  WHEN category = 'precios' THEN 'margen'
+  WHEN category = 'costos' THEN 'ahorro'
+  WHEN category = 'caja' THEN 'ahorro'
+  WHEN category = 'inventario' THEN 'riesgo_evitado'
+  ELSE impact_type
+END;
+ALTER TABLE ai_suggestions ADD CONSTRAINT ai_suggestions_impact_type_check
+  CHECK (impact_type IN ('ventas_adicionales', 'margen', 'ahorro', 'riesgo_evitado'));
 ALTER TABLE ai_suggestions DROP CONSTRAINT IF EXISTS ai_suggestions_status_check;
 UPDATE ai_suggestions SET status = CASE status
   WHEN 'open' THEN 'nueva'

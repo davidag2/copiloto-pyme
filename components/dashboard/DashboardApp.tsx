@@ -120,6 +120,7 @@ type AiSuggestionRow = {
   title: string;
   description: string;
   recommendation: string;
+  impactType: "ventas_adicionales" | "margen" | "ahorro" | "riesgo_evitado";
   impactLabel: string;
   impactValueCop: string | number | null;
   confidence: string | number;

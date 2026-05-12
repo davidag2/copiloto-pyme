@@ -23,6 +23,7 @@ type SuggestionDetail = {
   title: string;
   description: string;
   recommendation: string;
+  impactType: string;
   impactLabel: string;
   impactValueCop: string | null;
   confidence: string;
@@ -86,6 +87,7 @@ export default async function SuggestionDetailPage({ params }: PageProps) {
             ai_suggestions.title,
             ai_suggestions.description,
             ai_suggestions.recommendation,
+            ai_suggestions.impact_type AS "impactType",
             ai_suggestions.impact_label AS "impactLabel",
             ai_suggestions.impact_value_cop AS "impactValueCop",
             ai_suggestions.confidence,
@@ -147,6 +149,7 @@ export default async function SuggestionDetailPage({ params }: PageProps) {
         <aside>
           <span>Impacto estimado</span>
           <strong>{detail.impactLabel || formatCop(detail.impactValueCop)}</strong>
+          <em>{detail.impactType.replaceAll("_", " ")}</em>
           <small>{formatCop(detail.impactValueCop)}</small>
         </aside>
       </section>
