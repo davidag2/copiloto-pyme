@@ -74,6 +74,12 @@ type Metrics = {
   margin: number;
   criticalStock: number;
 };
+type DashboardKpis = {
+  metrics: Metrics;
+  weeklySales: SalePoint[];
+  products: Product[];
+  rowCount: number;
+};
 type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
@@ -99,6 +105,7 @@ type RecoveryResponse = { message: string; resetToken: string | null; expiresIn:
 type Invitation = { id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string };
 type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
+type DashboardDataResponse = { kpis?: DashboardKpis };
 type CsvColumnMapping = { fecha: string; producto: string; ventas: string; stock: string; caja: string; gastos: string; margen: string };
 type ImportBatch = {
   id: string;
@@ -541,6 +548,7 @@ export default function Home() {
   const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
   const [notificationsStatus, setNotificationsStatus] = useState("Notificaciones listas.");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
@@ -604,6 +612,7 @@ export default function Home() {
 
   useEffect(() => {
     if (companyId && authUser) {
+      void loadDashboardData(companyId);
       void loadTeam(companyId);
       void loadImportHistory(companyId);
       void loadAiSuggestions(companyId);
@@ -846,6 +855,17 @@ export default function Home() {
     setMetrics(next);
   }
 
+  function applyDashboardKpis(kpis: DashboardKpis) {
+    if (!kpis.rowCount) {
+      setKpiSourceStatus("Sin filas reales importadas. KPIs en modo demo.");
+      return;
+    }
+    setMetrics(kpis.metrics);
+    if (kpis.weeklySales.length) setWeeklySales(kpis.weeklySales);
+    if (kpis.products.length) setProducts(kpis.products);
+    setKpiSourceStatus(`${kpis.rowCount} fila(s) reales desde imported_data_rows.`);
+  }
+
   function triggerMicroInteraction(action: Exclude<MicroAction, null>, message: string) {
     setMicroAction(action);
     setMicroFeedback(message);
@@ -876,6 +896,16 @@ export default function Home() {
     if (teamResult.ok) setTeamMembers(teamResult.data.users);
     const invitationResult = await apiJson<{ invitations: Invitation[] }>(`/api/auth/invite?companyId=${activeCompanyId}`, { method: "GET" });
     if (invitationResult.ok) setInvitations(invitationResult.data.invitations);
+  }
+
+  async function loadDashboardData(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<DashboardDataResponse>(`/api/companies/${activeCompanyId}/dashboard`, { method: "GET" });
+    if (!result.ok) {
+      setKpiSourceStatus(`KPIs demo: ${result.error}`);
+      return;
+    }
+    if (result.data.kpis) applyDashboardKpis(result.data.kpis);
   }
 
   async function loadImportHistory(activeCompanyId = companyId) {
@@ -938,7 +968,12 @@ export default function Home() {
     setNotificationsStatus(`${result.data.updated} notificación(es) marcadas como leídas.`);
   }
 
-  function refreshMetrics() {
+  async function refreshMetrics() {
+    if (companyId) {
+      await loadDashboardData(companyId);
+      setRecommendation("KPIs actualizados desde imported_data_rows.");
+      return;
+    }
     const multiplier = 0.94 + Math.random() * 0.14;
     updateMetrics({
       sales: 84.2 * multiplier,
@@ -1368,6 +1403,7 @@ ${recommendedAction()}`;
     setImportPreview(`${result.data.batch.errorCount} error(es), ${result.data.batch.duplicateCount} duplicado(s).`);
     setPersistenceStatus("Importacion avanzada guardada en PostgreSQL.");
     await loadImportHistory(companyId);
+    await loadDashboardData(companyId);
   }
 
   async function reverseImport(batchId: string) {
@@ -1378,6 +1414,7 @@ ${recommendedAction()}`;
     });
     setPersistenceStatus(result.ok ? "Importacion reversada y filas eliminadas." : `No se pudo reversar: ${result.error}`);
     await loadImportHistory(companyId);
+    await loadDashboardData(companyId);
   }
 
   function navigateModule(item: NavItem) {
@@ -1533,7 +1570,7 @@ ${recommendedAction()}`;
             </button>
             <label className="upload-button" aria-disabled={!permissions.canImportData}><input type="file" accept=".csv" disabled={!permissions.canImportData} onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
             <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
-            <button className="primary-button" type="button" onClick={refreshMetrics} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
+            <button className="primary-button" type="button" onClick={() => { void refreshMetrics(); }} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <a className="secondary-button" href="/">Portal</a>
           </div>
@@ -1548,6 +1585,7 @@ ${recommendedAction()}`;
             <div className="ai-home-meta">
               <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
               <span data-status={overallStatusTone}>{overallStatus}</span>
+              <span><Database aria-hidden="true" />{kpiSourceStatus}</span>
               <span><Database aria-hidden="true" />{aiSuggestionsStatus}</span>
             </div>
             <button className="primary-button ai-home-action" type="button" onClick={() => { void loadAiSuggestions(); setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`); }}>
