@@ -142,6 +142,21 @@ type ActivityEventRow = {
   occurredAt: string;
   createdAt: string;
 };
+type NotificationRow = {
+  id: string;
+  companyId: string;
+  targetUserId: string | null;
+  type: "ai_suggestion" | "alert" | "decision" | "integration" | "report" | "payment" | "billing" | "team" | "system";
+  title: string;
+  body: string;
+  severity: "info" | "success" | "warning" | "danger";
+  actionUrl: string | null;
+  entityType: string;
+  entityId: string | null;
+  metadata: Record<string, unknown> | null;
+  readAt: string | null;
+  createdAt: string;
+};
 type AiSuggestionCard = {
   id?: string;
   tone: string;
@@ -330,6 +345,24 @@ function mapActivityEvent(event: ActivityEventRow): AiActivityItem {
   };
 }
 
+function notificationIcon(type: NotificationRow["type"], severity: NotificationRow["severity"]) {
+  if (severity === "danger" || severity === "warning" || type === "alert") return AlertTriangle;
+  if (type === "ai_suggestion") return Sparkles;
+  if (type === "decision") return ClipboardCheck;
+  if (type === "integration") return Link2;
+  if (type === "report") return FileText;
+  if (type === "payment" || type === "billing") return WalletCards;
+  if (type === "team") return Users;
+  return Bell;
+}
+
+function notificationTone(severity: NotificationRow["severity"]) {
+  if (severity === "success") return "green";
+  if (severity === "warning") return "warning";
+  if (severity === "danger") return "red";
+  return "purple";
+}
+
 function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: string; action?: ReactNode }) {
   return (
     <div className="empty-state">
@@ -494,6 +527,10 @@ export default function Home() {
   const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sugerencias demo listas.");
   const [activityRows, setActivityRows] = useState<ActivityEventRow[]>([]);
   const [activityStatus, setActivityStatus] = useState("Actividad demo lista.");
+  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+  const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
+  const [notificationsStatus, setNotificationsStatus] = useState("Notificaciones listas.");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
@@ -561,6 +598,7 @@ export default function Home() {
       void loadImportHistory(companyId);
       void loadAiSuggestions(companyId);
       void loadActivity(companyId);
+      void loadNotifications(companyId);
     }
   }, [companyId, authUser]);
 
@@ -605,7 +643,40 @@ export default function Home() {
   const userDisplayName = authUser?.name || customer.ownerName || "Andrés Vélez";
   const userFirstName = userDisplayName.split(" ")[0] || "Equipo";
   const userInitials = userDisplayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CP";
-  const notificationCount = criticalAlerts.length + openDecisions;
+  const notificationCount = companyId && authUser ? notificationsUnreadCount : criticalAlerts.length + openDecisions;
+  const fallbackNotifications: NotificationRow[] = [
+    {
+      id: "demo-ai",
+      companyId: companyId || "demo",
+      targetUserId: null,
+      type: "ai_suggestion",
+      title: "Nueva sugerencia IA",
+      body: "Reponer Panela Orgánica hoy para evitar quiebre de inventario.",
+      severity: "info",
+      actionUrl: "",
+      entityType: "ai_suggestions",
+      entityId: null,
+      metadata: null,
+      readAt: null,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: "demo-alert",
+      companyId: companyId || "demo",
+      targetUserId: null,
+      type: "alert",
+      title: "Inventario crítico",
+      body: `${metrics.criticalStock} productos requieren atención.`,
+      severity: "warning",
+      actionUrl: "",
+      entityType: "alerts",
+      entityId: null,
+      metadata: null,
+      readAt: null,
+      createdAt: new Date().toISOString()
+    }
+  ];
+  const visibleNotifications = companyId && authUser ? notifications : fallbackNotifications;
 
   const selectedSales = useMemo(() => salesForRange(weeklySales, dateRange, customRange), [weeklySales, dateRange, customRange]);
   const dateRangeLabel = rangeLabel(dateRange, customRange);
@@ -812,6 +883,36 @@ export default function Home() {
     setActivityStatus(result.data.activity.length
       ? `${result.data.activity.length} evento(s) cargados desde PostgreSQL.`
       : "Sin eventos reales todavía. Mostrando ejemplo de actividad AI.");
+  }
+
+  async function loadNotifications(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<{ notifications: NotificationRow[]; unreadCount: number }>(`/api/notifications?companyId=${activeCompanyId}&limit=8`, { method: "GET" });
+    if (!result.ok) {
+      setNotificationsStatus(`Modo demo local: ${result.error}`);
+      setNotificationsUnreadCount(criticalAlerts.length + openDecisions);
+      return;
+    }
+    setNotifications(result.data.notifications);
+    setNotificationsUnreadCount(result.data.unreadCount);
+    setNotificationsStatus(result.data.notifications.length
+      ? `${result.data.unreadCount} notificación(es) sin leer.`
+      : "Sin notificaciones reales todavía.");
+  }
+
+  async function markNotificationsRead() {
+    if (!companyId) return;
+    const result = await apiJson<{ updated: number }>("/api/notifications", {
+      method: "PATCH",
+      body: JSON.stringify({ companyId, markAll: true })
+    });
+    if (!result.ok) {
+      setNotificationsStatus(`No se pudieron marcar como leídas: ${result.error}`);
+      return;
+    }
+    setNotifications((current) => current.map((notification) => ({ ...notification, readAt: notification.readAt || new Date().toISOString() })));
+    setNotificationsUnreadCount(0);
+    setNotificationsStatus(`${result.data.updated} notificación(es) marcadas como leídas.`);
   }
 
   function refreshMetrics() {
@@ -1344,10 +1445,52 @@ ${recommendedAction()}`;
                 />
               </div>
             )}
-            <button className="notification-button" type="button" aria-label={`${notificationCount} notificaciones`}>
-              <Bell aria-hidden="true" />
-              {notificationCount ? <span>{notificationCount}</span> : null}
-            </button>
+            <div className="notification-menu">
+              <button
+                className="notification-button"
+                type="button"
+                aria-expanded={notificationsOpen}
+                aria-label={`${notificationCount} notificaciones`}
+                onClick={() => setNotificationsOpen((current) => !current)}
+              >
+                <Bell aria-hidden="true" />
+                {notificationCount ? <span>{notificationCount}</span> : null}
+              </button>
+              {notificationsOpen && (
+                <div className="notification-popover" role="dialog" aria-label="Notificaciones recientes">
+                  <div className="notification-popover-header">
+                    <div>
+                      <strong>Notificaciones</strong>
+                      <small>{notificationsStatus}</small>
+                    </div>
+                    <button type="button" onClick={() => { void markNotificationsRead(); }} disabled={!notificationCount}>Marcar leídas</button>
+                  </div>
+                  <div className="notification-list">
+                    {visibleNotifications.length ? visibleNotifications.map((notification) => {
+                      const Icon = notificationIcon(notification.type, notification.severity);
+                      const href = notification.actionUrl || (notification.entityType === "ai_suggestions" && notification.entityId ? `/dashboard/suggestions/${notification.entityId}` : "");
+                      return (
+                        <div className="notification-item" data-tone={notificationTone(notification.severity)} data-unread={!notification.readAt} key={notification.id}>
+                          <span><Icon aria-hidden="true" /></span>
+                          <div>
+                            <strong>{notification.title}</strong>
+                            <small>{notification.body || "Actividad registrada en Copiloto Pyme."}</small>
+                            {href ? <a href={href}>Abrir</a> : null}
+                          </div>
+                          <time>{formatActivityTime(notification.createdAt)}</time>
+                        </div>
+                      );
+                    }) : (
+                      <div className="notification-empty">
+                        <Bell aria-hidden="true" />
+                        <strong>Sin notificaciones pendientes</strong>
+                        <small>Cuando la IA detecte algo importante, aparecerá aquí.</small>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <button className="topbar-profile" type="button" aria-label="Perfil de usuario">
               <span>{userInitials}</span>
               <div><strong>{userDisplayName}</strong><small>{activeRoleLabel}</small></div>

@@ -426,6 +426,32 @@ CREATE TABLE IF NOT EXISTS activity_events (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  target_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN (
+    'ai_suggestion',
+    'alert',
+    'decision',
+    'integration',
+    'report',
+    'payment',
+    'billing',
+    'team',
+    'system'
+  )),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL DEFAULT '',
+  severity TEXT NOT NULL DEFAULT 'info' CHECK (severity IN ('info', 'success', 'warning', 'danger')),
+  action_url TEXT,
+  entity_type TEXT NOT NULL DEFAULT 'system',
+  entity_id UUID,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  read_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_imported_rows_company_date ON imported_data_rows(company_id, sale_date DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_company_status ON alerts(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ai_suggestions_company_status ON ai_suggestions(company_id, status, priority, suggested_for_date DESC);
@@ -437,6 +463,10 @@ CREATE INDEX IF NOT EXISTS idx_activity_events_company_time ON activity_events(c
 CREATE INDEX IF NOT EXISTS idx_activity_events_company_type ON activity_events(company_id, event_type, occurred_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_events_entity ON activity_events(entity_type, entity_id, occurred_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_events_actor ON activity_events(actor_user_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_company_created ON notifications(company_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_company_unread ON notifications(company_id, read_at, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_target_user ON notifications(target_user_id, read_at, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_entity ON notifications(entity_type, entity_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, status);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_company_status ON subscriptions(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_company_status ON payment_transactions(company_id, status, created_at DESC);

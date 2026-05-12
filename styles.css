@@ -5716,6 +5716,10 @@ h2 {
   width: 44px;
 }
 
+.notification-menu {
+  position: relative;
+}
+
 .notification-button svg {
   height: 19px;
   width: 19px;
@@ -5736,6 +5740,189 @@ h2 {
   position: absolute;
   right: -5px;
   top: -5px;
+}
+
+.notification-popover {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
+  min-width: 360px;
+  padding: 14px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 30;
+}
+
+.notification-popover::before {
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  content: "";
+  height: 12px;
+  position: absolute;
+  right: 16px;
+  top: -7px;
+  transform: rotate(45deg);
+  width: 12px;
+}
+
+.notification-popover-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 2px 2px 12px;
+}
+
+.notification-popover-header strong,
+.notification-popover-header small {
+  display: block;
+}
+
+.notification-popover-header strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.notification-popover-header small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.notification-popover-header button {
+  background: transparent;
+  border: 0;
+  color: var(--brand-blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 2px;
+}
+
+.notification-popover-header button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.notification-list {
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.notification-item {
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--surface-strong) 62%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 11px;
+}
+
+.notification-item[data-unread="true"] {
+  border-color: color-mix(in srgb, var(--brand-blue) 26%, var(--line));
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.09);
+}
+
+.notification-item > span {
+  align-items: center;
+  background: rgba(80, 70, 229, 0.1);
+  border-radius: 12px;
+  color: #6d5dfc;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.notification-item[data-tone="green"] > span {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.notification-item[data-tone="warning"] > span {
+  background: rgba(245, 158, 11, 0.13);
+  color: var(--amber);
+}
+
+.notification-item[data-tone="red"] > span {
+  background: rgba(239, 68, 68, 0.11);
+  color: var(--red);
+}
+
+.notification-item strong,
+.notification-item small,
+.notification-item time,
+.notification-item a {
+  display: block;
+}
+
+.notification-item strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.notification-item small,
+.notification-item time {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notification-item a {
+  color: var(--brand-blue);
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 6px;
+  text-decoration: none;
+}
+
+.notification-item a:hover {
+  text-decoration: underline;
+}
+
+.notification-item time {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.notification-empty {
+  align-items: center;
+  border: 1px dashed var(--line);
+  border-radius: 15px;
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 20px 14px;
+  text-align: center;
+}
+
+.notification-empty svg {
+  color: var(--brand-blue);
+  height: 24px;
+  width: 24px;
+}
+
+.notification-empty strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.notification-empty small {
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .topbar-profile {
@@ -8210,6 +8397,30 @@ select,
   }
 
   .ai-activity-item time {
+    text-align: left;
+  }
+
+  .notification-menu {
+    width: 100%;
+  }
+
+  .notification-button {
+    width: 100%;
+  }
+
+  .notification-popover {
+    left: 0;
+    min-width: 0;
+    right: auto;
+    width: min(88vw, 360px);
+  }
+
+  .notification-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .notification-item time {
+    grid-column: 2;
     text-align: left;
   }
 
