@@ -7757,6 +7757,38 @@ select,
   min-width: 0;
 }
 
+.real-trend-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.real-trend-card {
+  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.real-trend-card span,
+.real-trend-card small {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.real-trend-card strong {
+  color: var(--ink);
+  display: block;
+  font-size: 22px;
+  font-weight: 950;
+  margin: 3px 0;
+}
+
 .chart-tooltip {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -8411,6 +8443,7 @@ select,
   .ai-automation-card,
   .sales-command-header,
   .sales-insight-grid,
+  .real-trend-grid,
   .sales-action-row {
     grid-template-columns: 1fr;
   }

@@ -45,6 +45,12 @@ function toSqlDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(date.getDate() + days);
+  return next;
+}
+
 function resolveRange(request: Request) {
   const { searchParams } = new URL(request.url);
   const today = new Date();
@@ -75,9 +81,16 @@ export async function GET(request: Request, context: RouteContext) {
   try {
     const { companyId } = await context.params;
     const { startDate, endDate } = resolveRange(request);
+    const currentStart = new Date(`${startDate}T00:00:00`);
+    const currentEnd = new Date(`${endDate}T00:00:00`);
+    const rangeDays = dayDiff(currentStart, currentEnd) + 1;
+    const previousEnd = addDays(currentStart, -1);
+    const previousStart = addDays(previousEnd, -(rangeDays - 1));
+    const previousStartDate = toSqlDate(previousStart);
+    const previousEndDate = toSqlDate(previousEnd);
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, salesByDay, topProducts] = await Promise.all([
+    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, previousSummary, metricsByDay, previousSalesByDay, topProducts] = await Promise.all([
       query(`SELECT * FROM companies WHERE id = $1`, [companyId]),
       query(`SELECT id, name, email, role, created_at AS "createdAt" FROM users WHERE company_id = $1 ORDER BY created_at DESC`, [companyId]),
       query(
@@ -135,6 +148,51 @@ export async function GET(request: Request, context: RouteContext) {
         [companyId, startDate, endDate]
       ),
       query(
+        `WITH valid_rows AS (
+           SELECT *,
+                  COALESCE(sale_date, created_at::date) AS metric_date
+           FROM imported_data_rows
+           WHERE company_id = $1
+             AND validation_errors = '[]'::jsonb
+             AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
+         )
+         SELECT COUNT(*)::int AS "rowCount",
+                COALESCE(SUM(sales), 0)::text AS sales,
+                COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL), 0)::text AS margin
+         FROM valid_rows`,
+        [companyId, previousStartDate, previousEndDate]
+      ),
+      query(
+        `WITH valid_rows AS (
+           SELECT imported_data_rows.*,
+                  COALESCE(sale_date, imported_data_rows.created_at::date) AS metric_date,
+                  companies.minimum_stock
+           FROM imported_data_rows
+           JOIN companies ON companies.id = imported_data_rows.company_id
+           WHERE imported_data_rows.company_id = $1
+             AND validation_errors = '[]'::jsonb
+             AND COALESCE(sale_date, imported_data_rows.created_at::date) BETWEEN $2::date AND $3::date
+         ),
+         latest_cash AS (
+           SELECT DISTINCT ON (metric_date)
+                  metric_date,
+                  cash
+           FROM valid_rows
+           WHERE cash IS NOT NULL
+           ORDER BY metric_date, created_at DESC
+         )
+         SELECT valid_rows.metric_date AS "saleDate",
+                COALESCE(SUM(valid_rows.sales), 0)::text AS sales,
+                COALESCE(MAX(latest_cash.cash), 0)::text AS cash,
+                COALESCE(AVG(valid_rows.margin) FILTER (WHERE valid_rows.margin IS NOT NULL), 0)::text AS margin,
+                COUNT(*) FILTER (WHERE valid_rows.stock <= valid_rows.minimum_stock)::int AS "criticalStock"
+         FROM valid_rows
+         LEFT JOIN latest_cash ON latest_cash.metric_date = valid_rows.metric_date
+         GROUP BY valid_rows.metric_date
+         ORDER BY valid_rows.metric_date ASC`,
+        [companyId, startDate, endDate]
+      ),
+      query(
         `SELECT COALESCE(sale_date, created_at::date) AS "saleDate",
                 COALESCE(SUM(sales), 0)::text AS sales
          FROM imported_data_rows
@@ -143,7 +201,7 @@ export async function GET(request: Request, context: RouteContext) {
            AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
          GROUP BY "saleDate"
          ORDER BY "saleDate" ASC`,
-        [companyId, startDate, endDate]
+        [companyId, previousStartDate, previousEndDate]
       ),
       query(
         `WITH valid_rows AS (
@@ -184,15 +242,26 @@ export async function GET(request: Request, context: RouteContext) {
     const companyRow = company.rows[0] as { minimum_stock?: number };
     const minimumStock = Number(companyRow.minimum_stock || 0);
     const summary = kpiSummary.rows[0] || {};
-    const start = new Date(`${startDate}T00:00:00`);
-    const end = new Date(`${endDate}T00:00:00`);
-    const totalDays = dayDiff(start, end) + 1;
-    const salesByDate = new Map(salesByDay.rows.map((row) => [new Date(row.saleDate as string).toISOString().slice(0, 10), toMillions(row.sales)]));
+    const start = currentStart;
+    const totalDays = rangeDays;
+    const metricsByDate = new Map(metricsByDay.rows.map((row) => [new Date(row.saleDate as string).toISOString().slice(0, 10), row]));
+    const previousByOffset = new Map(previousSalesByDay.rows.map((row) => {
+      const previousDate = new Date(row.saleDate as string);
+      return [dayDiff(previousStart, previousDate), toMillions(row.sales)];
+    }));
     const weeklySales = Array.from({ length: totalDays }, (_, index) => {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       const key = date.toISOString().slice(0, 10);
-      return { day: chartLabel(date, totalDays), value: salesByDate.get(key) || 0 };
+      const metric = metricsByDate.get(key) || {};
+      return {
+        day: chartLabel(date, totalDays),
+        value: toMillions(metric.sales),
+        previous: previousByOffset.get(index) || 0,
+        cash: toMillions(metric.cash),
+        margin: Number(toNumber(metric.margin).toFixed(1)),
+        criticalStock: Number(metric.criticalStock || 0)
+      };
     });
     const products = topProducts.rows.map((product) => {
       const stock = toNumber(product.stock);
@@ -217,6 +286,12 @@ export async function GET(request: Request, context: RouteContext) {
         weeklySales,
         products,
         rowCount: Number(summary.rowCount || 0),
+        comparison: {
+          previousStartDate,
+          previousEndDate,
+          previousSales: toMillions(previousSummary.rows[0]?.sales),
+          previousMargin: Number(toNumber(previousSummary.rows[0]?.margin).toFixed(1))
+        },
         range: { startDate, endDate }
       },
       alertRules: alertRules.rows,

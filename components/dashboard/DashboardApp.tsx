@@ -50,7 +50,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
-type SalePoint = { day: string; value: number };
+type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
 type Alert = { level: "positive" | "warning" | "danger"; title: string; text: string };
 type Decision = {
@@ -79,6 +79,12 @@ type DashboardKpis = {
   weeklySales: SalePoint[];
   products: Product[];
   rowCount: number;
+  comparison?: {
+    previousStartDate: string;
+    previousEndDate: string;
+    previousSales: number;
+    previousMargin: number;
+  };
   range?: { startDate: string; endDate: string };
 };
 type ThemeMode = "light" | "dark";
@@ -725,23 +731,31 @@ export default function Home() {
   ];
   const visibleNotifications = companyId && authUser ? notifications : fallbackNotifications;
 
-  const selectedSales = useMemo(() => (kpiRowCount ? weeklySales : salesForRange(weeklySales, dateRange, customRange)), [weeklySales, dateRange, customRange, kpiRowCount]);
+  const selectedSales = useMemo<SalePoint[]>(() => (kpiRowCount ? weeklySales : salesForRange(weeklySales, dateRange, customRange)), [weeklySales, dateRange, customRange, kpiRowCount]);
   const dateRangeLabel = rangeLabel(dateRange, customRange);
   const bestDay = selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]);
   const chartData = selectedSales.map((item, index) => {
-    const previous = Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
+    const previous = typeof item.previous === "number" ? item.previous : Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
     const target = Number(((customer.monthlyGoal / 1_000_000) / Math.max(selectedSales.length, 1)).toFixed(1));
     return {
       day: item.day,
       actual: Number(item.value.toFixed(1)),
       previous,
       target,
-      variation: Number((((item.value - previous) / previous) * 100).toFixed(1))
+      cash: typeof item.cash === "number" ? item.cash : Number((cashDays(metrics.cash) * (0.94 + index * 0.01)).toFixed(1)),
+      margin: typeof item.margin === "number" ? item.margin : Number((metrics.margin + (index % 3) * 0.4 - 0.3).toFixed(1)),
+      criticalStock: typeof item.criticalStock === "number" ? item.criticalStock : Math.max(0, metrics.criticalStock - (index % 4)),
+      variation: previous ? Number((((item.value - previous) / previous) * 100).toFixed(1)) : 0
     };
   });
   const weeklyTotal = selectedSales.reduce((total, item) => total + item.value, 0);
   const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
+  const trendCards = [
+    { id: "cash", title: "Caja", value: `${cashDays(metrics.cash)} días`, helper: "Cobertura diaria", dataKey: "cash", color: "#22c55e", suffix: " días" },
+    { id: "margin", title: "Margen", value: `${metrics.margin.toFixed(1)}%`, helper: "Margen promedio", dataKey: "margin", color: "#6d5dfc", suffix: "%" },
+    { id: "stock", title: "Inventario crítico", value: `${metrics.criticalStock} SKU`, helper: "Productos en riesgo", dataKey: "criticalStock", color: "#ef4444", suffix: " SKU" }
+  ];
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -2073,6 +2087,29 @@ ${recommendedAction()}`;
                   <Line type="monotone" dataKey="actual" name="Actual" stroke="var(--brand-blue)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+            <div className="real-trend-grid" aria-label="Tendencias reales por indicador">
+              {trendCards.map((trend) => (
+                <article className="real-trend-card" key={trend.id}>
+                  <div>
+                    <span>{trend.title}</span>
+                    <strong>{trend.value}</strong>
+                    <small>{trend.helper}</small>
+                  </div>
+                  <ResponsiveContainer width="100%" height={112}>
+                    <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                      <XAxis dataKey="day" hide />
+                      <YAxis hide domain={["dataMin", "dataMax"]} />
+                      <Tooltip
+                        formatter={(value) => [`${Number(value).toFixed(trend.id === "margin" ? 1 : 0)}${trend.suffix}`, trend.title]}
+                        labelStyle={{ color: "var(--ink)", fontWeight: 900 }}
+                        contentStyle={{ border: "1px solid var(--line)", borderRadius: 12, boxShadow: "var(--shadow)" }}
+                      />
+                      <Line type="monotone" dataKey={trend.dataKey} stroke={trend.color} strokeWidth={3} dot={false} activeDot={{ r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </article>
+              ))}
             </div>
             <div className="sales-action-row">
               <span><Sparkles aria-hidden="true" />Acción recomendada</span>
