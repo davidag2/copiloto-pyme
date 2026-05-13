@@ -111,7 +111,7 @@ export async function GET(request: Request) {
     if (!session.ok) return session.response;
 
     const data = await transaction(async (client) => {
-      const [customers, products, channels, reps, paymentMethods, recentSales] = await Promise.all([
+      const [customers, products, channels, reps, paymentMethods, recentSales, summary] = await Promise.all([
         client.query(`SELECT id, name FROM sales_customers WHERE company_id = $1 AND status = 'active' ORDER BY name ASC LIMIT 100`, [companyId]),
         client.query(`SELECT id, name, unit_price AS "unitPrice" FROM sales_products WHERE company_id = $1 AND status = 'active' ORDER BY name ASC LIMIT 100`, [companyId]),
         client.query(`SELECT id, name FROM sales_channels WHERE company_id = $1 AND status = 'active' ORDER BY name ASC LIMIT 50`, [companyId]),
@@ -152,6 +152,59 @@ export async function GET(request: Request) {
            ORDER BY sales_orders.sale_date DESC, sales_orders.created_at DESC
            LIMIT 100`,
           [companyId]
+        ),
+        client.query(
+          `WITH valid_orders AS (
+             SELECT sales_orders.*,
+                    sales_customers.name AS customer_name,
+                    sales_channels.name AS channel_name
+             FROM sales_orders
+             LEFT JOIN sales_customers ON sales_customers.id = sales_orders.customer_id
+             LEFT JOIN sales_channels ON sales_channels.id = sales_orders.channel_id
+             WHERE sales_orders.company_id = $1
+               AND sales_orders.status <> 'anulada'
+           ),
+           item_totals AS (
+             SELECT sales_order_items.description AS product_name,
+                    SUM(sales_order_items.total) AS total
+             FROM sales_order_items
+             JOIN sales_orders ON sales_orders.id = sales_order_items.order_id
+             WHERE sales_orders.company_id = $1
+               AND sales_orders.status <> 'anulada'
+               AND sales_orders.sale_date >= date_trunc('month', CURRENT_DATE)::date
+             GROUP BY sales_order_items.description
+             ORDER BY total DESC
+             LIMIT 1
+           ),
+           customer_totals AS (
+             SELECT COALESCE(customer_name, 'Cliente sin nombre') AS customer_name,
+                    COUNT(*) AS orders
+             FROM valid_orders
+             WHERE sale_date >= date_trunc('month', CURRENT_DATE)::date
+             GROUP BY COALESCE(customer_name, 'Cliente sin nombre')
+             ORDER BY orders DESC
+             LIMIT 1
+           ),
+           channel_totals AS (
+             SELECT COALESCE(valid_orders.channel_name, 'Canal no definido') AS channel_name,
+                    SUM(sales_order_items.total - (COALESCE(sales_products.unit_cost, 0) * sales_order_items.quantity)) AS gross_profit
+             FROM sales_order_items
+             JOIN valid_orders ON valid_orders.id = sales_order_items.order_id
+             LEFT JOIN sales_products ON sales_products.id = sales_order_items.product_id
+             WHERE valid_orders.sale_date >= date_trunc('month', CURRENT_DATE)::date
+             GROUP BY COALESCE(valid_orders.channel_name, 'Canal no definido')
+             ORDER BY gross_profit DESC
+             LIMIT 1
+           )
+           SELECT COALESCE(SUM(total) FILTER (WHERE sale_date = CURRENT_DATE), 0)::text AS "salesToday",
+                  COALESCE(SUM(total) FILTER (WHERE sale_date >= date_trunc('month', CURRENT_DATE)::date), 0)::text AS "salesMonth",
+                  COALESCE(AVG(total) FILTER (WHERE sale_date >= date_trunc('month', CURRENT_DATE)::date), 0)::text AS "averageTicket",
+                  COALESCE((SELECT product_name FROM item_totals), 'Sin ventas') AS "topProduct",
+                  COALESCE((SELECT customer_name FROM customer_totals), 'Sin clientes') AS "topCustomer",
+                  COALESCE((SELECT channel_name FROM channel_totals), 'Sin canal') AS "topChannel",
+                  COALESCE(SUM(total) FILTER (WHERE status = 'pendiente'), 0)::text AS "pendingReceivables"
+           FROM valid_orders`,
+          [companyId]
         )
       ]);
 
@@ -163,7 +216,8 @@ export async function GET(request: Request) {
           reps: reps.rows,
           paymentMethods: paymentMethods.rows
         },
-        recentSales: recentSales.rows
+        recentSales: recentSales.rows,
+        summary: summary.rows[0] || {}
       };
     });
 

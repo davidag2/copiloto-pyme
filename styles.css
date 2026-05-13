@@ -8027,6 +8027,83 @@ tr[data-status="anulada"] .sale-status-pill {
   min-width: 180px;
 }
 
+.sales-summary-panel {
+  background:
+    radial-gradient(circle at 12% 16%, color-mix(in srgb, var(--brand-blue) 10%, transparent), transparent 28%),
+    var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.sales-summary-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sales-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.sales-summary-card span {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 950;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.sales-summary-card span svg {
+  color: var(--brand-blue);
+  height: 17px;
+  width: 17px;
+}
+
+.sales-summary-card strong {
+  color: var(--ink);
+  display: block;
+  font-size: clamp(18px, 1.8vw, 24px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.sales-summary-card small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.sales-summary-card[data-tone="green"] {
+  border-color: color-mix(in srgb, var(--green) 24%, var(--line));
+}
+
+.sales-summary-card[data-tone="green"] span svg {
+  color: var(--green);
+}
+
+.sales-summary-card[data-tone="purple"] span svg {
+  color: #6d5dfc;
+}
+
+.sales-summary-card[data-tone="red"] {
+  border-color: color-mix(in srgb, var(--red) 28%, var(--line));
+}
+
+.sales-summary-card[data-tone="red"] span svg {
+  color: var(--red);
+}
+
 .sales-action-row {
   align-items: center;
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.08));
@@ -8804,6 +8881,7 @@ select,
   .ai-automation-card,
   .manual-sale-grid,
   .sales-filter-grid,
+  .sales-summary-grid,
   .sales-command-header,
   .sales-insight-grid,
   .real-trend-grid,

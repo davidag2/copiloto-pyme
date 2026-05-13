@@ -245,6 +245,15 @@ type SalesCatalogs = {
   reps: SalesCatalogOption[];
   paymentMethods: SalesCatalogOption[];
 };
+type SalesSummary = {
+  salesToday: string | number;
+  salesMonth: string | number;
+  averageTicket: string | number;
+  topProduct: string;
+  topCustomer: string;
+  topChannel: string;
+  pendingReceivables: string | number;
+};
 type ManualSaleForm = {
   saleDate: string;
   customerName: string;
@@ -658,6 +667,15 @@ export default function Home() {
     paymentMethods: []
   });
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
+  const [salesSummary, setSalesSummary] = useState<SalesSummary>({
+    salesToday: 0,
+    salesMonth: 0,
+    averageTicket: 0,
+    topProduct: "Sin ventas",
+    topCustomer: "Sin clientes",
+    topChannel: "Sin canal",
+    pendingReceivables: 0
+  });
   const [manualSaleForm, setManualSaleForm] = useState<ManualSaleForm>(() => initialManualSaleForm());
   const [manualSaleStatus, setManualSaleStatus] = useState("Registra ventas manuales para alimentar el dashboard y la IA.");
   const [salesFilters, setSalesFilters] = useState<SalesFilters>({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" });
@@ -858,6 +876,15 @@ export default function Home() {
     return true;
   });
   const filteredSalesTotal = filteredSales.reduce((total, sale) => total + Number(sale.total || 0), 0);
+  const salesSummaryCards = [
+    { label: "Ventas del día", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.salesToday || 0)), helper: "Facturación de hoy", icon: BarChart3, tone: "blue" },
+    { label: "Ventas del mes", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.salesMonth || 0)), helper: "Mes actual", icon: TrendingUp, tone: "green" },
+    { label: "Ticket promedio", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.averageTicket || 0)), helper: "Promedio por venta", icon: WalletCards, tone: "purple" },
+    { label: "Producto más vendido", value: salesSummary.topProduct || "Sin ventas", helper: "Mayor venta del mes", icon: PackageCheck, tone: "blue" },
+    { label: "Cliente más frecuente", value: salesSummary.topCustomer || "Sin clientes", helper: "Más compras del mes", icon: Users, tone: "green" },
+    { label: "Canal más rentable", value: salesSummary.topChannel || "Sin canal", helper: "Mayor margen bruto", icon: Link2, tone: "purple" },
+    { label: "Pendiente por cobrar", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.pendingReceivables || 0)), helper: "Ventas pendientes", icon: AlertTriangle, tone: Number(salesSummary.pendingReceivables || 0) > 0 ? "red" : "green" }
+  ];
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -1109,13 +1136,14 @@ export default function Home() {
 
   async function loadSalesData(activeCompanyId = companyId) {
     if (!activeCompanyId) return;
-    const result = await apiJson<{ catalogs: SalesCatalogs; recentSales: RecentSale[] }>(`/api/sales?companyId=${activeCompanyId}`, { method: "GET" });
+    const result = await apiJson<{ catalogs: SalesCatalogs; recentSales: RecentSale[]; summary: SalesSummary }>(`/api/sales?companyId=${activeCompanyId}`, { method: "GET" });
     if (!result.ok) {
       setManualSaleStatus(`Ventas en modo local: ${result.error}`);
       return;
     }
     setSalesCatalogs(result.data.catalogs);
     setRecentSales(result.data.recentSales);
+    setSalesSummary(result.data.summary);
     setManualSaleStatus(result.data.recentSales.length
       ? `${result.data.recentSales.length} venta(s) recientes cargadas desde PostgreSQL.`
       : "Listo para registrar la primera venta manual.");
@@ -2392,6 +2420,27 @@ ${recommendedAction()}`;
                 <button className="primary-button micro-button" type="submit" disabled={!permissions.canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
               </div>
             </form>
+            <div className="sales-summary-panel" aria-label="Resumen de ventas">
+              <div className="sales-list-heading">
+                <div>
+                  <span><TrendingUp aria-hidden="true" />Resumen de ventas</span>
+                  <h3>KPIs comerciales</h3>
+                  <p>Lectura rápida del módulo: ventas del día, mes, ticket promedio, producto, cliente, canal y cartera pendiente.</p>
+                </div>
+              </div>
+              <div className="sales-summary-grid">
+                {salesSummaryCards.map((card) => {
+                  const Icon = card.icon;
+                  return (
+                    <article className="sales-summary-card" data-tone={card.tone} key={card.label}>
+                      <span><Icon aria-hidden="true" />{card.label}</span>
+                      <strong>{card.value}</strong>
+                      <small>{card.helper}</small>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
             <div className="sales-list-panel" aria-label="Listado de ventas">
               <div className="sales-list-heading">
                 <div>
