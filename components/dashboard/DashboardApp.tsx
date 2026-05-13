@@ -205,11 +205,38 @@ type SalesCatalogOption = { id: string; name: string; unitPrice?: string | numbe
 type RecentSale = {
   id: string;
   saleDate: string;
+  customerId?: string | null;
   customerName: string;
+  productId?: string | null;
   productName: string;
+  channelId?: string | null;
   channelName: string;
+  salesRepId?: string | null;
+  salesRepName: string;
+  paymentMethodId?: string | null;
+  paymentMethodName: string;
   status: "pagada" | "pendiente" | "anulada";
+  quantity?: string | number;
+  unitPrice?: string | number;
+  discount?: string | number;
+  notes?: string | null;
   total: string | number;
+};
+type SalesFilters = {
+  startDate: string;
+  endDate: string;
+  customer: string;
+  product: string;
+  channel: string;
+  salesRep: string;
+  status: string;
+  search: string;
+};
+type EditingSale = {
+  saleDate: string;
+  status: RecentSale["status"];
+  discount: string;
+  notes: string;
 };
 type SalesCatalogs = {
   customers: SalesCatalogOption[];
@@ -633,6 +660,9 @@ export default function Home() {
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [manualSaleForm, setManualSaleForm] = useState<ManualSaleForm>(() => initialManualSaleForm());
   const [manualSaleStatus, setManualSaleStatus] = useState("Registra ventas manuales para alimentar el dashboard y la IA.");
+  const [salesFilters, setSalesFilters] = useState<SalesFilters>({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" });
+  const [editingSaleId, setEditingSaleId] = useState("");
+  const [editingSale, setEditingSale] = useState<EditingSale>({ saleDate: "", status: "pagada", discount: "0", notes: "" });
   const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
   const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
@@ -806,6 +836,28 @@ export default function Home() {
     { id: "margin", title: "Margen", value: `${metrics.margin.toFixed(1)}%`, helper: "Margen promedio", dataKey: "margin", color: "#6d5dfc", suffix: "%" },
     { id: "stock", title: "Inventario crítico", value: `${metrics.criticalStock} SKU`, helper: "Productos en riesgo", dataKey: "criticalStock", color: "#ef4444", suffix: " SKU" }
   ];
+  const filteredSales = recentSales.filter((sale) => {
+    const haystack = [
+      sale.customerName,
+      sale.productName,
+      sale.channelName,
+      sale.salesRepName,
+      sale.paymentMethodName,
+      sale.notes || "",
+      sale.status
+    ].join(" ").toLowerCase();
+    const saleDate = String(sale.saleDate || "").slice(0, 10);
+    if (salesFilters.startDate && saleDate < salesFilters.startDate) return false;
+    if (salesFilters.endDate && saleDate > salesFilters.endDate) return false;
+    if (salesFilters.customer && sale.customerName !== salesFilters.customer) return false;
+    if (salesFilters.product && sale.productName !== salesFilters.product) return false;
+    if (salesFilters.channel && sale.channelName !== salesFilters.channel) return false;
+    if (salesFilters.salesRep && sale.salesRepName !== salesFilters.salesRep) return false;
+    if (salesFilters.status && sale.status !== salesFilters.status) return false;
+    if (salesFilters.search && !haystack.includes(salesFilters.search.toLowerCase())) return false;
+    return true;
+  });
+  const filteredSalesTotal = filteredSales.reduce((total, sale) => total + Number(sale.total || 0), 0);
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -1080,6 +1132,10 @@ export default function Home() {
     setManualSaleForm((current) => ({ ...current, [field]: value }));
   }
 
+  function updateSalesFilter<K extends keyof SalesFilters>(field: K, value: SalesFilters[K]) {
+    setSalesFilters((current) => ({ ...current, [field]: value }));
+  }
+
   function selectProductForManualSale(productName: string) {
     const product = salesCatalogs.products.find((item) => item.name === productName);
     setManualSaleForm((current) => ({
@@ -1087,6 +1143,35 @@ export default function Home() {
       productName,
       unitPrice: product?.unitPrice ? String(product.unitPrice) : current.unitPrice
     }));
+  }
+
+  function startEditingSale(sale: RecentSale) {
+    setEditingSaleId(sale.id);
+    setEditingSale({
+      saleDate: String(sale.saleDate || "").slice(0, 10),
+      status: sale.status,
+      discount: String(sale.discount || 0),
+      notes: sale.notes || ""
+    });
+  }
+
+  async function saveQuickSaleEdit(saleId: string) {
+    if (!companyId) return;
+    setManualSaleStatus("Guardando edición rápida...");
+    const result = await apiJson<{ sale: Partial<RecentSale> }>("/api/sales", {
+      method: "PATCH",
+      body: JSON.stringify({ companyId, saleId, ...editingSale })
+    });
+    if (!result.ok) {
+      setManualSaleStatus(`No se pudo editar la venta: ${result.error}`);
+      return;
+    }
+    setRecentSales((current) => current.map((sale) => sale.id === saleId ? { ...sale, ...result.data.sale } : sale));
+    setEditingSaleId("");
+    setManualSaleStatus("Venta actualizada. KPIs y datos de IA recalculados.");
+    await loadDashboardData(companyId);
+    await loadSalesData(companyId);
+    await loadActivity(companyId);
   }
 
   async function submitManualSale(event: FormEvent<HTMLFormElement>) {
@@ -2307,24 +2392,60 @@ ${recommendedAction()}`;
                 <button className="primary-button micro-button" type="submit" disabled={!permissions.canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
               </div>
             </form>
-            <div className="recent-sales-list" aria-label="Ventas recientes registradas">
-              <div className="preview-heading"><span>Ventas recientes</span><button className="secondary-button" type="button" onClick={() => { void loadSalesData(); }}>Actualizar</button></div>
-              {recentSales.length ? recentSales.map((sale) => (
-                <article className="recent-sale-item" data-status={sale.status} key={sale.id}>
-                  <div>
-                    <strong>{sale.productName}</strong>
-                    <span>{sale.customerName} · {sale.channelName} · {formatShortDate(sale.saleDate)}</span>
-                  </div>
-                  <div>
-                    <strong>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(sale.total || 0))}</strong>
-                    <span>{sale.status}</span>
-                  </div>
-                </article>
-              )) : (
+            <div className="sales-list-panel" aria-label="Listado de ventas">
+              <div className="sales-list-heading">
+                <div>
+                  <span><BarChart3 aria-hidden="true" />Listado de ventas</span>
+                  <h3>Ventas registradas</h3>
+                  <p>Filtra por fecha, cliente, producto, canal, vendedor, estado o búsqueda libre. Usa edición rápida para corregir datos sin salir del dashboard.</p>
+                </div>
+                <div>
+                  <strong>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(filteredSalesTotal)}</strong>
+                  <span>{filteredSales.length} venta(s)</span>
+                </div>
+              </div>
+              <div className="sales-filter-grid">
+                <label><span>Desde</span><input type="date" value={salesFilters.startDate} onChange={(event) => updateSalesFilter("startDate", event.target.value)} /></label>
+                <label><span>Hasta</span><input type="date" value={salesFilters.endDate} onChange={(event) => updateSalesFilter("endDate", event.target.value)} /></label>
+                <label><span>Cliente</span><select value={salesFilters.customer} onChange={(event) => updateSalesFilter("customer", event.target.value)}><option value="">Todos</option>{salesCatalogs.customers.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+                <label><span>Producto</span><select value={salesFilters.product} onChange={(event) => updateSalesFilter("product", event.target.value)}><option value="">Todos</option>{salesCatalogs.products.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+                <label><span>Canal</span><select value={salesFilters.channel} onChange={(event) => updateSalesFilter("channel", event.target.value)}><option value="">Todos</option>{salesCatalogs.channels.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+                <label><span>Vendedor</span><select value={salesFilters.salesRep} onChange={(event) => updateSalesFilter("salesRep", event.target.value)}><option value="">Todos</option>{salesCatalogs.reps.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+                <label><span>Estado</span><select value={salesFilters.status} onChange={(event) => updateSalesFilter("status", event.target.value)}><option value="">Todos</option><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select></label>
+                <label className="sales-search-field"><span>Búsqueda</span><input value={salesFilters.search} onChange={(event) => updateSalesFilter("search", event.target.value)} placeholder="Buscar cliente, producto, canal o nota" /></label>
+                <button className="secondary-button" type="button" onClick={() => setSalesFilters({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" })}>Limpiar filtros</button>
+                <button className="secondary-button" type="button" onClick={() => { void loadSalesData(); }}>Actualizar</button>
+              </div>
+              {filteredSales.length ? (
+                <div className="sales-table-wrap">
+                  <table className="sales-table">
+                    <thead>
+                      <tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Canal</th><th>Vendedor</th><th>Estado</th><th>Total</th><th>Edición rápida</th></tr>
+                    </thead>
+                    <tbody>
+                      {filteredSales.map((sale) => {
+                        const isEditing = editingSaleId === sale.id;
+                        return (
+                          <tr data-status={sale.status} key={sale.id}>
+                            <td>{isEditing ? <input type="date" value={editingSale.saleDate} onChange={(event) => setEditingSale((current) => ({ ...current, saleDate: event.target.value }))} /> : formatShortDate(sale.saleDate)}</td>
+                            <td><strong>{sale.customerName}</strong><small>{sale.paymentMethodName}</small></td>
+                            <td><strong>{sale.productName}</strong><small>{Number(sale.quantity || 0)} x {new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(sale.unitPrice || 0))}</small></td>
+                            <td>{sale.channelName}</td>
+                            <td>{sale.salesRepName}</td>
+                            <td>{isEditing ? <select value={editingSale.status} onChange={(event) => setEditingSale((current) => ({ ...current, status: event.target.value as RecentSale["status"] }))}><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select> : <span className="sale-status-pill">{sale.status}</span>}</td>
+                            <td><strong>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(sale.total || 0))}</strong>{isEditing ? <input type="number" min="0" step="100" value={editingSale.discount} onChange={(event) => setEditingSale((current) => ({ ...current, discount: event.target.value }))} aria-label="Descuento" /> : <small>Desc. {new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(sale.discount || 0))}</small>}</td>
+                            <td>{isEditing ? <div className="quick-edit-controls"><input value={editingSale.notes} onChange={(event) => setEditingSale((current) => ({ ...current, notes: event.target.value }))} placeholder="Notas" /><button className="primary-button" type="button" onClick={() => { void saveQuickSaleEdit(sale.id); }}>Guardar</button><button className="secondary-button" type="button" onClick={() => setEditingSaleId("")}>Cancelar</button></div> : <button className="secondary-button" type="button" onClick={() => startEditingSale(sale)}>Editar</button>}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
                 <EmptyState
                   icon={ClipboardCheck}
-                  title="Todavía no hay ventas manuales"
-                  text="Registra la primera venta para construir historial comercial, alimentar KPIs y mejorar las sugerencias de la IA."
+                  title="No hay ventas con esos filtros"
+                  text="Ajusta la búsqueda o registra una venta manual para construir historial comercial y alimentar las sugerencias de IA."
                 />
               )}
             </div>

@@ -19,6 +19,7 @@ const allowedEventTypes = new Set([
   "payment_created",
   "payment_paid",
   "sale_created",
+  "sale_updated",
   "user_invited",
   "user_login",
   "onboarding_completed",

@@ -122,14 +122,27 @@ export async function GET(request: Request) {
                   sales_orders.sale_date AS "saleDate",
                   sales_orders.status,
                   sales_orders.total::text,
+                  sales_orders.discount_total::text AS "discount",
+                  sales_orders.notes,
+                  sales_order_items.quantity::text,
+                  sales_order_items.unit_price::text AS "unitPrice",
+                  sales_customers.id AS "customerId",
                   COALESCE(sales_customers.name, 'Cliente sin nombre') AS "customerName",
+                  sales_order_items.product_id AS "productId",
                   COALESCE(sales_order_items.description, 'Producto sin nombre') AS "productName",
-                  COALESCE(sales_channels.name, 'Canal no definido') AS "channelName"
+                  sales_channels.id AS "channelId",
+                  COALESCE(sales_channels.name, 'Canal no definido') AS "channelName",
+                  sales_reps.id AS "salesRepId",
+                  COALESCE(sales_reps.name, 'Sin vendedor') AS "salesRepName",
+                  sales_payment_methods.id AS "paymentMethodId",
+                  COALESCE(sales_payment_methods.name, 'Sin método') AS "paymentMethodName"
            FROM sales_orders
            LEFT JOIN sales_customers ON sales_customers.id = sales_orders.customer_id
            LEFT JOIN sales_channels ON sales_channels.id = sales_orders.channel_id
+           LEFT JOIN sales_reps ON sales_reps.id = sales_orders.sales_rep_id
+           LEFT JOIN sales_payment_methods ON sales_payment_methods.id = sales_orders.payment_method_id
            LEFT JOIN LATERAL (
-             SELECT description
+             SELECT description, product_id, quantity, unit_price
              FROM sales_order_items
              WHERE sales_order_items.order_id = sales_orders.id
              ORDER BY created_at ASC
@@ -137,7 +150,7 @@ export async function GET(request: Request) {
            ) sales_order_items ON TRUE
            WHERE sales_orders.company_id = $1
            ORDER BY sales_orders.sale_date DESC, sales_orders.created_at DESC
-           LIMIT 8`,
+           LIMIT 100`,
           [companyId]
         )
       ]);
@@ -301,6 +314,126 @@ export async function POST(request: Request) {
     });
 
     return ok(result, 201);
+  } catch (error) {
+    return fail(error, 400);
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const companyId = requiredString(body.companyId, "companyId");
+    const session = await requireCompanySession(request, companyId);
+    if (!session.ok) return session.response;
+    const saleId = requiredString(body.saleId, "saleId");
+    const status = body.status ? requiredString(body.status, "estado").toLowerCase() : null;
+    if (status && !allowedStatuses.has(status)) throw new Error(`Estado no permitido: ${status}`);
+    const saleDate = optionalTrim(body.saleDate);
+    const notes = typeof body.notes === "string" ? body.notes.trim() : null;
+    const discount = body.discount === undefined ? null : money(body.discount || 0, "descuento", 0);
+
+    const result = await transaction(async (client) => {
+      const current = await client.query(
+        `SELECT sales_orders.id,
+                sales_orders.status,
+                sales_orders.sale_date AS "saleDate",
+                sales_orders.notes,
+                sales_orders.discount_total AS "discount",
+                sales_order_items.id AS "itemId",
+                sales_order_items.description AS "productName",
+                sales_order_items.quantity,
+                sales_order_items.unit_price,
+                sales_products.stock,
+                sales_products.unit_cost
+         FROM sales_orders
+         LEFT JOIN LATERAL (
+           SELECT id, description, quantity, unit_price, product_id
+           FROM sales_order_items
+           WHERE order_id = sales_orders.id
+           ORDER BY created_at ASC
+           LIMIT 1
+         ) sales_order_items ON TRUE
+         LEFT JOIN sales_products ON sales_products.id = sales_order_items.product_id
+         WHERE sales_orders.id = $1 AND sales_orders.company_id = $2
+         LIMIT 1`,
+        [saleId, companyId]
+      );
+      const row = current.rows[0];
+      if (!row) throw new Error("Venta no encontrada.");
+
+      const quantity = Number(row.quantity || 0);
+      const unitPrice = Number(row.unit_price || 0);
+      const subtotal = quantity * unitPrice;
+      const discountTotal = Math.min(discount ?? Number(row.discount || 0), subtotal);
+      const total = Math.max(subtotal - discountTotal, 0);
+      const nextStatus = status || row.status;
+      const nextDate = saleDate || row.saleDate;
+      const nextNotes = notes ?? row.notes;
+      const unitCost = Number(row.unit_cost || 0);
+      const margin = total > 0 ? (((unitPrice - unitCost) * quantity - discountTotal) / total) * 100 : null;
+
+      await client.query(
+        `UPDATE sales_order_items
+         SET discount = $3,
+             total = $4
+         WHERE id = $1 AND company_id = $2`,
+        [row.itemId, companyId, discountTotal, total]
+      );
+
+      const sale = await client.query(
+        `UPDATE sales_orders
+         SET sale_date = $3::date,
+             status = $4,
+             discount_total = $5,
+             total = $6,
+             notes = $7,
+             updated_at = NOW()
+         WHERE id = $1 AND company_id = $2
+         RETURNING id,
+                   sale_date AS "saleDate",
+                   status,
+                   total::text,
+                   discount_total::text AS "discount",
+                   notes`,
+        [saleId, companyId, nextDate, nextStatus, discountTotal, total, nextNotes]
+      );
+
+      await client.query(
+        `UPDATE imported_data_rows
+         SET sale_date = $3::date,
+             sales = $4,
+             cash = $5,
+             margin = $6,
+             raw_data = raw_data || $7::jsonb
+         WHERE company_id = $1 AND duplicate_key = $2`,
+        [
+          companyId,
+          `manual-sale:${saleId}`,
+          nextDate,
+          nextStatus === "anulada" ? 0 : total,
+          nextStatus === "pagada" ? total : null,
+          margin,
+          JSON.stringify({ status: nextStatus, notes: nextNotes, discount: discountTotal })
+        ]
+      );
+
+      await client.query(
+        `INSERT INTO activity_events
+         (company_id, actor_user_id, event_type, entity_type, entity_id, title, description, severity, metadata)
+         VALUES ($1, $2, 'sale_updated', 'sales_orders', $3, 'Venta actualizada', $4, 'info', $5::jsonb)`,
+        [
+          companyId,
+          session.session.userId,
+          saleId,
+          `Se actualizó una venta por $${Math.round(total).toLocaleString("es-CO")}.`,
+          JSON.stringify({ total, status: nextStatus, discount: discountTotal })
+        ]
+      );
+
+      return sale.rows[0];
+    });
+
+    return ok({ sale: result });
   } catch (error) {
     return fail(error, 400);
   }

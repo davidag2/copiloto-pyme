@@ -7839,6 +7839,194 @@ h2 {
   font-weight: 800;
 }
 
+.sales-list-panel {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.sales-list-heading {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.sales-list-heading span,
+.sales-filter-grid span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sales-list-heading span {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.sales-list-heading span svg {
+  color: var(--brand-blue);
+  height: 17px;
+  width: 17px;
+}
+
+.sales-list-heading h3 {
+  color: var(--ink);
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.1;
+  margin: 6px 0;
+}
+
+.sales-list-heading p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+  max-width: 680px;
+}
+
+.sales-list-heading > div:last-child {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand-blue) 10%, var(--surface)), color-mix(in srgb, var(--green) 8%, var(--surface)));
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 18%, var(--line));
+  border-radius: 16px;
+  min-width: 180px;
+  padding: 12px;
+  text-align: right;
+}
+
+.sales-list-heading > div:last-child strong {
+  color: var(--ink);
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sales-filter-grid {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.sales-filter-grid label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.sales-filter-grid input,
+.sales-filter-grid select,
+.sales-table input,
+.sales-table select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  min-width: 0;
+  padding: 10px 11px;
+  width: 100%;
+}
+
+.sales-search-field {
+  grid-column: span 2;
+}
+
+.sales-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: auto;
+}
+
+.sales-table {
+  border-collapse: collapse;
+  min-width: 980px;
+  width: 100%;
+}
+
+.sales-table th,
+.sales-table td {
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.sales-table th {
+  background: color-mix(in srgb, var(--surface) 80%, var(--brand-blue) 5%);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.sales-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.sales-table tr[data-status="anulada"] {
+  opacity: 0.72;
+}
+
+.sales-table strong,
+.sales-table small {
+  display: block;
+}
+
+.sales-table strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.sales-table small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.sale-status-pill {
+  background: color-mix(in srgb, var(--brand-blue) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 24%, var(--line));
+  border-radius: 999px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 6px 9px;
+  text-transform: capitalize;
+}
+
+tr[data-status="pagada"] .sale-status-pill {
+  background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--green) 30%, var(--line));
+  color: var(--green);
+}
+
+tr[data-status="pendiente"] .sale-status-pill {
+  background: color-mix(in srgb, var(--amber) 13%, var(--surface));
+  border-color: color-mix(in srgb, var(--amber) 34%, var(--line));
+  color: #a16207;
+}
+
+tr[data-status="anulada"] .sale-status-pill {
+  background: color-mix(in srgb, var(--red) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--red) 30%, var(--line));
+  color: var(--red);
+}
+
+.quick-edit-controls {
+  display: grid;
+  gap: 7px;
+  min-width: 180px;
+}
+
 .sales-action-row {
   align-items: center;
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.08));
@@ -8615,6 +8803,7 @@ select,
   .ai-automation-actions,
   .ai-automation-card,
   .manual-sale-grid,
+  .sales-filter-grid,
   .sales-command-header,
   .sales-insight-grid,
   .real-trend-grid,
@@ -8623,9 +8812,19 @@ select,
   }
 
   .sales-command-header,
+  .sales-list-heading,
   .manual-sale-heading,
   .manual-sale-footer {
     display: grid;
+  }
+
+  .sales-list-heading > div:last-child {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .sales-search-field {
+    grid-column: auto;
   }
 
   .manual-sale-heading > strong {
