@@ -79,6 +79,7 @@ type DashboardKpis = {
   weeklySales: SalePoint[];
   products: Product[];
   rowCount: number;
+  range?: { startDate: string; endDate: string };
 };
 type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
@@ -475,6 +476,27 @@ function customDayCount(start: string, end: string) {
   return Math.min(Math.round((endDate - startDate) / 86_400_000) + 1, 60);
 }
 
+function dashboardRange(range: DateRangeMode, customRange: { start: string; end: string }) {
+  const end = new Date();
+  const start = new Date();
+  if (range === "today") {
+    return { startDate: toInputDate(end), endDate: toInputDate(end) };
+  }
+  if (range === "30d") {
+    start.setDate(end.getDate() - 29);
+    return { startDate: toInputDate(start), endDate: toInputDate(end) };
+  }
+  if (range === "month") {
+    start.setDate(1);
+    return { startDate: toInputDate(start), endDate: toInputDate(end) };
+  }
+  if (range === "custom") {
+    return { startDate: customRange.start, endDate: customRange.end };
+  }
+  start.setDate(end.getDate() - 6);
+  return { startDate: toInputDate(start), endDate: toInputDate(end) };
+}
+
 export default function Home() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
@@ -549,6 +571,7 @@ export default function Home() {
   const [notificationsStatus, setNotificationsStatus] = useState("Notificaciones listas.");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
+  const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
@@ -612,7 +635,6 @@ export default function Home() {
 
   useEffect(() => {
     if (companyId && authUser) {
-      void loadDashboardData(companyId);
       void loadTeam(companyId);
       void loadImportHistory(companyId);
       void loadAiSuggestions(companyId);
@@ -620,6 +642,12 @@ export default function Home() {
       void loadNotifications(companyId);
     }
   }, [companyId, authUser]);
+
+  useEffect(() => {
+    if (companyId && authUser) {
+      void loadDashboardData(companyId);
+    }
+  }, [companyId, authUser, dateRange, customRange.start, customRange.end]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
@@ -697,7 +725,7 @@ export default function Home() {
   ];
   const visibleNotifications = companyId && authUser ? notifications : fallbackNotifications;
 
-  const selectedSales = useMemo(() => salesForRange(weeklySales, dateRange, customRange), [weeklySales, dateRange, customRange]);
+  const selectedSales = useMemo(() => (kpiRowCount ? weeklySales : salesForRange(weeklySales, dateRange, customRange)), [weeklySales, dateRange, customRange, kpiRowCount]);
   const dateRangeLabel = rangeLabel(dateRange, customRange);
   const bestDay = selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]);
   const chartData = selectedSales.map((item, index) => {
@@ -856,6 +884,7 @@ export default function Home() {
   }
 
   function applyDashboardKpis(kpis: DashboardKpis) {
+    setKpiRowCount(kpis.rowCount);
     if (!kpis.rowCount) {
       setKpiSourceStatus("Sin filas reales importadas. KPIs en modo demo.");
       return;
@@ -863,7 +892,8 @@ export default function Home() {
     setMetrics(kpis.metrics);
     if (kpis.weeklySales.length) setWeeklySales(kpis.weeklySales);
     if (kpis.products.length) setProducts(kpis.products);
-    setKpiSourceStatus(`${kpis.rowCount} fila(s) reales desde imported_data_rows.`);
+    const rangeText = kpis.range ? ` del ${formatShortDate(kpis.range.startDate)} al ${formatShortDate(kpis.range.endDate)}` : "";
+    setKpiSourceStatus(`${kpis.rowCount} fila(s) reales${rangeText}.`);
   }
 
   function triggerMicroInteraction(action: Exclude<MicroAction, null>, message: string) {
@@ -900,7 +930,9 @@ export default function Home() {
 
   async function loadDashboardData(activeCompanyId = companyId) {
     if (!activeCompanyId) return;
-    const result = await apiJson<DashboardDataResponse>(`/api/companies/${activeCompanyId}/dashboard`, { method: "GET" });
+    const range = dashboardRange(dateRange, customRange);
+    const params = new URLSearchParams(range);
+    const result = await apiJson<DashboardDataResponse>(`/api/companies/${activeCompanyId}/dashboard?${params.toString()}`, { method: "GET" });
     if (!result.ok) {
       setKpiSourceStatus(`KPIs demo: ${result.error}`);
       return;

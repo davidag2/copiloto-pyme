@@ -19,15 +19,62 @@ function dayLabel(date: Date) {
   return ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"][date.getDay()];
 }
 
+function dayDiff(startDate: Date, endDate: Date) {
+  return Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000));
+}
+
+function chartLabel(date: Date, totalDays: number) {
+  if (totalDays > 10) return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+  return dayLabel(date);
+}
+
 function stockLabel(stock: number, minimumStock: number) {
   if (stock <= minimumStock) return "Critico";
   if (stock <= minimumStock * 2) return "Bajo";
   return "Normal";
 }
 
+function parseDateParam(value: string | null) {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
+
+function toSqlDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function resolveRange(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const today = new Date();
+  const fallbackStart = new Date();
+  fallbackStart.setDate(today.getDate() - 6);
+
+  const parsedEnd = parseDateParam(searchParams.get("endDate"));
+  const parsedStart = parseDateParam(searchParams.get("startDate"));
+  const end = parsedEnd || today;
+  const start = parsedStart || fallbackStart;
+
+  if (start > end) {
+    return {
+      startDate: toSqlDate(fallbackStart),
+      endDate: toSqlDate(today)
+    };
+  }
+
+  const maxStart = new Date(end);
+  maxStart.setDate(end.getDate() - 365);
+  return {
+    startDate: toSqlDate(start < maxStart ? maxStart : start),
+    endDate: toSqlDate(end)
+  };
+}
+
 export async function GET(request: Request, context: RouteContext) {
   try {
     const { companyId } = await context.params;
+    const { startDate, endDate } = resolveRange(request);
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
     const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, salesByDay, topProducts] = await Promise.all([
@@ -54,6 +101,7 @@ export async function GET(request: Request, context: RouteContext) {
            FROM imported_data_rows
            WHERE company_id = $1
              AND validation_errors = '[]'::jsonb
+             AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
          ),
          latest_cash AS (
            SELECT cash
@@ -70,8 +118,8 @@ export async function GET(request: Request, context: RouteContext) {
          ),
          summary AS (
            SELECT COUNT(*)::int AS row_count,
-                  COALESCE(SUM(sales) FILTER (WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'), 0) AS sales_30d,
-                  COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL AND metric_date >= CURRENT_DATE - INTERVAL '30 days'), 0) AS avg_margin
+                  COALESCE(SUM(sales), 0) AS sales_30d,
+                  COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL), 0) AS avg_margin
            FROM valid_rows
          )
          SELECT summary.row_count AS "rowCount",
@@ -84,7 +132,7 @@ export async function GET(request: Request, context: RouteContext) {
          LEFT JOIN latest_products ON TRUE
          WHERE companies.id = $1
          GROUP BY companies.id, summary.row_count, summary.sales_30d, summary.avg_margin`,
-        [companyId]
+        [companyId, startDate, endDate]
       ),
       query(
         `SELECT COALESCE(sale_date, created_at::date) AS "saleDate",
@@ -92,10 +140,10 @@ export async function GET(request: Request, context: RouteContext) {
          FROM imported_data_rows
          WHERE company_id = $1
            AND validation_errors = '[]'::jsonb
-           AND COALESCE(sale_date, created_at::date) >= CURRENT_DATE - INTERVAL '6 days'
+           AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
          GROUP BY "saleDate"
          ORDER BY "saleDate" ASC`,
-        [companyId]
+        [companyId, startDate, endDate]
       ),
       query(
         `WITH valid_rows AS (
@@ -104,12 +152,12 @@ export async function GET(request: Request, context: RouteContext) {
            FROM imported_data_rows
            WHERE company_id = $1
              AND validation_errors = '[]'::jsonb
+             AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
          ),
          sales_totals AS (
            SELECT product_name,
                   SUM(sales) AS total_sales
            FROM valid_rows
-           WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'
            GROUP BY product_name
          ),
          latest_stock AS (
@@ -125,7 +173,7 @@ export async function GET(request: Request, context: RouteContext) {
          LEFT JOIN latest_stock ON latest_stock.product_name = sales_totals.product_name AND latest_stock.rn = 1
          ORDER BY sales_totals.total_sales DESC
          LIMIT 4`,
-        [companyId]
+        [companyId, startDate, endDate]
       )
     ]);
 
@@ -136,12 +184,15 @@ export async function GET(request: Request, context: RouteContext) {
     const companyRow = company.rows[0] as { minimum_stock?: number };
     const minimumStock = Number(companyRow.minimum_stock || 0);
     const summary = kpiSummary.rows[0] || {};
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    const totalDays = dayDiff(start, end) + 1;
     const salesByDate = new Map(salesByDay.rows.map((row) => [new Date(row.saleDate as string).toISOString().slice(0, 10), toMillions(row.sales)]));
-    const weeklySales = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - index));
+    const weeklySales = Array.from({ length: totalDays }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
       const key = date.toISOString().slice(0, 10);
-      return { day: dayLabel(date), value: salesByDate.get(key) || 0 };
+      return { day: chartLabel(date, totalDays), value: salesByDate.get(key) || 0 };
     });
     const products = topProducts.rows.map((product) => {
       const stock = toNumber(product.stock);
@@ -165,7 +216,8 @@ export async function GET(request: Request, context: RouteContext) {
         },
         weeklySales,
         products,
-        rowCount: Number(summary.rowCount || 0)
+        rowCount: Number(summary.rowCount || 0),
+        range: { startDate, endDate }
       },
       alertRules: alertRules.rows,
       alerts: alerts.rows,
