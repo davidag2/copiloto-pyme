@@ -48,11 +48,12 @@ import {
   YAxis
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { evaluateBasicRules } from "@/lib/rule-engine";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
 type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
-type Alert = { level: "positive" | "warning" | "danger"; title: string; text: string };
+type Alert = { level: "positive" | "warning" | "danger"; title: string; text: string; metric?: string; status?: string };
 type Decision = {
   id: number | string;
   text: string;
@@ -670,20 +671,12 @@ export default function Home() {
   ];
 
   const alerts = useMemo<Alert[]>(() => {
-    const nextAlerts: Alert[] = [];
-    if (salesPercent < rules.sales) {
-      nextAlerts.push({ level: "danger", title: "Ventas bajo regla configurada", text: `Avance actual ${salesPercent}%. La regla exige minimo ${rules.sales}%.` });
-    }
-    if (cashDays(metrics.cash) < rules.cash) {
-      nextAlerts.push({ level: "warning", title: "Caja por debajo del minimo", text: `Cobertura estimada ${cashDays(metrics.cash)} dias. La regla exige ${rules.cash} dias.` });
-    }
-    if (metrics.margin < rules.margin) {
-      nextAlerts.push({ level: "warning", title: "Margen bruto bajo", text: `Margen actual ${metrics.margin.toFixed(1)}%. La regla exige ${rules.margin}%.` });
-    }
-    if (metrics.criticalStock > rules.stock) {
-      nextAlerts.push({ level: "danger", title: "Inventario critico supera el limite", text: `${metrics.criticalStock} SKU en riesgo. La regla permite hasta ${rules.stock}.` });
-    }
-    return nextAlerts.length ? nextAlerts : [{ level: "positive", title: "Reglas dentro de rango", text: "No hay alertas activas segun los umbrales configurados." }];
+    return evaluateBasicRules({
+      salesProgressPercent: salesPercent,
+      cashDays: cashDays(metrics.cash),
+      marginPercent: metrics.margin,
+      criticalStockCount: metrics.criticalStock
+    }, rules);
   }, [metrics, rules, salesPercent]);
   const criticalAlerts = alerts.filter((alert) => alert.level === "danger" || alert.level === "warning");
   const overallStatus = criticalAlerts.some((alert) => alert.level === "danger")
@@ -1345,18 +1338,21 @@ ${recommendedAction()}`;
       setPersistenceStatus("Modo demo local: crea o recupera una empresa antes de guardar alertas.");
       return;
     }
-    const results = await Promise.all(alerts.map((alert) => apiJson<EntityResponse<unknown>>("/api/alerts", {
+    const result = await apiJson<EntityResponse<unknown>>("/api/alerts", {
       method: "POST",
       body: JSON.stringify({
         companyId,
-        level: alert.level,
-        title: alert.title,
-        text: alert.text,
-        status: alert.level === "positive" ? "resolved" : "open"
+        engine: "basic",
+        metrics: {
+          salesProgressPercent: salesPercent,
+          cashDays: cashDays(metrics.cash),
+          marginPercent: metrics.margin,
+          criticalStockCount: metrics.criticalStock
+        },
+        rules
       })
-    })));
-    const failed = results.find((result) => !result.ok);
-    setPersistenceStatus(failed && !failed.ok ? `Modo demo local: ${failed.error}` : "Alertas guardadas en PostgreSQL.");
+    });
+    setPersistenceStatus(result.ok ? "Motor básico ejecutado y alertas guardadas en PostgreSQL." : `Modo demo local: ${result.error}`);
   }
 
   function downloadReport() {

@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { evaluateBasicRules } from "@/lib/rule-engine";
 import { requireCompanySession } from "@/lib/session";
 
 export async function GET(request: Request) {
@@ -27,6 +28,30 @@ export async function POST(request: Request) {
     const companyId = requiredString(body.companyId, "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
+
+    if (body.engine === "basic") {
+      const generatedAlerts = evaluateBasicRules({
+        salesProgressPercent: Number(body.metrics?.salesProgressPercent || 0),
+        cashDays: Number(body.metrics?.cashDays || 0),
+        marginPercent: Number(body.metrics?.marginPercent || 0),
+        criticalStockCount: Number(body.metrics?.criticalStockCount || 0)
+      }, {
+        sales: Number(body.rules?.sales || 70),
+        cash: Number(body.rules?.cash || 14),
+        margin: Number(body.rules?.margin || 30),
+        stock: Number(body.rules?.stock || 3)
+      });
+
+      const alerts = await Promise.all(generatedAlerts.map((alert) => query(
+        `INSERT INTO alerts (company_id, rule_id, level, title, text, status)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING *`,
+        [companyId, null, alert.level, alert.title, alert.text, alert.status]
+      )));
+
+      return ok({ alerts: alerts.map((alert) => alert.rows[0]) }, 201);
+    }
+
     const level = requiredString(body.level, "level");
     const title = requiredString(body.title, "title");
     const text = requiredString(body.text, "text");
