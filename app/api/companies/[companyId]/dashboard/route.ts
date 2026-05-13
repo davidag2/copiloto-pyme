@@ -104,7 +104,22 @@ export async function GET(request: Request, context: RouteContext) {
       query(`SELECT * FROM alert_rules WHERE company_id = $1 ORDER BY metric ASC`, [companyId]),
       query(`SELECT * FROM alerts WHERE company_id = $1 ORDER BY created_at DESC LIMIT 20`, [companyId]),
       query(`SELECT * FROM integrations WHERE company_id = $1 ORDER BY provider ASC`, [companyId]),
-      query(`SELECT * FROM decisions WHERE company_id = $1 ORDER BY decision_date DESC, created_at DESC LIMIT 50`, [companyId]),
+      query(
+        `SELECT id,
+                company_id AS "companyId",
+                text,
+                owner,
+                impact,
+                status,
+                decision_date AS "date",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt"
+         FROM decisions
+         WHERE company_id = $1
+         ORDER BY decision_date DESC, created_at DESC
+         LIMIT 50`,
+        [companyId]
+      ),
       query(`SELECT * FROM ai_suggestions WHERE company_id = $1 AND status <> 'descartada' ORDER BY generated_at DESC LIMIT 20`, [companyId]),
       query(`SELECT * FROM reports WHERE company_id = $1 ORDER BY created_at DESC LIMIT 20`, [companyId]),
       query(

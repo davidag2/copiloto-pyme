@@ -115,7 +115,7 @@ type Invitation = { id: string; email: string; role: string; status: string; exp
 type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; createdAt?: string; updatedAt?: string };
-type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[] };
+type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[] };
 type CsvColumnMapping = { fecha: string; producto: string; ventas: string; stock: string; caja: string; gastos: string; margen: string };
 type ImportBatch = {
   id: string;
@@ -949,6 +949,9 @@ export default function Home() {
     if (result.data.alertRules?.length) {
       setRules(thresholdsFromRules(result.data.alertRules, rules));
     }
+    if (result.data.decisions) {
+      setDecisions(result.data.decisions);
+    }
     if (result.data.kpis) applyDashboardKpis(result.data.kpis);
   }
 
@@ -1293,19 +1296,61 @@ export default function Home() {
     setRecommendation("Decision registrada. Dale seguimiento desde el historial para medir si genera resultado.");
   }
 
+  async function updateDecisionStatus(decisionId: Decision["id"], status: Decision["status"]) {
+    setActiveDecisionId(decisionId);
+    setDecisions((current) => current.map((decision) => decision.id === decisionId ? { ...decision, status } : decision));
+    if (!companyId || typeof decisionId !== "string") {
+      triggerMicroInteraction("decision", "Estado actualizado en modo local.");
+      return;
+    }
+
+    const result = await apiJson<{ decision: Decision }>("/api/decisions", {
+      method: "PATCH",
+      body: JSON.stringify({ companyId, decisionId, status })
+    });
+
+    if (result.ok) {
+      setDecisions((current) => current.map((decision) => decision.id === decisionId ? result.data.decision : decision));
+      setPersistenceStatus("Estado de decisión actualizado en PostgreSQL.");
+      triggerMicroInteraction("decision", "Estado de decisión actualizado.");
+    } else {
+      setPersistenceStatus(`No se pudo actualizar decisión: ${result.error}`);
+    }
+  }
+
   async function generateReport() {
     triggerMicroInteraction("report", `Generando reporte ${reportSettings.frequency.toLowerCase()}...`);
+    const dashboardSnapshot = {
+      range: dateRangeLabel,
+      metrics,
+      salesPercent,
+      cashDays: cashDays(metrics.cash),
+      connectedIntegrations,
+      openDecisions,
+      alerts: alerts.map((alert) => ({ title: alert.title, text: alert.text, level: alert.level })),
+      topProducts: products.slice(0, 4),
+      weeklyTotal,
+      weeklyVariation,
+      bestDay,
+      recommendation: recommendedAction()
+    };
     const text = `Reporte ${reportSettings.frequency} - ${customer.companyName}
 Canal: ${reportSettings.channel}
 Destinatario: ${reportSettings.recipient}
+Rango: ${dateRangeLabel}
 
 Resumen ejecutivo
 - Ventas: ${formatMoney(metrics.sales)} (${salesPercent}% de la meta ${formatGoal(customer.monthlyGoal)})
 - Caja: ${formatMoney(metrics.cash)} (${cashDays(metrics.cash)} dias estimados)
 - Margen: ${metrics.margin.toFixed(1)}%
 - Inventario critico: ${metrics.criticalStock} SKU
+- Variacion ventas: ${weeklyVariation >= 0 ? "+" : ""}${weeklyVariation}% vs periodo anterior
+- Mejor dia: ${bestDay.day} con ${formatMoney(bestDay.value)}
 - Integraciones conectadas: ${connectedIntegrations}
 - Decisiones abiertas: ${openDecisions}
+
+Productos principales
+${products.slice(0, 4).map((product) => `- ${product.name}: ${product.sales} · stock ${product.stock}`).join("\n")}
 
 Alertas
 ${alerts.map((alert) => `- ${alert.title}: ${alert.text}`).join("\n")}
@@ -1322,6 +1367,7 @@ ${recommendedAction()}`;
           channel: reportSettings.channel,
           recipient: reportSettings.recipient,
           content: text,
+          dashboardSnapshot,
           status: "draft"
         })
       });
@@ -2132,7 +2178,7 @@ ${recommendedAction()}`;
                 {decisions.length ? decisions.map((decision) => (
                   <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}>
                     <div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div>
-                    <select value={decision.status} onChange={(event) => setDecisions((current) => current.map((item) => item.id === decision.id ? { ...item, status: event.target.value as Decision["status"] } : item))}><option>Pendiente</option><option>En curso</option><option>Completada</option></select>
+                    <select value={decision.status} onChange={(event) => { void updateDecisionStatus(decision.id, event.target.value as Decision["status"]); }}><option>Pendiente</option><option>En curso</option><option>Completada</option></select>
                   </div>
                 )) : (
                   <EmptyState
