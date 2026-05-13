@@ -201,6 +201,36 @@ type SmartAction = {
   buttonLabel: string;
   featured?: boolean;
 };
+type SalesCatalogOption = { id: string; name: string; unitPrice?: string | number };
+type RecentSale = {
+  id: string;
+  saleDate: string;
+  customerName: string;
+  productName: string;
+  channelName: string;
+  status: "pagada" | "pendiente" | "anulada";
+  total: string | number;
+};
+type SalesCatalogs = {
+  customers: SalesCatalogOption[];
+  products: SalesCatalogOption[];
+  channels: SalesCatalogOption[];
+  reps: SalesCatalogOption[];
+  paymentMethods: SalesCatalogOption[];
+};
+type ManualSaleForm = {
+  saleDate: string;
+  customerName: string;
+  productName: string;
+  quantity: string;
+  unitPrice: string;
+  discount: string;
+  channelName: string;
+  salesRepName: string;
+  paymentMethodName: string;
+  status: "pagada" | "pendiente" | "anulada";
+  notes: string;
+};
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -337,6 +367,7 @@ function activityIcon(eventType: string, severity: ActivityEventRow["severity"])
   if (eventType.startsWith("integration")) return Link2;
   if (eventType.startsWith("report")) return FileText;
   if (eventType.startsWith("payment")) return WalletCards;
+  if (eventType.startsWith("sale")) return BarChart3;
   if (eventType.startsWith("user")) return Users;
   if (eventType.startsWith("onboarding")) return CheckCircle2;
   return Clock3;
@@ -430,6 +461,19 @@ const initialIntegrations: Integration[] = [
 const formatMoney = (value: number) => `$${value.toFixed(1)}M`;
 const formatGoal = (value: number) => `$${(value / 1_000_000).toFixed(1)}M`;
 const cashDays = (cash: number) => Math.round(cash / 1.55);
+const initialManualSaleForm = (): ManualSaleForm => ({
+  saleDate: toInputDate(new Date()),
+  customerName: "",
+  productName: "",
+  quantity: "1",
+  unitPrice: "",
+  discount: "0",
+  channelName: "",
+  salesRepName: "",
+  paymentMethodName: "",
+  status: "pagada",
+  notes: ""
+});
 const formatCopCompact = (value: number) => {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
@@ -579,6 +623,16 @@ export default function Home() {
   const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
   const [notificationsStatus, setNotificationsStatus] = useState("Notificaciones listas.");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [salesCatalogs, setSalesCatalogs] = useState<SalesCatalogs>({
+    customers: [],
+    products: [],
+    channels: [],
+    reps: [],
+    paymentMethods: []
+  });
+  const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
+  const [manualSaleForm, setManualSaleForm] = useState<ManualSaleForm>(() => initialManualSaleForm());
+  const [manualSaleStatus, setManualSaleStatus] = useState("Registra ventas manuales para alimentar el dashboard y la IA.");
   const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
   const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
@@ -649,6 +703,7 @@ export default function Home() {
       void loadAiSuggestions(companyId);
       void loadActivity(companyId);
       void loadNotifications(companyId);
+      void loadSalesData(companyId);
     }
   }, [companyId, authUser]);
 
@@ -998,6 +1053,71 @@ export default function Home() {
     setNotificationsStatus(result.data.notifications.length
       ? `${result.data.unreadCount} notificación(es) sin leer.`
       : "Sin notificaciones reales todavía.");
+  }
+
+  async function loadSalesData(activeCompanyId = companyId) {
+    if (!activeCompanyId) return;
+    const result = await apiJson<{ catalogs: SalesCatalogs; recentSales: RecentSale[] }>(`/api/sales?companyId=${activeCompanyId}`, { method: "GET" });
+    if (!result.ok) {
+      setManualSaleStatus(`Ventas en modo local: ${result.error}`);
+      return;
+    }
+    setSalesCatalogs(result.data.catalogs);
+    setRecentSales(result.data.recentSales);
+    setManualSaleStatus(result.data.recentSales.length
+      ? `${result.data.recentSales.length} venta(s) recientes cargadas desde PostgreSQL.`
+      : "Listo para registrar la primera venta manual.");
+
+    setManualSaleForm((current) => ({
+      ...current,
+      channelName: current.channelName || result.data.catalogs.channels[0]?.name || "",
+      salesRepName: current.salesRepName || result.data.catalogs.reps[0]?.name || authUser?.name || "",
+      paymentMethodName: current.paymentMethodName || result.data.catalogs.paymentMethods[0]?.name || ""
+    }));
+  }
+
+  function updateManualSaleField<K extends keyof ManualSaleForm>(field: K, value: ManualSaleForm[K]) {
+    setManualSaleForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function selectProductForManualSale(productName: string) {
+    const product = salesCatalogs.products.find((item) => item.name === productName);
+    setManualSaleForm((current) => ({
+      ...current,
+      productName,
+      unitPrice: product?.unitPrice ? String(product.unitPrice) : current.unitPrice
+    }));
+  }
+
+  async function submitManualSale(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!companyId) {
+      setManualSaleStatus("Inicia sesión en una empresa para guardar ventas en PostgreSQL.");
+      return;
+    }
+    triggerMicroInteraction("sync", "Guardando venta...");
+    setManualSaleStatus("Guardando venta manual...");
+    const result = await apiJson<{ sale: RecentSale }>("/api/sales", {
+      method: "POST",
+      body: JSON.stringify({ companyId, ...manualSaleForm })
+    });
+    if (!result.ok) {
+      setManualSaleStatus(`No se pudo registrar la venta: ${result.error}`);
+      return;
+    }
+    setRecentSales((current) => [result.data.sale, ...current].slice(0, 8));
+    setManualSaleForm((current) => ({
+      ...initialManualSaleForm(),
+      channelName: current.channelName,
+      salesRepName: current.salesRepName,
+      paymentMethodName: current.paymentMethodName
+    }));
+    setManualSaleStatus("Venta registrada. El dashboard y la IA ya pueden usar este dato.");
+    setPersistenceStatus("Venta manual guardada en PostgreSQL.");
+    setRecommendation("Nueva venta registrada. Revisa tendencia, caja y productos para detectar oportunidades.");
+    await loadDashboardData(companyId);
+    await loadSalesData(companyId);
+    await loadActivity(companyId);
   }
 
   async function markNotificationsRead() {
@@ -2114,6 +2234,99 @@ ${recommendedAction()}`;
                   </article>
                 );
               })}
+            </div>
+            <form className="manual-sale-form" onSubmit={submitManualSale}>
+              <div className="manual-sale-heading">
+                <div>
+                  <span><ClipboardCheck aria-hidden="true" />Registro manual</span>
+                  <h3>Registrar una venta</h3>
+                  <p>Captura ventas del día cuando no vienen de CSV o integración. Copiloto las usa para métricas, alertas y recomendaciones.</p>
+                </div>
+                <strong>{manualSaleStatus}</strong>
+              </div>
+              <div className="manual-sale-grid">
+                <label>
+                  <span>Fecha</span>
+                  <input type="date" value={manualSaleForm.saleDate} onChange={(event) => updateManualSaleField("saleDate", event.target.value)} disabled={!permissions.canRegisterSales} required />
+                </label>
+                <label>
+                  <span>Cliente</span>
+                  <input list="sales-customers-list" value={manualSaleForm.customerName} onChange={(event) => updateManualSaleField("customerName", event.target.value)} placeholder="Ej. Café Oriente" disabled={!permissions.canRegisterSales} required />
+                  <datalist id="sales-customers-list">{salesCatalogs.customers.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+                </label>
+                <label>
+                  <span>Producto o servicio</span>
+                  <input list="sales-products-list" value={manualSaleForm.productName} onChange={(event) => selectProductForManualSale(event.target.value)} placeholder="Ej. Panela Orgánica" disabled={!permissions.canRegisterSales} required />
+                  <datalist id="sales-products-list">{salesCatalogs.products.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+                </label>
+                <label>
+                  <span>Cantidad</span>
+                  <input type="number" min="0.01" step="0.01" value={manualSaleForm.quantity} onChange={(event) => updateManualSaleField("quantity", event.target.value)} disabled={!permissions.canRegisterSales} required />
+                </label>
+                <label>
+                  <span>Precio</span>
+                  <input type="number" min="0" step="100" value={manualSaleForm.unitPrice} onChange={(event) => updateManualSaleField("unitPrice", event.target.value)} placeholder="50000" disabled={!permissions.canRegisterSales} required />
+                </label>
+                <label>
+                  <span>Descuento</span>
+                  <input type="number" min="0" step="100" value={manualSaleForm.discount} onChange={(event) => updateManualSaleField("discount", event.target.value)} disabled={!permissions.canRegisterSales} />
+                </label>
+                <label>
+                  <span>Canal</span>
+                  <input list="sales-channels-list" value={manualSaleForm.channelName} onChange={(event) => updateManualSaleField("channelName", event.target.value)} placeholder="Mostrador" disabled={!permissions.canRegisterSales} required />
+                  <datalist id="sales-channels-list">{salesCatalogs.channels.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+                </label>
+                <label>
+                  <span>Vendedor</span>
+                  <input list="sales-reps-list" value={manualSaleForm.salesRepName} onChange={(event) => updateManualSaleField("salesRepName", event.target.value)} placeholder="Responsable" disabled={!permissions.canRegisterSales} required />
+                  <datalist id="sales-reps-list">{salesCatalogs.reps.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+                </label>
+                <label>
+                  <span>Método de pago</span>
+                  <input list="sales-payment-methods-list" value={manualSaleForm.paymentMethodName} onChange={(event) => updateManualSaleField("paymentMethodName", event.target.value)} placeholder="Efectivo" disabled={!permissions.canRegisterSales} required />
+                  <datalist id="sales-payment-methods-list">{salesCatalogs.paymentMethods.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+                </label>
+                <label>
+                  <span>Estado de pago</span>
+                  <select value={manualSaleForm.status} onChange={(event) => updateManualSaleField("status", event.target.value as ManualSaleForm["status"])} disabled={!permissions.canRegisterSales}>
+                    <option value="pagada">Pagada</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="anulada">Anulada</option>
+                  </select>
+                </label>
+                <label className="manual-sale-notes">
+                  <span>Notas</span>
+                  <textarea value={manualSaleForm.notes} onChange={(event) => updateManualSaleField("notes", event.target.value)} placeholder="Observaciones, entrega, condiciones o próximos pasos." disabled={!permissions.canRegisterSales} />
+                </label>
+              </div>
+              <div className="manual-sale-footer">
+                <div>
+                  <span>Total estimado</span>
+                  <strong>{Number.isFinite(Number(manualSaleForm.quantity) * Number(manualSaleForm.unitPrice) - Number(manualSaleForm.discount || 0)) ? new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Math.max((Number(manualSaleForm.quantity) * Number(manualSaleForm.unitPrice)) - Number(manualSaleForm.discount || 0), 0)) : "$0"}</strong>
+                </div>
+                <button className="primary-button micro-button" type="submit" disabled={!permissions.canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
+              </div>
+            </form>
+            <div className="recent-sales-list" aria-label="Ventas recientes registradas">
+              <div className="preview-heading"><span>Ventas recientes</span><button className="secondary-button" type="button" onClick={() => { void loadSalesData(); }}>Actualizar</button></div>
+              {recentSales.length ? recentSales.map((sale) => (
+                <article className="recent-sale-item" data-status={sale.status} key={sale.id}>
+                  <div>
+                    <strong>{sale.productName}</strong>
+                    <span>{sale.customerName} · {sale.channelName} · {formatShortDate(sale.saleDate)}</span>
+                  </div>
+                  <div>
+                    <strong>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(sale.total || 0))}</strong>
+                    <span>{sale.status}</span>
+                  </div>
+                </article>
+              )) : (
+                <EmptyState
+                  icon={ClipboardCheck}
+                  title="Todavía no hay ventas manuales"
+                  text="Registra la primera venta para construir historial comercial, alimentar KPIs y mejorar las sugerencias de la IA."
+                />
+              )}
             </div>
             <div className="trend-metrics">
               <div><span>Total semana</span><strong>{formatMoney(weeklyTotal)}</strong></div>

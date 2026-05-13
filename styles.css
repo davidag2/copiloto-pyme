@@ -7666,6 +7666,179 @@ h2 {
   color: #6d5dfc;
 }
 
+.manual-sale-form {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--brand-blue) 7%, transparent), color-mix(in srgb, var(--green) 6%, transparent)),
+    var(--surface-strong);
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 20%, var(--line));
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.manual-sale-heading {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.manual-sale-heading span,
+.manual-sale-footer span,
+.recent-sales-list .preview-heading span {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.manual-sale-heading span svg {
+  color: var(--brand-blue);
+  height: 17px;
+  width: 17px;
+}
+
+.manual-sale-heading h3 {
+  color: var(--ink);
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.1;
+  margin: 6px 0;
+}
+
+.manual-sale-heading p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+  max-width: 660px;
+}
+
+.manual-sale-heading > strong {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--brand-blue);
+  flex: 0 0 auto;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 260px;
+  padding: 9px 12px;
+}
+
+.manual-sale-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.manual-sale-grid label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.manual-sale-grid label > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.manual-sale-grid input,
+.manual-sale-grid select,
+.manual-sale-grid textarea {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  min-width: 0;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.manual-sale-grid textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.manual-sale-grid input:focus-visible,
+.manual-sale-grid select:focus-visible,
+.manual-sale-grid textarea:focus-visible {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-blue) 16%, transparent);
+  outline: none;
+}
+
+.manual-sale-notes {
+  grid-column: span 2;
+}
+
+.manual-sale-footer {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding-top: 14px;
+}
+
+.manual-sale-footer strong {
+  color: var(--ink);
+  display: block;
+  font-size: 22px;
+  margin-top: 3px;
+}
+
+.recent-sales-list {
+  display: grid;
+  gap: 10px;
+}
+
+.recent-sale-item {
+  align-items: center;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--brand-blue);
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 12px 14px;
+}
+
+.recent-sale-item[data-status="pagada"] {
+  border-left-color: var(--green);
+}
+
+.recent-sale-item[data-status="pendiente"] {
+  border-left-color: var(--amber);
+}
+
+.recent-sale-item[data-status="anulada"] {
+  border-left-color: var(--red);
+  opacity: 0.78;
+}
+
+.recent-sale-item strong,
+.recent-sale-item span {
+  display: block;
+}
+
+.recent-sale-item strong {
+  color: var(--ink);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.recent-sale-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .sales-action-row {
   align-items: center;
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 197, 94, 0.08));
@@ -8441,6 +8614,7 @@ select,
   .ai-activity-item,
   .ai-automation-actions,
   .ai-automation-card,
+  .manual-sale-grid,
   .sales-command-header,
   .sales-insight-grid,
   .real-trend-grid,
@@ -8448,8 +8622,23 @@ select,
     grid-template-columns: 1fr;
   }
 
-  .sales-command-header {
+  .sales-command-header,
+  .manual-sale-heading,
+  .manual-sale-footer {
     display: grid;
+  }
+
+  .manual-sale-heading > strong {
+    max-width: none;
+  }
+
+  .manual-sale-notes {
+    grid-column: auto;
+  }
+
+  .recent-sale-item {
+    align-items: start;
+    grid-template-columns: 1fr;
   }
 
   .ai-automation-card .secondary-button {

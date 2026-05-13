@@ -43,6 +43,7 @@ export function roleCapabilities(role: string | null | undefined) {
     canManageRules: normalized === "propietario" || normalized === "administrador",
     canImportData: normalized === "propietario" || normalized === "administrador" || normalized === "contador",
     canGenerateReports: normalized === "propietario" || normalized === "administrador" || normalized === "contador",
+    canRegisterSales: normalized === "propietario" || normalized === "administrador" || normalized === "ventas",
     canRegisterDecisions: normalized !== "contador"
   };
 }
