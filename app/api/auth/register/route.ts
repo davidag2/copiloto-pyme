@@ -21,6 +21,15 @@ const defaultIntegrations = [
   ["WooCommerce", "Ecommerce", "Disponible", "Cada 3 horas"]
 ];
 
+const defaultSalesChannels = ["Mostrador", "WhatsApp", "Instagram", "Mercado Libre", "Sitio web"];
+const defaultPaymentMethods = [
+  ["Efectivo", "cash"],
+  ["Transferencia bancaria", "bank_transfer"],
+  ["Tarjeta", "card"],
+  ["Mercado Pago", "digital_wallet"],
+  ["Crédito cliente", "credit"]
+];
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -75,6 +84,31 @@ export async function POST(request: Request) {
           [companyId, ...integration]
         );
       }
+
+      for (const channel of defaultSalesChannels) {
+        await client.query(
+          `INSERT INTO sales_channels (company_id, name)
+           VALUES ($1, $2)
+           ON CONFLICT (company_id, name) DO NOTHING`,
+          [companyId, channel]
+        );
+      }
+
+      for (const method of defaultPaymentMethods) {
+        await client.query(
+          `INSERT INTO sales_payment_methods (company_id, name, type)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (company_id, name) DO NOTHING`,
+          [companyId, ...method]
+        );
+      }
+
+      await client.query(
+        `INSERT INTO sales_reps (company_id, user_id, name, email)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (company_id, email) DO NOTHING`,
+        [companyId, user.rows[0].id, ownerName, ownerEmail]
+      );
 
       const sessionToken = createPlainToken();
       const sessionTokenHash = hashToken(sessionToken);

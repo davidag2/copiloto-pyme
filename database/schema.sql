@@ -328,6 +328,107 @@ CREATE TABLE IF NOT EXISTS decisions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS sales_customers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  document_type TEXT,
+  document_number TEXT,
+  email TEXT,
+  phone TEXT,
+  city TEXT,
+  notes TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, document_number)
+);
+
+CREATE TABLE IF NOT EXISTS sales_products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sku TEXT,
+  type TEXT NOT NULL DEFAULT 'producto' CHECK (type IN ('producto', 'servicio')),
+  category TEXT,
+  unit_price NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  unit_cost NUMERIC(14, 2),
+  stock INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, sku)
+);
+
+CREATE TABLE IF NOT EXISTS sales_channels (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS sales_reps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, email)
+);
+
+CREATE TABLE IF NOT EXISTS sales_payment_methods (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'manual' CHECK (type IN ('cash', 'bank_transfer', 'card', 'digital_wallet', 'credit', 'manual')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS sales_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  customer_id UUID REFERENCES sales_customers(id) ON DELETE SET NULL,
+  channel_id UUID REFERENCES sales_channels(id) ON DELETE SET NULL,
+  sales_rep_id UUID REFERENCES sales_reps(id) ON DELETE SET NULL,
+  payment_method_id UUID REFERENCES sales_payment_methods(id) ON DELETE SET NULL,
+  sale_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  status TEXT NOT NULL DEFAULT 'pendiente' CHECK (status IN ('pagada', 'pendiente', 'anulada')),
+  subtotal NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  discount_total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  tax_total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT 'manual',
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sales_order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  order_id UUID NOT NULL REFERENCES sales_orders(id) ON DELETE CASCADE,
+  product_id UUID REFERENCES sales_products(id) ON DELETE SET NULL,
+  description TEXT NOT NULL,
+  quantity NUMERIC(14, 2) NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  unit_price NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  discount NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  tax NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS ai_suggestions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
@@ -454,6 +555,13 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE INDEX IF NOT EXISTS idx_imported_rows_company_date ON imported_data_rows(company_id, sale_date DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_company_status ON alerts(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sales_customers_company_name ON sales_customers(company_id, name);
+CREATE INDEX IF NOT EXISTS idx_sales_products_company_name ON sales_products(company_id, name);
+CREATE INDEX IF NOT EXISTS idx_sales_orders_company_date ON sales_orders(company_id, sale_date DESC);
+CREATE INDEX IF NOT EXISTS idx_sales_orders_company_status ON sales_orders(company_id, status, sale_date DESC);
+CREATE INDEX IF NOT EXISTS idx_sales_orders_customer ON sales_orders(customer_id, sale_date DESC);
+CREATE INDEX IF NOT EXISTS idx_sales_order_items_order ON sales_order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_sales_order_items_product ON sales_order_items(product_id);
 CREATE INDEX IF NOT EXISTS idx_ai_suggestions_company_status ON ai_suggestions(company_id, status, priority, suggested_for_date DESC);
 CREATE INDEX IF NOT EXISTS idx_ai_suggestions_company_category ON ai_suggestions(company_id, category, generated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ai_suggestions_assigned_to ON ai_suggestions(assigned_to, status, suggested_for_date DESC);
