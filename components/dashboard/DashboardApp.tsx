@@ -48,7 +48,8 @@ import {
   YAxis
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { evaluateBasicRules } from "@/lib/rule-engine";
+import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
+import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
 
 type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
@@ -113,7 +114,8 @@ type RecoveryResponse = { message: string; resetToken: string | null; expiresIn:
 type Invitation = { id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string };
 type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
-type DashboardDataResponse = { kpis?: DashboardKpis };
+type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; createdAt?: string; updatedAt?: string };
+type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[] };
 type CsvColumnMapping = { fecha: string; producto: string; ventas: string; stock: string; caja: string; gastos: string; margen: string };
 type ImportBatch = {
   id: string;
@@ -943,6 +945,9 @@ export default function Home() {
     if (!result.ok) {
       setKpiSourceStatus(`KPIs demo: ${result.error}`);
       return;
+    }
+    if (result.data.alertRules?.length) {
+      setRules(thresholdsFromRules(result.data.alertRules, rules));
     }
     if (result.data.kpis) applyDashboardKpis(result.data.kpis);
   }
