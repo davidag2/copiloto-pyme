@@ -4794,6 +4794,54 @@ select:focus-visible {
   padding: 14px;
 }
 
+.reports-sidebar {
+  display: grid;
+  gap: 14px;
+}
+
+.sales-report-breakdown {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.sales-report-group {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 9px;
+  padding-top: 12px;
+}
+
+.sales-report-group:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.sales-report-group > strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.sales-report-row {
+  display: grid;
+  gap: 3px;
+}
+
+.sales-report-row span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sales-report-row small,
+.sales-report-group > small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .report-settings label {
   color: var(--muted);
   display: grid;

@@ -89,6 +89,13 @@ type DashboardKpis = {
   };
   range?: { startDate: string; endDate: string };
 };
+type DashboardSalesReportRow = {
+  type: "vendedor" | "producto" | "cliente" | "canal";
+  name: string;
+  total: string | number;
+  orders: number;
+  quantity?: string | number | null;
+};
 type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
@@ -115,7 +122,7 @@ type Invitation = { id: string; email: string; role: string; status: string; exp
 type TeamMember = { id: string; companyId: string; name: string; email: string; role: string; status: string; lastLoginAt?: string | null; createdAt: string };
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; createdAt?: string; updatedAt?: string };
-type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[] };
+type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[]; salesReports?: DashboardSalesReportRow[] };
 type CsvColumnMapping = {
   fecha: string;
   cliente: string;
@@ -525,6 +532,7 @@ const initialIntegrations: Integration[] = [
 
 const formatMoney = (value: number) => `$${value.toFixed(1)}M`;
 const formatGoal = (value: number) => `$${(value / 1_000_000).toFixed(1)}M`;
+const formatCop = (value: number | string | null | undefined) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(value || 0));
 const cashDays = (cash: number) => Math.round(cash / 1.55);
 const initialManualSaleForm = (): ManualSaleForm => ({
   saleDate: toInputDate(new Date()),
@@ -696,6 +704,7 @@ export default function Home() {
   const [importValidation, setImportValidation] = useState<ImportValidation | null>(null);
   const [importHistory, setImportHistory] = useState<ImportBatch[]>([]);
   const [report, setReport] = useState("");
+  const [dashboardSalesReports, setDashboardSalesReports] = useState<DashboardSalesReportRow[]>([]);
   const [reportSettings, setReportSettings] = useState({ frequency: "Semanal", channel: "Email", recipient: "gerencia@empresa.com" });
   const [microAction, setMicroAction] = useState<MicroAction>(null);
   const [microFeedback, setMicroFeedback] = useState("");
@@ -937,6 +946,15 @@ export default function Home() {
     { label: "Canal más rentable", value: salesSummary.topChannel || "Sin canal", helper: "Mayor margen bruto", icon: Link2, tone: "purple" },
     { label: "Pendiente por cobrar", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.pendingReceivables || 0)), helper: "Ventas pendientes", icon: AlertTriangle, tone: Number(salesSummary.pendingReceivables || 0) > 0 ? "red" : "green" }
   ];
+  const salesReportGroups = dashboardSalesReports.reduce<Record<DashboardSalesReportRow["type"], DashboardSalesReportRow[]>>((groups, row) => {
+    groups[row.type].push(row);
+    return groups;
+  }, { vendedor: [], producto: [], cliente: [], canal: [] });
+  const salesReportHighlights = (["vendedor", "producto", "cliente", "canal"] as const).map((type) => ({
+    type,
+    label: type === "vendedor" ? "Por vendedor" : type === "producto" ? "Por producto" : type === "cliente" ? "Por cliente" : "Por canal",
+    rows: salesReportGroups[type].slice(0, 3)
+  }));
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -1137,6 +1155,9 @@ export default function Home() {
     }
     if (result.data.decisions) {
       setDecisions(result.data.decisions);
+    }
+    if (result.data.salesReports) {
+      setDashboardSalesReports(result.data.salesReports);
     }
     if (result.data.kpis) applyDashboardKpis(result.data.kpis);
   }
@@ -1674,6 +1695,10 @@ export default function Home() {
       openDecisions,
       alerts: alerts.map((alert) => ({ title: alert.title, text: alert.text, level: alert.level })),
       topProducts: products.slice(0, 4),
+      salesReports: salesReportHighlights.map((group) => ({
+        type: group.type,
+        rows: group.rows.map((row) => ({ name: row.name, total: row.total, orders: row.orders, quantity: row.quantity }))
+      })),
       weeklyTotal,
       weeklyVariation,
       bestDay,
@@ -1696,6 +1721,12 @@ Resumen ejecutivo
 
 Productos principales
 ${products.slice(0, 4).map((product) => `- ${product.name}: ${product.sales} · stock ${product.stock}`).join("\n")}
+
+Reportes de ventas
+${salesReportHighlights.map((group) => {
+  const rows = group.rows.length ? group.rows.map((row) => `  - ${row.name}: ${formatCop(row.total)} · ${row.orders} ventas${row.quantity ? ` · ${Number(row.quantity).toFixed(0)} unidades` : ""}`).join("\n") : "  - Sin datos en el rango";
+  return `- ${group.label}\n${rows}`;
+}).join("\n")}
 
 Alertas
 ${alerts.map((alert) => `- ${alert.title}: ${alert.text}`).join("\n")}
@@ -2333,20 +2364,36 @@ ${recommendedAction()}`;
 
         {visible.reports && (
           <section id="dashboardReportes" className="reports-panel dashboard-module-section">
-            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automaticos</span><h2>Envios para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}><FileText aria-hidden="true" />Generar reporte</button></div>
+            <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automáticos</span><h2>Envíos para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
-              <form className="report-settings">
-                <label>Frecuencia<select value={reportSettings.frequency} onChange={(event) => setReportSettings({ ...reportSettings, frequency: event.target.value })}><option>Diario</option><option>Semanal</option><option>Mensual</option></select></label>
-                <label>Canal<select value={reportSettings.channel} onChange={(event) => setReportSettings({ ...reportSettings, channel: event.target.value })}><option>Email</option><option>WhatsApp</option><option>Email y WhatsApp</option></select></label>
-                <label>Destinatario<input value={reportSettings.recipient} onChange={(event) => setReportSettings({ ...reportSettings, recipient: event.target.value })} /></label>
-                <button className="secondary-button" type="button" onClick={downloadReport}><FileText aria-hidden="true" />Descargar TXT</button>
-              </form>
+              <div className="reports-sidebar">
+                <form className="report-settings">
+                  <label>Frecuencia<select value={reportSettings.frequency} onChange={(event) => setReportSettings({ ...reportSettings, frequency: event.target.value })}><option>Diario</option><option>Semanal</option><option>Mensual</option></select></label>
+                  <label>Canal<select value={reportSettings.channel} onChange={(event) => setReportSettings({ ...reportSettings, channel: event.target.value })}><option>Email</option><option>WhatsApp</option><option>Email y WhatsApp</option></select></label>
+                  <label>Destinatario<input value={reportSettings.recipient} onChange={(event) => setReportSettings({ ...reportSettings, recipient: event.target.value })} /></label>
+                  <button className="secondary-button" type="button" onClick={downloadReport}><FileText aria-hidden="true" />Descargar TXT</button>
+                </form>
+                <div className="sales-report-breakdown">
+                  <div className="preview-heading"><span>Ventas del rango</span><strong>{dateRangeLabel}</strong></div>
+                  {salesReportHighlights.map((group) => (
+                    <article className="sales-report-group" key={group.type}>
+                      <strong>{group.label}</strong>
+                      {group.rows.length ? group.rows.map((row) => (
+                        <div className="sales-report-row" key={`${group.type}-${row.name}`}>
+                          <span>{row.name}</span>
+                          <small>{formatCop(row.total)} · {row.orders} ventas{row.quantity ? ` · ${Number(row.quantity).toFixed(0)} unidades` : ""}</small>
+                        </div>
+                      )) : <small>Sin datos en el rango.</small>}
+                    </article>
+                  ))}
+                </div>
+              </div>
               <div className="report-preview" data-motion={microAction === "report" ? "active" : undefined}>
                 <div className="preview-heading"><span>Vista previa</span><strong>Programado {reportSettings.frequency.toLowerCase()}</strong></div>
                 {report ? <pre>{report}</pre> : (
                   <EmptyState
                     icon={FileText}
-                    title="Todavia no hay reportes"
+                    title="Todavía no hay reportes"
                     text="Genera el primer resumen ejecutivo para revisar ventas, caja, alertas y decisiones abiertas en un solo documento."
                     action={<button className="primary-button" type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}>Generar primer reporte</button>}
                   />

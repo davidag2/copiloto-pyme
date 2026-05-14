@@ -90,7 +90,7 @@ export async function GET(request: Request, context: RouteContext) {
     const previousEndDate = toSqlDate(previousEnd);
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, previousSummary, metricsByDay, previousSalesByDay, topProducts] = await Promise.all([
+    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, previousSummary, metricsByDay, previousSalesByDay, topProducts, salesReports] = await Promise.all([
       query(`SELECT * FROM companies WHERE id = $1`, [companyId]),
       query(`SELECT id, name, email, role, created_at AS "createdAt" FROM users WHERE company_id = $1 ORDER BY created_at DESC`, [companyId]),
       query(
@@ -123,7 +123,15 @@ export async function GET(request: Request, context: RouteContext) {
       query(`SELECT * FROM ai_suggestions WHERE company_id = $1 AND status <> 'descartada' ORDER BY generated_at DESC LIMIT 20`, [companyId]),
       query(`SELECT * FROM reports WHERE company_id = $1 ORDER BY created_at DESC LIMIT 20`, [companyId]),
       query(
-        `WITH valid_rows AS (
+        `WITH valid_sales AS (
+           SELECT sale_date AS metric_date,
+                  total
+           FROM sales_orders
+           WHERE company_id = $1
+             AND status <> 'anulada'
+             AND sale_date BETWEEN $2::date AND $3::date
+         ),
+         valid_rows AS (
            SELECT *,
                   COALESCE(sale_date, created_at::date) AS metric_date
            FROM imported_data_rows
@@ -146,39 +154,52 @@ export async function GET(request: Request, context: RouteContext) {
          ),
          summary AS (
            SELECT COUNT(*)::int AS row_count,
-                  COALESCE(SUM(sales), 0) AS sales_30d,
-                  COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL), 0) AS avg_margin
+                  COALESCE(SUM(total), 0) AS sales_30d
+           FROM valid_sales
+         ),
+         margin_summary AS (
+           SELECT COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL), 0) AS avg_margin
            FROM valid_rows
          )
          SELECT summary.row_count AS "rowCount",
                 summary.sales_30d::text AS "sales30d",
                 COALESCE((SELECT cash FROM latest_cash), 0)::text AS "latestCash",
-                summary.avg_margin::text AS "avgMargin",
-                COALESCE(COUNT(*) FILTER (WHERE latest_products.rn = 1 AND latest_products.stock <= companies.minimum_stock), 0)::int AS "criticalStock"
+                margin_summary.avg_margin::text AS "avgMargin",
+                COALESCE(COUNT(*) FILTER (WHERE sales_products.stock <= companies.minimum_stock AND sales_products.status = 'active'), 0)::int AS "criticalStock"
          FROM companies
          CROSS JOIN summary
-         LEFT JOIN latest_products ON TRUE
+         CROSS JOIN margin_summary
+         LEFT JOIN sales_products ON sales_products.company_id = companies.id
          WHERE companies.id = $1
-         GROUP BY companies.id, summary.row_count, summary.sales_30d, summary.avg_margin`,
+         GROUP BY companies.id, summary.row_count, summary.sales_30d, margin_summary.avg_margin`,
         [companyId, startDate, endDate]
       ),
       query(
-        `WITH valid_rows AS (
-           SELECT *,
-                  COALESCE(sale_date, created_at::date) AS metric_date
-           FROM imported_data_rows
+        `WITH valid_sales AS (
+           SELECT sale_date AS metric_date,
+                  total
+           FROM sales_orders
            WHERE company_id = $1
-             AND validation_errors = '[]'::jsonb
-             AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
+             AND status <> 'anulada'
+             AND sale_date BETWEEN $2::date AND $3::date
          )
          SELECT COUNT(*)::int AS "rowCount",
-                COALESCE(SUM(sales), 0)::text AS sales,
-                COALESCE(AVG(margin) FILTER (WHERE margin IS NOT NULL), 0)::text AS margin
-         FROM valid_rows`,
+                COALESCE(SUM(total), 0)::text AS sales,
+                0::text AS margin
+         FROM valid_sales`,
         [companyId, previousStartDate, previousEndDate]
       ),
       query(
-        `WITH valid_rows AS (
+        `WITH sales_by_day AS (
+           SELECT sale_date AS metric_date,
+                  COALESCE(SUM(total), 0) AS sales
+           FROM sales_orders
+           WHERE company_id = $1
+             AND status <> 'anulada'
+             AND sale_date BETWEEN $2::date AND $3::date
+           GROUP BY sale_date
+         ),
+         valid_rows AS (
            SELECT imported_data_rows.*,
                   COALESCE(sale_date, imported_data_rows.created_at::date) AS metric_date,
                   companies.minimum_stock
@@ -195,57 +216,111 @@ export async function GET(request: Request, context: RouteContext) {
            FROM valid_rows
            WHERE cash IS NOT NULL
            ORDER BY metric_date, created_at DESC
+         ),
+         imported_by_day AS (
+           SELECT valid_rows.metric_date,
+                  COALESCE(MAX(latest_cash.cash), 0) AS cash,
+                  COALESCE(AVG(valid_rows.margin) FILTER (WHERE valid_rows.margin IS NOT NULL), 0) AS margin,
+                  COUNT(*) FILTER (WHERE valid_rows.stock <= valid_rows.minimum_stock)::int AS "criticalStock"
+           FROM valid_rows
+           LEFT JOIN latest_cash ON latest_cash.metric_date = valid_rows.metric_date
+           GROUP BY valid_rows.metric_date
          )
-         SELECT valid_rows.metric_date AS "saleDate",
-                COALESCE(SUM(valid_rows.sales), 0)::text AS sales,
-                COALESCE(MAX(latest_cash.cash), 0)::text AS cash,
-                COALESCE(AVG(valid_rows.margin) FILTER (WHERE valid_rows.margin IS NOT NULL), 0)::text AS margin,
-                COUNT(*) FILTER (WHERE valid_rows.stock <= valid_rows.minimum_stock)::int AS "criticalStock"
-         FROM valid_rows
-         LEFT JOIN latest_cash ON latest_cash.metric_date = valid_rows.metric_date
-         GROUP BY valid_rows.metric_date
-         ORDER BY valid_rows.metric_date ASC`,
+         SELECT COALESCE(sales_by_day.metric_date, imported_by_day.metric_date) AS "saleDate",
+                COALESCE(sales_by_day.sales, 0)::text AS sales,
+                COALESCE(imported_by_day.cash, 0)::text AS cash,
+                COALESCE(imported_by_day.margin, 0)::text AS margin,
+                COALESCE(imported_by_day."criticalStock", 0)::int AS "criticalStock"
+         FROM sales_by_day
+         FULL OUTER JOIN imported_by_day ON imported_by_day.metric_date = sales_by_day.metric_date
+         ORDER BY "saleDate" ASC`,
         [companyId, startDate, endDate]
       ),
       query(
-        `SELECT COALESCE(sale_date, created_at::date) AS "saleDate",
-                COALESCE(SUM(sales), 0)::text AS sales
-         FROM imported_data_rows
+        `SELECT sale_date AS "saleDate",
+                COALESCE(SUM(total), 0)::text AS sales
+         FROM sales_orders
          WHERE company_id = $1
-           AND validation_errors = '[]'::jsonb
-           AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
-         GROUP BY "saleDate"
-         ORDER BY "saleDate" ASC`,
+           AND status <> 'anulada'
+           AND sale_date BETWEEN $2::date AND $3::date
+         GROUP BY sale_date
+         ORDER BY sale_date ASC`,
         [companyId, previousStartDate, previousEndDate]
       ),
       query(
-        `WITH valid_rows AS (
-           SELECT *,
-                  COALESCE(sale_date, created_at::date) AS metric_date
-           FROM imported_data_rows
-           WHERE company_id = $1
-             AND validation_errors = '[]'::jsonb
-             AND COALESCE(sale_date, created_at::date) BETWEEN $2::date AND $3::date
-         ),
-         sales_totals AS (
-           SELECT product_name,
-                  SUM(sales) AS total_sales
-           FROM valid_rows
-           GROUP BY product_name
-         ),
-         latest_stock AS (
-           SELECT product_name,
-                  stock,
-                  ROW_NUMBER() OVER (PARTITION BY product_name ORDER BY metric_date DESC, created_at DESC) AS rn
-           FROM valid_rows
-         )
-         SELECT sales_totals.product_name AS name,
-                sales_totals.total_sales::text AS sales,
-                COALESCE(latest_stock.stock, 0)::int AS stock
-         FROM sales_totals
-         LEFT JOIN latest_stock ON latest_stock.product_name = sales_totals.product_name AND latest_stock.rn = 1
-         ORDER BY sales_totals.total_sales DESC
+        `SELECT sales_order_items.description AS name,
+                COALESCE(SUM(sales_order_items.total), 0)::text AS sales,
+                COALESCE(MAX(sales_products.stock), 0)::int AS stock
+         FROM sales_order_items
+         JOIN sales_orders ON sales_orders.id = sales_order_items.order_id
+         LEFT JOIN sales_products ON sales_products.id = sales_order_items.product_id
+         WHERE sales_orders.company_id = $1
+           AND sales_orders.status <> 'anulada'
+           AND sales_orders.sale_date BETWEEN $2::date AND $3::date
+         GROUP BY sales_order_items.description
+         ORDER BY SUM(sales_order_items.total) DESC
          LIMIT 4`,
+        [companyId, startDate, endDate]
+      ),
+      query(
+        `WITH valid_orders AS (
+           SELECT *
+           FROM sales_orders
+           WHERE company_id = $1
+             AND status <> 'anulada'
+             AND sale_date BETWEEN $2::date AND $3::date
+         ),
+         report_rows AS (
+           SELECT 'vendedor' AS type,
+                  COALESCE(sales_reps.name, 'Sin vendedor') AS name,
+                  COALESCE(SUM(valid_orders.total), 0) AS total,
+                  COUNT(*)::int AS orders,
+                  NULL::numeric AS quantity
+           FROM valid_orders
+           LEFT JOIN sales_reps ON sales_reps.id = valid_orders.sales_rep_id
+           GROUP BY sales_reps.name
+
+           UNION ALL
+
+           SELECT 'producto' AS type,
+                  COALESCE(sales_order_items.description, 'Producto sin nombre') AS name,
+                  COALESCE(SUM(sales_order_items.total), 0) AS total,
+                  COUNT(DISTINCT valid_orders.id)::int AS orders,
+                  COALESCE(SUM(sales_order_items.quantity), 0) AS quantity
+           FROM valid_orders
+           JOIN sales_order_items ON sales_order_items.order_id = valid_orders.id
+           GROUP BY sales_order_items.description
+
+           UNION ALL
+
+           SELECT 'cliente' AS type,
+                  COALESCE(sales_customers.name, 'Cliente sin nombre') AS name,
+                  COALESCE(SUM(valid_orders.total), 0) AS total,
+                  COUNT(*)::int AS orders,
+                  NULL::numeric AS quantity
+           FROM valid_orders
+           LEFT JOIN sales_customers ON sales_customers.id = valid_orders.customer_id
+           GROUP BY sales_customers.name
+
+           UNION ALL
+
+           SELECT 'canal' AS type,
+                  COALESCE(sales_channels.name, 'Canal no definido') AS name,
+                  COALESCE(SUM(valid_orders.total), 0) AS total,
+                  COUNT(*)::int AS orders,
+                  NULL::numeric AS quantity
+           FROM valid_orders
+           LEFT JOIN sales_channels ON sales_channels.id = valid_orders.channel_id
+           GROUP BY sales_channels.name
+         )
+         SELECT type,
+                name,
+                total::text,
+                orders,
+                quantity::text
+         FROM report_rows
+         ORDER BY total DESC
+         LIMIT 30`,
         [companyId, startDate, endDate]
       )
     ]);
@@ -314,7 +389,8 @@ export async function GET(request: Request, context: RouteContext) {
       integrations: integrations.rows,
       decisions: decisions.rows,
       aiSuggestions: aiSuggestions.rows,
-      reports: reports.rows
+      reports: reports.rows,
+      salesReports: salesReports.rows
     });
   } catch (error) {
     return fail(error);
