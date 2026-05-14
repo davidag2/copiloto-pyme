@@ -267,6 +267,11 @@ type ManualSaleForm = {
   status: "pagada" | "pendiente" | "anulada";
   notes: string;
 };
+type QuickSaleForm = {
+  productName: string;
+  unitPrice: string;
+  paymentMethodName: string;
+};
 type ChartTooltipProps = {
   active?: boolean;
   label?: string;
@@ -510,6 +515,11 @@ const initialManualSaleForm = (): ManualSaleForm => ({
   status: "pagada",
   notes: ""
 });
+const initialQuickSaleForm = (): QuickSaleForm => ({
+  productName: "",
+  unitPrice: "",
+  paymentMethodName: ""
+});
 const formatCopCompact = (value: number) => {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
@@ -677,7 +687,9 @@ export default function Home() {
     pendingReceivables: 0
   });
   const [manualSaleForm, setManualSaleForm] = useState<ManualSaleForm>(() => initialManualSaleForm());
+  const [quickSaleForm, setQuickSaleForm] = useState<QuickSaleForm>(() => initialQuickSaleForm());
   const [manualSaleStatus, setManualSaleStatus] = useState("Registra ventas manuales para alimentar el dashboard y la IA.");
+  const [quickSaleStatus, setQuickSaleStatus] = useState("Captura ventas simples en segundos.");
   const [salesFilters, setSalesFilters] = useState<SalesFilters>({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" });
   const [editingSaleId, setEditingSaleId] = useState("");
   const [editingSale, setEditingSale] = useState<EditingSale>({ saleDate: "", status: "pagada", discount: "0", notes: "" });
@@ -1154,10 +1166,18 @@ export default function Home() {
       salesRepName: current.salesRepName || result.data.catalogs.reps[0]?.name || authUser?.name || "",
       paymentMethodName: current.paymentMethodName || result.data.catalogs.paymentMethods[0]?.name || ""
     }));
+    setQuickSaleForm((current) => ({
+      ...current,
+      paymentMethodName: current.paymentMethodName || result.data.catalogs.paymentMethods[0]?.name || "Efectivo"
+    }));
   }
 
   function updateManualSaleField<K extends keyof ManualSaleForm>(field: K, value: ManualSaleForm[K]) {
     setManualSaleForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateQuickSaleField<K extends keyof QuickSaleForm>(field: K, value: QuickSaleForm[K]) {
+    setQuickSaleForm((current) => ({ ...current, [field]: value }));
   }
 
   function updateSalesFilter<K extends keyof SalesFilters>(field: K, value: SalesFilters[K]) {
@@ -1167,6 +1187,15 @@ export default function Home() {
   function selectProductForManualSale(productName: string) {
     const product = salesCatalogs.products.find((item) => item.name === productName);
     setManualSaleForm((current) => ({
+      ...current,
+      productName,
+      unitPrice: product?.unitPrice ? String(product.unitPrice) : current.unitPrice
+    }));
+  }
+
+  function selectProductForQuickSale(productName: string) {
+    const product = salesCatalogs.products.find((item) => item.name === productName);
+    setQuickSaleForm((current) => ({
       ...current,
       productName,
       unitPrice: product?.unitPrice ? String(product.unitPrice) : current.unitPrice
@@ -1228,6 +1257,49 @@ export default function Home() {
     setManualSaleStatus("Venta registrada. El dashboard y la IA ya pueden usar este dato.");
     setPersistenceStatus("Venta manual guardada en PostgreSQL.");
     setRecommendation("Nueva venta registrada. Revisa tendencia, caja y productos para detectar oportunidades.");
+    await loadDashboardData(companyId);
+    await loadSalesData(companyId);
+    await loadActivity(companyId);
+  }
+
+  async function submitQuickSale(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!companyId) {
+      setQuickSaleStatus("Inicia sesión en una empresa para guardar ventas rápidas.");
+      return;
+    }
+    if (!quickSaleForm.productName.trim() || !quickSaleForm.unitPrice) {
+      setQuickSaleStatus("Producto y valor son obligatorios.");
+      return;
+    }
+    triggerMicroInteraction("sync", "Guardando venta rápida...");
+    setQuickSaleStatus("Guardando y preparando el siguiente registro...");
+    const result = await apiJson<{ sale: RecentSale }>("/api/sales", {
+      method: "POST",
+      body: JSON.stringify({
+        companyId,
+        saleDate: toInputDate(new Date()),
+        customerName: "Venta rápida",
+        productName: quickSaleForm.productName,
+        quantity: "1",
+        unitPrice: quickSaleForm.unitPrice,
+        discount: "0",
+        channelName: salesCatalogs.channels[0]?.name || "Mostrador",
+        salesRepName: salesCatalogs.reps[0]?.name || authUser?.name || "Vendedor",
+        paymentMethodName: quickSaleForm.paymentMethodName || "Efectivo",
+        status: "pagada",
+        notes: "Captura rápida"
+      })
+    });
+    if (!result.ok) {
+      setQuickSaleStatus(`No se pudo guardar: ${result.error}`);
+      return;
+    }
+    setRecentSales((current) => [result.data.sale, ...current].slice(0, 100));
+    setQuickSaleForm((current) => ({ ...initialQuickSaleForm(), paymentMethodName: current.paymentMethodName }));
+    setQuickSaleStatus("Venta guardada. Sigue registrando la siguiente.");
+    setPersistenceStatus("Venta rápida guardada en PostgreSQL.");
+    setRecommendation("Nueva venta rápida registrada. Copiloto actualizará KPIs y señales comerciales.");
     await loadDashboardData(companyId);
     await loadSalesData(companyId);
     await loadActivity(companyId);
@@ -2348,6 +2420,32 @@ ${recommendedAction()}`;
                 );
               })}
             </div>
+            <form className="quick-sale-panel" onSubmit={submitQuickSale} aria-label="Carga manual rápida de venta">
+              <div className="quick-sale-copy">
+                <span><WalletCards aria-hidden="true" />Carga manual rápida</span>
+                <h3>Venta simple</h3>
+                <p>Para registrar ventas de mostrador sin llenar todo el formulario. Guardas y sigues capturando.</p>
+              </div>
+              <label>
+                <span>Producto</span>
+                <input list="quick-sales-products-list" value={quickSaleForm.productName} onChange={(event) => selectProductForQuickSale(event.target.value)} placeholder="Ej. Café Premium" disabled={!permissions.canRegisterSales} required />
+                <datalist id="quick-sales-products-list">{salesCatalogs.products.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+              </label>
+              <label>
+                <span>Valor</span>
+                <input type="number" min="0" step="100" value={quickSaleForm.unitPrice} onChange={(event) => updateQuickSaleField("unitPrice", event.target.value)} placeholder="25000" disabled={!permissions.canRegisterSales} required />
+              </label>
+              <label>
+                <span>Forma de pago</span>
+                <input list="quick-sales-payment-list" value={quickSaleForm.paymentMethodName} onChange={(event) => updateQuickSaleField("paymentMethodName", event.target.value)} placeholder="Efectivo" disabled={!permissions.canRegisterSales} required />
+                <datalist id="quick-sales-payment-list">{salesCatalogs.paymentMethods.map((item) => <option value={item.name} key={item.id} />)}</datalist>
+              </label>
+              <div className="quick-sale-action">
+                <strong>{Number(quickSaleForm.unitPrice || 0).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 })}</strong>
+                <button className="primary-button micro-button" type="submit" disabled={!permissions.canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar y seguir</button>
+                <small>{quickSaleStatus}</small>
+              </div>
+            </form>
             <form className="manual-sale-form" onSubmit={submitManualSale}>
               <div className="manual-sale-heading">
                 <div>

@@ -7666,6 +7666,88 @@ h2 {
   color: #6d5dfc;
 }
 
+.quick-sale-panel {
+  align-items: end;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--brand-blue) 12%, transparent), color-mix(in srgb, var(--green) 8%, transparent)),
+    var(--surface-strong);
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 22%, var(--line));
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1.1fr) repeat(3, minmax(130px, 0.8fr)) minmax(190px, 0.9fr);
+  padding: 16px;
+}
+
+.quick-sale-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.quick-sale-copy span,
+.quick-sale-panel label > span,
+.quick-sale-action small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.quick-sale-copy span {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.quick-sale-copy span svg {
+  color: var(--brand-blue);
+  height: 17px;
+  width: 17px;
+}
+
+.quick-sale-copy h3 {
+  color: var(--ink);
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.quick-sale-copy p {
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.quick-sale-panel label,
+.quick-sale-action {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.quick-sale-panel input {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  min-width: 0;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.quick-sale-panel input:focus-visible {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-blue) 16%, transparent);
+  outline: none;
+}
+
+.quick-sale-action strong {
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1;
+}
+
 .manual-sale-form {
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--brand-blue) 7%, transparent), color-mix(in srgb, var(--green) 6%, transparent)),
@@ -8879,6 +8961,7 @@ select,
   .ai-activity-item,
   .ai-automation-actions,
   .ai-automation-card,
+  .quick-sale-panel,
   .manual-sale-grid,
   .sales-filter-grid,
   .sales-summary-grid,
@@ -8891,6 +8974,7 @@ select,
 
   .sales-command-header,
   .sales-list-heading,
+  .quick-sale-panel,
   .manual-sale-heading,
   .manual-sale-footer {
     display: grid;
