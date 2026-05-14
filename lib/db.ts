@@ -10,10 +10,14 @@ function createPool() {
   if (!connectionString) {
     throw new Error("DATABASE_URL no esta configurada. Copia .env.example a .env y apunta a PostgreSQL.");
   }
+  const requiresSsl =
+    process.env.DATABASE_SSL === "true" ||
+    connectionString.includes("supabase.com") ||
+    connectionString.includes("sslmode=require");
 
   return new Pool({
     connectionString,
-    ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined
+    ssl: requiresSsl ? { rejectUnauthorized: false } : undefined
   });
 }
 
