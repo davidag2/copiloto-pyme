@@ -264,7 +264,7 @@ async function upsertSalesAnalysisSuggestion(companyId: string, suggestion: {
 }
 
 async function generateSalesAnalysisSuggestions(companyId: string) {
-  const [trend, lowRotation, frequentCustomer, weakChannel, discounts, pending, strongDay, promo] = await Promise.all([
+  const [trend, lowRotation, frequentCustomer, weakChannel, discounts, pending, strongDay, promo, weeklyProductDrop, channelComparison, topProductStock, inactiveCustomer] = await Promise.all([
     query<{ recentSales: string; previousSales: string; recentOrders: string }>(
       `SELECT COALESCE(SUM(total) FILTER (WHERE sale_date >= CURRENT_DATE - INTERVAL '30 days' AND status <> 'anulada'), 0)::text AS "recentSales",
               COALESCE(SUM(total) FILTER (WHERE sale_date < CURRENT_DATE - INTERVAL '30 days' AND sale_date >= CURRENT_DATE - INTERVAL '60 days' AND status <> 'anulada'), 0)::text AS "previousSales",
@@ -374,6 +374,96 @@ async function generateSalesAnalysisSuggestions(companyId: string) {
          AND sales_orders.sale_date >= CURRENT_DATE - INTERVAL '30 days'
        GROUP BY sales_order_items.description
        ORDER BY SUM(sales_order_items.total) DESC
+      LIMIT 1`,
+      [companyId]
+    ),
+    query<{ productName: string; currentSales: string; previousSales: string }>(
+      `WITH product_periods AS (
+         SELECT sales_order_items.description AS product_name,
+                COALESCE(SUM(sales_order_items.total) FILTER (WHERE sales_orders.sale_date >= CURRENT_DATE - INTERVAL '7 days'), 0) AS current_sales,
+                COALESCE(SUM(sales_order_items.total) FILTER (
+                  WHERE sales_orders.sale_date < CURRENT_DATE - INTERVAL '7 days'
+                    AND sales_orders.sale_date >= CURRENT_DATE - INTERVAL '14 days'
+                ), 0) AS previous_sales
+         FROM sales_order_items
+         JOIN sales_orders ON sales_orders.id = sales_order_items.order_id
+         WHERE sales_orders.company_id = $1
+           AND sales_orders.status <> 'anulada'
+           AND sales_orders.sale_date >= CURRENT_DATE - INTERVAL '14 days'
+         GROUP BY sales_order_items.description
+       )
+       SELECT product_name AS "productName",
+              current_sales::text AS "currentSales",
+              previous_sales::text AS "previousSales"
+       FROM product_periods
+       WHERE previous_sales > 0
+         AND current_sales < previous_sales * 0.9
+       ORDER BY ((previous_sales - current_sales) / previous_sales) DESC
+       LIMIT 1`,
+      [companyId]
+    ),
+    query<{ topChannel: string; topSales: string; physicalChannel: string; physicalSales: string }>(
+      `WITH channel_sales AS (
+         SELECT COALESCE(sales_channels.name, 'Canal no definido') AS channel_name,
+                COALESCE(SUM(sales_orders.total), 0) AS sales
+         FROM sales_orders
+         LEFT JOIN sales_channels ON sales_channels.id = sales_orders.channel_id
+         WHERE sales_orders.company_id = $1
+           AND sales_orders.status <> 'anulada'
+           AND sales_orders.sale_date >= CURRENT_DATE - INTERVAL '30 days'
+         GROUP BY COALESCE(sales_channels.name, 'Canal no definido')
+       ),
+       top_channel AS (
+         SELECT channel_name, sales
+         FROM channel_sales
+         ORDER BY sales DESC
+         LIMIT 1
+       ),
+       physical_channel AS (
+         SELECT channel_name, sales
+         FROM channel_sales
+         WHERE lower(channel_name) SIMILAR TO '%(tienda|fisica|física|mostrador|local)%'
+         ORDER BY sales DESC
+         LIMIT 1
+       )
+       SELECT COALESCE((SELECT channel_name FROM top_channel), '') AS "topChannel",
+              COALESCE((SELECT sales FROM top_channel), 0)::text AS "topSales",
+              COALESCE((SELECT channel_name FROM physical_channel), 'tienda física') AS "physicalChannel",
+              COALESCE((SELECT sales FROM physical_channel), 0)::text AS "physicalSales"`,
+      [companyId]
+    ),
+    query<{ productName: string; sales: string; stock: string }>(
+      `SELECT sales_products.name AS "productName",
+              COALESCE(SUM(sales_order_items.total), 0)::text AS sales,
+              COALESCE(MAX(sales_products.stock), 0)::text AS stock
+       FROM sales_order_items
+       JOIN sales_orders ON sales_orders.id = sales_order_items.order_id
+       LEFT JOIN sales_products ON sales_products.id = sales_order_items.product_id
+       WHERE sales_orders.company_id = $1
+         AND sales_orders.status <> 'anulada'
+         AND sales_orders.sale_date >= CURRENT_DATE - INTERVAL '30 days'
+       GROUP BY sales_products.id, sales_products.name
+       ORDER BY SUM(sales_order_items.total) DESC
+       LIMIT 1`,
+      [companyId]
+    ),
+    query<{ customerName: string; lastPurchase: string; sales: string }>(
+      `WITH customer_last_purchase AS (
+         SELECT sales_customers.name AS customer_name,
+                MAX(sales_orders.sale_date) AS last_purchase,
+                COALESCE(SUM(sales_orders.total), 0) AS sales
+         FROM sales_customers
+         JOIN sales_orders ON sales_orders.customer_id = sales_customers.id
+         WHERE sales_customers.company_id = $1
+           AND sales_orders.status <> 'anulada'
+         GROUP BY sales_customers.id, sales_customers.name
+       )
+       SELECT customer_name AS "customerName",
+              last_purchase::text AS "lastPurchase",
+              sales::text
+       FROM customer_last_purchase
+       WHERE last_purchase < CURRENT_DATE - INTERVAL '30 days'
+       ORDER BY sales DESC
        LIMIT 1`,
       [companyId]
     )
@@ -400,6 +490,26 @@ async function generateSalesAnalysisSuggestions(companyId: string) {
       impactValueCop: Math.round((previousSales - recentSales) * 0.35),
       confidence: 88,
       evidence: { recentSales, previousSales, dropPercent }
+    });
+  }
+
+  const weeklyDropRow = weeklyProductDrop.rows[0];
+  const currentProductSales = Number(weeklyDropRow?.currentSales || 0);
+  const previousProductSales = Number(weeklyDropRow?.previousSales || 0);
+  const productDropPercent = previousProductSales > 0 ? ((previousProductSales - currentProductSales) / previousProductSales) * 100 : 0;
+  if (weeklyDropRow?.productName && productDropPercent >= 10) {
+    suggestions.push({
+      analysisKey: "weekly_product_drop",
+      category: "ventas",
+      priority: productDropPercent >= 18 ? "high" : "medium",
+      title: "Producto bajó esta semana",
+      description: `${weeklyDropRow.productName} bajó ${percent(productDropPercent)} esta semana frente a la semana anterior.`,
+      recommendation: "Revisa precio, disponibilidad, exhibición y canal principal. Si el producto sigue siendo rentable, activa recordatorio o promoción puntual.",
+      impactType: "ventas_adicionales",
+      impactLabel: moneyLabel((previousProductSales - currentProductSales) * 0.45, "recuperables"),
+      impactValueCop: Math.round((previousProductSales - currentProductSales) * 0.45),
+      confidence: 84,
+      evidence: { ...weeklyDropRow, productDropPercent }
     });
   }
 
@@ -456,6 +566,25 @@ async function generateSalesAnalysisSuggestions(companyId: string) {
     });
   }
 
+  const channelComparisonRow = channelComparison.rows[0];
+  const topSales = Number(channelComparisonRow?.topSales || 0);
+  const physicalSales = Number(channelComparisonRow?.physicalSales || 0);
+  if (channelComparisonRow?.topChannel && topSales > 0 && channelComparisonRow.topChannel !== channelComparisonRow.physicalChannel && topSales > physicalSales * 1.15) {
+    suggestions.push({
+      analysisKey: "channel_outperforms_physical",
+      category: "ventas",
+      priority: "medium",
+      title: `${channelComparisonRow.topChannel} supera a ${channelComparisonRow.physicalChannel}`,
+      description: `El canal ${channelComparisonRow.topChannel} vende más que ${channelComparisonRow.physicalChannel} en los últimos 30 días.`,
+      recommendation: `Refuerza inventario, atención y campañas en ${channelComparisonRow.topChannel}. Mantén ${channelComparisonRow.physicalChannel} como apoyo, pero asigna más esfuerzo al canal ganador.`,
+      impactType: "ventas_adicionales",
+      impactLabel: moneyLabel((topSales - physicalSales) * 0.2, "de oportunidad por canal"),
+      impactValueCop: Math.round((topSales - physicalSales) * 0.2),
+      confidence: 79,
+      evidence: channelComparisonRow
+    });
+  }
+
   const discountRow = discounts.rows[0];
   const subtotal = Number(discountRow?.subtotal || 0);
   const discountTotal = Number(discountRow?.discountTotal || 0);
@@ -484,13 +613,48 @@ async function generateSalesAnalysisSuggestions(companyId: string) {
       category: "caja",
       priority: pendingTotal > recentSales * 0.2 ? "high" : "medium",
       title: "Ventas pendientes por cobrar",
-      description: `Tienes ${moneyLabel(pendingTotal, "pendientes por cobrar")} en ventas abiertas.`,
+      description: `Hay ${moneyLabel(pendingTotal, "pendientes por cobrar")} en ventas abiertas.`,
       recommendation: "Prioriza cobro hoy, separa clientes por vencimiento y evita entregar nuevos pedidos sin acuerdo de pago.",
       impactType: "ahorro",
       impactLabel: moneyLabel(pendingTotal * 0.25, "de caja recuperable"),
       impactValueCop: Math.round(pendingTotal * 0.25),
       confidence: 90,
       evidence: pendingRow
+    });
+  }
+
+  const topProductStockRow = topProductStock.rows[0];
+  if (topProductStockRow?.productName && Number(topProductStockRow.sales || 0) > 0) {
+    const stock = Number(topProductStockRow.stock || 0);
+    suggestions.push({
+      analysisKey: "increase_top_product_inventory",
+      category: "inventario",
+      priority: stock <= 5 ? "high" : "medium",
+      title: "Sube inventario del producto más vendido",
+      description: `${topProductStockRow.productName} es el producto más vendido del mes y tiene ${stock} unidades registradas.`,
+      recommendation: "Asegura reposición antes de impulsar campañas. Si el proveedor tarda, compra cobertura mínima para no perder ventas.",
+      impactType: "riesgo_evitado",
+      impactLabel: moneyLabel(Number(topProductStockRow.sales || 0) * 0.18, "en ventas protegidas"),
+      impactValueCop: Math.round(Number(topProductStockRow.sales || 0) * 0.18),
+      confidence: 83,
+      evidence: topProductStockRow
+    });
+  }
+
+  const inactiveCustomerRow = inactiveCustomer.rows[0];
+  if (inactiveCustomerRow?.customerName) {
+    suggestions.push({
+      analysisKey: "contact_inactive_customer",
+      category: "clientes",
+      priority: "medium",
+      title: "Contacta clientes sin compra reciente",
+      description: `${inactiveCustomerRow.customerName} no compra hace más de 30 días.`,
+      recommendation: "Envía mensaje de recompra con una oferta simple o producto recomendado según su historial.",
+      impactType: "ventas_adicionales",
+      impactLabel: moneyLabel(Number(inactiveCustomerRow.sales || 0) * 0.08, "potenciales por reactivación"),
+      impactValueCop: Math.round(Number(inactiveCustomerRow.sales || 0) * 0.08),
+      confidence: 77,
+      evidence: inactiveCustomerRow
     });
   }
 
