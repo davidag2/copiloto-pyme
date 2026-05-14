@@ -6,7 +6,7 @@ declare global {
 }
 
 function createPool() {
-  const connectionString = process.env.DATABASE_URL;
+  let connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL no esta configurada. Copia .env.example a .env y apunta a PostgreSQL.");
   }
@@ -14,6 +14,12 @@ function createPool() {
     process.env.DATABASE_SSL === "true" ||
     connectionString.includes("supabase.com") ||
     connectionString.includes("sslmode=require");
+
+  if (requiresSsl) {
+    const databaseUrl = new URL(connectionString);
+    databaseUrl.searchParams.delete("sslmode");
+    connectionString = databaseUrl.toString();
+  }
 
   return new Pool({
     connectionString,
