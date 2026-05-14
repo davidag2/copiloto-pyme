@@ -116,7 +116,23 @@ type TeamMember = { id: string; companyId: string; name: string; email: string; 
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; createdAt?: string; updatedAt?: string };
 type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[] };
-type CsvColumnMapping = { fecha: string; producto: string; ventas: string; stock: string; caja: string; gastos: string; margen: string };
+type CsvColumnMapping = {
+  fecha: string;
+  cliente: string;
+  producto: string;
+  ventas: string;
+  cantidad: string;
+  precio: string;
+  descuento: string;
+  stock: string;
+  caja: string;
+  gastos: string;
+  margen: string;
+  canal: string;
+  vendedor: string;
+  metodoPago: string;
+  estadoPago: string;
+};
 type ImportBatch = {
   id: string;
   fileName: string | null;
@@ -324,12 +340,20 @@ function inferCsvMapping(headers: string[]): CsvColumnMapping {
   const findColumn = (...candidates: string[]) => headers.find((header) => candidates.some((candidate) => header.includes(candidate))) || "";
   return {
     fecha: findColumn("fecha", "date", "dia"),
+    cliente: findColumn("cliente", "customer", "comprador", "tercero"),
     producto: findColumn("producto", "product", "item", "sku"),
     ventas: findColumn("ventas", "venta", "sales", "ingreso"),
+    cantidad: findColumn("cantidad", "qty", "quantity", "unidades"),
+    precio: findColumn("precio", "price", "valor_unitario", "unitario"),
+    descuento: findColumn("descuento", "discount", "rebaja"),
     stock: findColumn("stock", "inventario", "existencia"),
     caja: findColumn("caja", "cash"),
     gastos: findColumn("gastos", "expenses", "egresos"),
-    margen: findColumn("margen", "margin")
+    margen: findColumn("margen", "margin"),
+    canal: findColumn("canal", "channel", "origen"),
+    vendedor: findColumn("vendedor", "asesor", "responsable", "seller"),
+    metodoPago: findColumn("metodo", "método", "forma", "payment", "pago"),
+    estadoPago: findColumn("estado", "status", "pagada", "pendiente")
   };
 }
 
@@ -652,7 +676,23 @@ export default function Home() {
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [csvRows, setCsvRows] = useState<Array<Record<string, string>>>([]);
   const [csvFileName, setCsvFileName] = useState("");
-  const [csvMapping, setCsvMapping] = useState<CsvColumnMapping>({ fecha: "", producto: "", ventas: "", stock: "", caja: "", gastos: "", margen: "" });
+  const [csvMapping, setCsvMapping] = useState<CsvColumnMapping>({
+    fecha: "",
+    cliente: "",
+    producto: "",
+    ventas: "",
+    cantidad: "",
+    precio: "",
+    descuento: "",
+    stock: "",
+    caja: "",
+    gastos: "",
+    margen: "",
+    canal: "",
+    vendedor: "",
+    metodoPago: "",
+    estadoPago: ""
+  });
   const [importValidation, setImportValidation] = useState<ImportValidation | null>(null);
   const [importHistory, setImportHistory] = useState<ImportBatch[]>([]);
   const [report, setReport] = useState("");
@@ -1724,10 +1764,10 @@ ${recommendedAction()}`;
 
   function downloadTemplate() {
     const rows = [
-      "fecha,producto,ventas,stock,caja,gastos,margen",
-      "2026-04-23,Cafe Premium 500g,18400000,8,27600000,2200000,32",
-      "2026-04-24,Chocolate Familiar,12700000,24,28900000,1800000,29",
-      "2026-04-25,Panela Organica,9800000,3,27100000,1600000,35"
+      "fecha,cliente,producto,ventas,cantidad,precio,descuento,stock,caja,gastos,margen,canal,vendedor,metodo_pago,estado_pago",
+      "2026-04-23,Cafe Oriente,Cafe Premium 500g,18400000,20,920000,0,8,27600000,2200000,32,Mostrador,Andres Velez,Transferencia,pagada",
+      "2026-04-24,Dulce Hogar,Chocolate Familiar,12700000,10,1270000,0,24,28900000,1800000,29,WhatsApp,Equipo comercial,Efectivo,pagada",
+      "2026-04-25,Marketu,Panela Organica,9800000,14,700000,0,3,27100000,1600000,35,Instagram,Equipo comercial,Credito cliente,pendiente"
     ];
     const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1799,9 +1839,10 @@ ${recommendedAction()}`;
     setImportValidation(result.data.validation);
     setImportStatus(`${result.data.batch.validCount}/${result.data.batch.rowCount} fila(s) importadas`);
     setImportPreview(`${result.data.batch.errorCount} error(es), ${result.data.batch.duplicateCount} duplicado(s).`);
-    setPersistenceStatus("Importacion avanzada guardada en PostgreSQL.");
+    setPersistenceStatus("Importacion avanzada guardada en PostgreSQL y conectada al modulo Ventas.");
     await loadImportHistory(companyId);
     await loadDashboardData(companyId);
+    await loadSalesData(companyId);
   }
 
   async function reverseImport(batchId: string) {
@@ -1813,6 +1854,7 @@ ${recommendedAction()}`;
     setPersistenceStatus(result.ok ? "Importacion reversada y filas eliminadas." : `No se pudo reversar: ${result.error}`);
     await loadImportHistory(companyId);
     await loadDashboardData(companyId);
+    await loadSalesData(companyId);
   }
 
   function navigateModule(item: NavItem) {

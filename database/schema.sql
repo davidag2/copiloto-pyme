@@ -398,6 +398,7 @@ CREATE TABLE IF NOT EXISTS sales_payment_methods (
 CREATE TABLE IF NOT EXISTS sales_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  import_batch_id UUID REFERENCES imported_data_batches(id) ON DELETE SET NULL,
   customer_id UUID REFERENCES sales_customers(id) ON DELETE SET NULL,
   channel_id UUID REFERENCES sales_channels(id) ON DELETE SET NULL,
   sales_rep_id UUID REFERENCES sales_reps(id) ON DELETE SET NULL,
@@ -414,6 +415,8 @@ CREATE TABLE IF NOT EXISTS sales_orders (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE sales_orders ADD COLUMN IF NOT EXISTS import_batch_id UUID REFERENCES imported_data_batches(id) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS sales_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -559,6 +562,7 @@ CREATE INDEX IF NOT EXISTS idx_sales_customers_company_name ON sales_customers(c
 CREATE INDEX IF NOT EXISTS idx_sales_products_company_name ON sales_products(company_id, name);
 CREATE INDEX IF NOT EXISTS idx_sales_orders_company_date ON sales_orders(company_id, sale_date DESC);
 CREATE INDEX IF NOT EXISTS idx_sales_orders_company_status ON sales_orders(company_id, status, sale_date DESC);
+CREATE INDEX IF NOT EXISTS idx_sales_orders_import_batch ON sales_orders(import_batch_id);
 CREATE INDEX IF NOT EXISTS idx_sales_orders_customer ON sales_orders(customer_id, sale_date DESC);
 CREATE INDEX IF NOT EXISTS idx_sales_order_items_order ON sales_order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_sales_order_items_product ON sales_order_items(product_id);
