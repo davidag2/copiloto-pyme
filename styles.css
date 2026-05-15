@@ -5635,6 +5635,8 @@ select:focus-visible {
 }
 
 .main-panel {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   overflow-y: auto;
   padding: 30px 30px 106px;
@@ -5683,6 +5685,42 @@ select:focus-visible {
   font-size: 14px;
   font-weight: 800;
   margin: 0;
+}
+
+.active-module-pill {
+  align-items: center;
+  background: color-mix(in srgb, var(--brand-blue) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 18%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 10px;
+  padding: 7px 10px;
+}
+
+.dashboard-module-content {
+  display: grid;
+  flex: 1 0 auto;
+  gap: 20px;
+  min-height: calc(100vh - 250px);
+}
+
+.dashboard-module-content > .dashboard-module-section[data-active="true"] {
+  animation: moduleFadeIn 220ms ease both;
+}
+
+@keyframes moduleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .eyebrow {

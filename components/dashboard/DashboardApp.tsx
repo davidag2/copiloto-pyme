@@ -955,6 +955,7 @@ export default function Home() {
     label: type === "vendedor" ? "Por vendedor" : type === "producto" ? "Por producto" : type === "cliente" ? "Por cliente" : "Por canal",
     rows: salesReportGroups[type].slice(0, 3)
   }));
+  const activeNavItem = navItems.find((item) => item.id === activeModule) || navItems[0];
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -1888,8 +1889,11 @@ ${recommendedAction()}`;
     await loadSalesData(companyId);
   }
 
-  function navigateModule(item: NavItem) {
-    setActiveModule(item.id);
+  function navigateModule(moduleId: DashboardModule) {
+    setActiveModule(moduleId);
+    window.requestAnimationFrame(() => {
+      document.querySelector(".main-panel")?.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
 
   return (
@@ -1933,7 +1937,7 @@ ${recommendedAction()}`;
               <button
                 aria-current={activeModule === item.id ? "page" : undefined}
                 className={`nav-item ${activeModule === item.id ? "active" : ""}`}
-                onClick={() => navigateModule(item)}
+                onClick={() => navigateModule(item.id)}
                 type="button"
                 key={item.id}
               >
@@ -1958,6 +1962,7 @@ ${recommendedAction()}`;
           <div className="topbar-greeting">
             <h1>¡Hola, {userFirstName}! <Sparkles aria-hidden="true" /></h1>
             <p>{currentDateLabel}</p>
+            <span className="active-module-pill">Módulo: {activeNavItem.label}</span>
           </div>
           <div className="topbar-actions">
             <label className="topbar-range-control">
@@ -2046,6 +2051,7 @@ ${recommendedAction()}`;
           </div>
         </header>
 
+        <div className="dashboard-module-content" aria-live="polite">
         <section id="dashboardInicio" className="ai-home-hero dashboard-module-section" data-active={activeModule === "inicio"} data-status={overallStatusTone} aria-label="Inicio Copiloto AI">
           <div className="ai-home-copy">
             <span className="ai-home-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
@@ -2762,6 +2768,8 @@ ${recommendedAction()}`;
           {activeModule === "ventas" && visible.copilot && <article id="mobileCopilotAnchor" className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
 
+        </div>
+
         <footer className="app-context-bar" aria-label="Acciones contextuales del dashboard">
           <div>
             <span>Copiloto activo</span>
@@ -2781,10 +2789,10 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav">
-        <button aria-current={activeModule === "inicio" ? "page" : undefined} type="button" onClick={() => setActiveModule("inicio")}><Target aria-hidden="true" /><span>Inicio</span></button>
-        <button aria-current={activeModule === "ventas" ? "page" : undefined} type="button" onClick={() => setActiveModule("ventas")}><BarChart3 aria-hidden="true" /><span>Ventas</span></button>
-        <button aria-current={activeModule === "inventario" ? "page" : undefined} type="button" onClick={() => setActiveModule("inventario")}><Database aria-hidden="true" /><span>Datos</span></button>
-        <button aria-current={activeModule === "reportes" ? "page" : undefined} type="button" onClick={() => setActiveModule("reportes")}><FileText aria-hidden="true" /><span>Reportes</span></button>
+        <button aria-current={activeModule === "inicio" ? "page" : undefined} type="button" onClick={() => navigateModule("inicio")}><Target aria-hidden="true" /><span>Inicio</span></button>
+        <button aria-current={activeModule === "ventas" ? "page" : undefined} type="button" onClick={() => navigateModule("ventas")}><BarChart3 aria-hidden="true" /><span>Ventas</span></button>
+        <button aria-current={activeModule === "inventario" ? "page" : undefined} type="button" onClick={() => navigateModule("inventario")}><Database aria-hidden="true" /><span>Datos</span></button>
+        <button aria-current={activeModule === "reportes" ? "page" : undefined} type="button" onClick={() => navigateModule("reportes")}><FileText aria-hidden="true" /><span>Reportes</span></button>
       </nav>
     </div>
   );
