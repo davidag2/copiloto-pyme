@@ -38,12 +38,13 @@ import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { CashModule } from "@/components/dashboard/CashModule";
+import { ClientsModule } from "@/components/dashboard/ClientsModule";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { InventoryModule } from "@/components/dashboard/InventoryModule";
 import { SalesModule } from "@/components/dashboard/SalesModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
-import { canManageTeam, companyRoles, roleCapabilities, roleLabel } from "@/lib/roles";
+import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
 
 type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -2054,71 +2055,22 @@ ${recommendedAction()}`;
           formatMoney={formatMoney}
           />
 
-        <section className="team-panel dashboard-module-section" data-active={moduleVisibility.clientes}>
-            <div className="panel-heading">
-              <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
-              <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
-            </div>
-          <div className="tenant-scope-banner">
-            <strong>{customer.companyName}</strong>
-            <span>Todos los usuarios, invitaciones, reportes, decisiones, integraciones y datos importados quedan filtrados por <b>company_id</b>: {tenantShortId}.</span>
-          </div>
-          <div className="team-layout">
-            <div className="session-card">
-              <span>Sesion activa</span>
-              <strong>{authUser ? authUser.name : "Demo sin login"}</strong>
-              <small>{authUser ? `${authUser.email} · ${activeRoleLabel}` : "Crea una cuenta o inicia sesion para activar roles reales."}</small>
-              <div className="permission-list">
-                <span data-enabled={permissions.canManageTeam}>Equipo</span>
-                <span data-enabled={permissions.canImportData}>Importar</span>
-                <span data-enabled={permissions.canManageIntegrations}>Integraciones</span>
-                <span data-enabled={permissions.canGenerateReports}>Reportes</span>
-                <span data-enabled={permissions.canManageRules}>Reglas</span>
-              </div>
-              <button className="ghost-button" type="button" onClick={logout}>Cerrar sesion</button>
-            </div>
-            <form className="invite-form" onSubmit={inviteTeamMember}>
-              <label>Email del invitado<input type="email" value={inviteForm.email} onChange={(event) => setInviteForm({ ...inviteForm, email: event.target.value })} required /></label>
-              <label>Rol<select value={inviteForm.role} onChange={(event) => setInviteForm({ ...inviteForm, role: event.target.value })}>{companyRoles.filter((role) => role.value !== "propietario").map((role) => <option value={role.value} key={role.value}>{role.label}</option>)}</select></label>
-              <button className="primary-button" type="submit" disabled={!permissions.canManageTeam}>Invitar</button>
-              {inviteLink && <small>Link demo: {inviteLink}</small>}
-            </form>
-          </div>
-          <div className="role-matrix" aria-label="Permisos por rol">
-            {companyRoles.map((role) => {
-              const capability = roleCapabilities(role.value);
-              return (
-                <article key={role.value}>
-                  <strong>{role.label}</strong>
-                  <span>{role.description}</span>
-                  <small>{[
-                    capability.canManageTeam && "equipo",
-                    capability.canImportData && "datos",
-                    capability.canManageIntegrations && "integraciones",
-                    capability.canGenerateReports && "reportes",
-                    capability.canRegisterDecisions && "decisiones"
-                  ].filter(Boolean).join(" · ")}</small>
-                </article>
-              );
-            })}
-          </div>
-          <div className="team-grid">
-            {teamMembers.map((member) => (
-              <article className="team-member-card" data-status={member.status} key={member.id}>
-                <strong>{member.name}</strong>
-                <span>{member.email}</span>
-                <small>{roleLabel(member.role)} · {member.status}</small>
-              </article>
-            ))}
-            {invitations.map((invitation) => (
-              <article className="team-member-card" data-status={invitation.status} key={invitation.id}>
-                <strong>Invitacion pendiente</strong>
-                <span>{invitation.email}</span>
-                <small>{roleLabel(invitation.role)} · expira {new Date(invitation.expiresAt).toLocaleDateString("es-CO")}</small>
-              </article>
-            ))}
-          </div>
-        </section>
+        <ClientsModule
+          isActive={moduleVisibility.clientes}
+          companyName={customer.companyName}
+          tenantShortId={tenantShortId}
+          authUser={authUser}
+          activeRoleLabel={activeRoleLabel}
+          permissions={permissions}
+          inviteForm={inviteForm}
+          inviteLink={inviteLink}
+          teamMembers={teamMembers}
+          invitations={invitations}
+          onRefreshTeam={() => { void loadTeam(); }}
+          onLogout={() => { void logout(); }}
+          onInviteFormChange={setInviteForm}
+          onInviteTeamMember={inviteTeamMember}
+        />
 
         <section className="customizer-panel dashboard-module-section" data-active={moduleVisibility.configuracion}>
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
