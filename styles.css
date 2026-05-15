@@ -5590,6 +5590,11 @@ select:focus-visible {
   scroll-margin-top: 112px;
 }
 
+.dashboard-module-section[data-active="false"],
+.dashboard-module-panel[data-active="false"] {
+  display: none !important;
+}
+
 .tenant-card {
   margin-top: auto;
   padding: 16px;
