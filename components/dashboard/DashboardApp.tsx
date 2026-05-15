@@ -100,7 +100,7 @@ type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
 type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "reportes" | "alertas" | "configuracion";
-type NavItem = { id: DashboardModule; label: string; icon: LucideIcon; sectionId: string };
+type NavItem = { id: DashboardModule; label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
 type EntityResponse<T> = { [key: string]: T };
@@ -302,14 +302,14 @@ type ChartTooltipProps = {
 };
 
 const navItems: NavItem[] = [
-  { id: "inicio", label: "Inicio", icon: Target, sectionId: "dashboardInicio" },
-  { id: "ventas", label: "Ventas", icon: BarChart3, sectionId: "dashboardVentas" },
-  { id: "caja", label: "Caja", icon: WalletCards, sectionId: "dashboardCaja" },
-  { id: "inventario", label: "Inventario", icon: Boxes, sectionId: "dashboardInventario" },
-  { id: "clientes", label: "Clientes", icon: Users, sectionId: "dashboardClientes" },
-  { id: "reportes", label: "Reportes", icon: FileText, sectionId: "dashboardReportes" },
-  { id: "alertas", label: "Alertas", icon: AlertTriangle, sectionId: "dashboardAlertas" },
-  { id: "configuracion", label: "Configuración", icon: Settings2, sectionId: "dashboardConfiguracion" }
+  { id: "inicio", label: "Inicio", icon: Target },
+  { id: "ventas", label: "Ventas", icon: BarChart3 },
+  { id: "caja", label: "Caja", icon: WalletCards },
+  { id: "inventario", label: "Inventario", icon: Boxes },
+  { id: "clientes", label: "Clientes", icon: Users },
+  { id: "reportes", label: "Reportes", icon: FileText },
+  { id: "alertas", label: "Alertas", icon: AlertTriangle },
+  { id: "configuracion", label: "Configuración", icon: Settings2 }
 ];
 
 async function apiJson<T>(path: string, options: RequestInit): Promise<ApiResult<T>> {
@@ -1890,7 +1890,6 @@ ${recommendedAction()}`;
 
   function navigateModule(item: NavItem) {
     setActiveModule(item.id);
-    document.getElementById(item.sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -2782,10 +2781,10 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav">
-        <a href="#dashboardInicio"><Target aria-hidden="true" /><span>Inicio</span></a>
-        <a href="#dashboardVentas"><BarChart3 aria-hidden="true" /><span>Ventas</span></a>
-        <a href="#dashboardInventario"><Database aria-hidden="true" /><span>Datos</span></a>
-        <a href="#dashboardReportes"><FileText aria-hidden="true" /><span>Reportes</span></a>
+        <button aria-current={activeModule === "inicio" ? "page" : undefined} type="button" onClick={() => setActiveModule("inicio")}><Target aria-hidden="true" /><span>Inicio</span></button>
+        <button aria-current={activeModule === "ventas" ? "page" : undefined} type="button" onClick={() => setActiveModule("ventas")}><BarChart3 aria-hidden="true" /><span>Ventas</span></button>
+        <button aria-current={activeModule === "inventario" ? "page" : undefined} type="button" onClick={() => setActiveModule("inventario")}><Database aria-hidden="true" /><span>Datos</span></button>
+        <button aria-current={activeModule === "reportes" ? "page" : undefined} type="button" onClick={() => setActiveModule("reportes")}><FileText aria-hidden="true" /><span>Reportes</span></button>
       </nav>
     </div>
   );

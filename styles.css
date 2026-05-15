@@ -8913,11 +8913,16 @@ select,
     backdrop-filter: blur(18px);
   }
 
-  .mobile-quick-nav a {
+  .mobile-quick-nav button {
     align-items: center;
+    appearance: none;
+    background: transparent;
+    border: 0;
     border-radius: 8px;
     color: #dce7f3;
+    cursor: pointer;
     display: grid;
+    font: inherit;
     font-size: 12px;
     font-weight: 800;
     gap: 4px;
@@ -8933,8 +8938,9 @@ select,
     width: 19px;
   }
 
-  .mobile-quick-nav a:active,
-  .mobile-quick-nav a:hover {
+  .mobile-quick-nav button:active,
+  .mobile-quick-nav button:hover,
+  .mobile-quick-nav button[aria-current="page"] {
     background: rgba(255, 255, 255, 0.08);
     transform: translateY(-1px);
   }
