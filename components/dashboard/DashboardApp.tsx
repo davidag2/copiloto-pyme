@@ -956,6 +956,17 @@ export default function Home() {
     rows: salesReportGroups[type].slice(0, 3)
   }));
   const activeNavItem = navItems.find((item) => item.id === activeModule) || navItems[0];
+  const moduleVisibility = useMemo<Record<DashboardModule, boolean>>(() => ({
+    inicio: activeModule === "inicio",
+    ventas: activeModule === "ventas",
+    caja: activeModule === "caja",
+    inventario: activeModule === "inventario",
+    clientes: activeModule === "clientes",
+    reportes: activeModule === "reportes",
+    alertas: activeModule === "alertas",
+    configuracion: activeModule === "configuracion"
+  }), [activeModule]);
+  const isCommercialModule = moduleVisibility.ventas || moduleVisibility.alertas;
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -2052,7 +2063,7 @@ ${recommendedAction()}`;
         </header>
 
         <div className="dashboard-module-content" aria-live="polite">
-        <section className="ai-home-hero dashboard-module-section" data-active={activeModule === "inicio"} data-status={overallStatusTone} aria-label="Inicio Copiloto AI">
+        <section className="ai-home-hero dashboard-module-section" data-active={moduleVisibility.inicio} data-status={overallStatusTone} aria-label="Inicio Copiloto AI">
           <div className="ai-home-copy">
             <span className="ai-home-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
             <h2>Tu negocio, mejor cada día.</h2>
@@ -2106,7 +2117,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        <section className="ai-impact-section dashboard-module-section" data-active={activeModule === "inicio"} aria-label="Impacto de las sugerencias AI">
+        <section className="ai-impact-section dashboard-module-section" data-active={moduleVisibility.inicio} aria-label="Impacto de las sugerencias AI">
           <article className="ai-impact-chart-card">
             <div className="panel-heading">
               <div>
@@ -2212,7 +2223,7 @@ ${recommendedAction()}`;
           </article>
         </section>
 
-        {activeModule === "inicio" && showAutomationStrip && (
+        {moduleVisibility.inicio && showAutomationStrip && (
           <section className="ai-automation-strip smart-actions-bar" aria-label="Acciones inteligentes del dashboard">
             <div className="ai-automation-intro">
               <span><Sparkles aria-hidden="true" /></span>
@@ -2254,13 +2265,13 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section className="setup-summary dashboard-module-section" data-active={activeModule === "inicio"}>
+        <section className="setup-summary dashboard-module-section" data-active={moduleVisibility.inicio}>
           <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
           <div><span>Rol activo</span><strong>{activeRoleLabel}</strong></div>
           <div><span>Moneda</span><strong>{customer.currency.split(" - ")[0]}</strong></div>
           <div><span>Meta mensual</span><strong>{formatGoal(customer.monthlyGoal)}</strong></div>
         </section>
-        <p className="persistence-note dashboard-module-section" data-active={activeModule === "inicio"}>{persistenceStatus}</p>
+        <p className="persistence-note dashboard-module-section" data-active={moduleVisibility.inicio}>{persistenceStatus}</p>
         {microFeedback && (
           <div className="micro-feedback" data-action={microAction ?? undefined}>
             <CheckCircle2 aria-hidden="true" />
@@ -2268,7 +2279,7 @@ ${recommendedAction()}`;
           </div>
         )}
 
-        <section className="team-panel dashboard-module-section" data-active={activeModule === "clientes"}>
+        <section className="team-panel dashboard-module-section" data-active={moduleVisibility.clientes}>
             <div className="panel-heading">
               <div><span><Link2 aria-hidden="true" />Autenticacion y equipo</span><h2>Roles por empresa</h2></div>
               <button className="secondary-button" type="button" onClick={() => { void loadTeam(); }}>Actualizar equipo</button>
@@ -2334,7 +2345,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        <section className="customizer-panel dashboard-module-section" data-active={activeModule === "configuracion"}>
+        <section className="customizer-panel dashboard-module-section" data-active={moduleVisibility.configuracion}>
           <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
             <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Propietario / Gerencia</option><option value="admin">Administrador</option><option value="finance">Contador</option><option value="sales">Ventas</option></select>
           </div>
@@ -2345,7 +2356,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        {activeModule === "inventario" && visible.integrations && (
+        {moduleVisibility.inventario && visible.integrations && (
           <section className="integrations-panel dashboard-module-section">
             <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations} disabled={!permissions.canManageIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
             {connectedIntegrations === 0 && (
@@ -2367,7 +2378,7 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        {activeModule === "reportes" && visible.reports && (
+        {moduleVisibility.reportes && visible.reports && (
           <section className="reports-panel dashboard-module-section">
             <div className="panel-heading"><div><span><FileText aria-hidden="true" />Reportes automáticos</span><h2>Envíos para gerencia</h2></div><button className="primary-button micro-button" data-motion={microAction === "report" ? "active" : undefined} type="button" onClick={generateReport} disabled={!permissions.canGenerateReports}><FileText aria-hidden="true" />Generar reporte</button></div>
             <div className="reports-layout">
@@ -2408,7 +2419,7 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section className="goals-panel dashboard-module-section" data-active={activeModule === "caja"}>
+        <section className="goals-panel dashboard-module-section" data-active={moduleVisibility.caja}>
           <div className="panel-heading"><div><span><Target aria-hidden="true" />Metas y semaforos</span><h2>Avance contra objetivos</h2></div><button className="secondary-button" type="button"><RefreshCw aria-hidden="true" />Recalcular</button></div>
           <div className="goals-grid">
             {[
@@ -2425,7 +2436,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        <section className="rules-panel dashboard-module-section" data-active={activeModule === "alertas"}>
+        <section className="rules-panel dashboard-module-section" data-active={moduleVisibility.alertas}>
           <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }} disabled={!permissions.canManageRules}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
           <div className="rules-grid" data-motion={microAction === "rules" ? "active" : undefined}>
             <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
@@ -2435,7 +2446,7 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        {activeModule === "inventario" && visible.importer && (
+        {moduleVisibility.inventario && visible.importer && (
           <section className="importer-panel dashboard-module-section">
             <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
             <div className="importer-grid">
@@ -2486,14 +2497,14 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section className="kpi-grid secondary-kpi-grid dashboard-module-section" data-active={activeModule === "caja"}>
+        <section className="kpi-grid secondary-kpi-grid dashboard-module-section" data-active={moduleVisibility.caja}>
           {visible.margin && <article className="metric-card" data-status={metrics.margin >= rules.margin ? "green" : "yellow"}><span><Banknote aria-hidden="true" />Margen bruto</span><strong>{metrics.margin.toFixed(1)}%</strong><small className="positive">{(metrics.margin - rules.margin).toFixed(1)} pts vs meta</small></article>}
           {visible.stock && <article className="metric-card" data-status={metrics.criticalStock > rules.stock ? "red" : "green"}><span><Boxes aria-hidden="true" />Inventario critico</span><strong>{metrics.criticalStock} SKU</strong><small className="danger">Requiere atencion hoy</small></article>}
         </section>
 
-        <section className="content-grid dashboard-module-section" data-active={activeModule === "ventas" || activeModule === "alertas"}>
-          <article className="panel alerts-panel priority-panel dashboard-module-panel" data-active={activeModule === "alertas"}><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
-          <article className="panel chart-panel dashboard-module-section" data-active={activeModule === "ventas"}>
+        <section className="content-grid dashboard-module-section" data-active={isCommercialModule}>
+          <article className="panel alerts-panel priority-panel dashboard-module-panel" data-active={moduleVisibility.alertas}><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
+          <article className="panel chart-panel dashboard-module-section" data-active={moduleVisibility.ventas}>
             <div className="sales-command-header">
               <div>
                 <span><BarChart3 aria-hidden="true" />Ventas recientes</span>
@@ -2739,8 +2750,8 @@ ${recommendedAction()}`;
               <button className="secondary-button" type="button" onClick={() => setAnswer(`Ventas: ${formatMoney(weeklyTotal)} en ${dateRangeLabel}. Mejor dia: ${bestDay.day}. ${recommendedAction()}`)}>Generar lectura</button>
             </div>
           </article>
-          {activeModule === "ventas" && visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-          {activeModule === "ventas" && visible.decisions && (
+          {moduleVisibility.ventas && visible.products && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Mas vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
+          {moduleVisibility.ventas && visible.decisions && (
             <article className="panel decisions-panel">
               <div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div>
               <form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={addDecision}>
@@ -2765,7 +2776,7 @@ ${recommendedAction()}`;
               </div>
             </article>
           )}
-          {activeModule === "ventas" && visible.copilot && <article className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
+          {moduleVisibility.ventas && visible.copilot && <article className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customer.companyName} va en {salesPercent}% de la meta mensual. El mejor dia reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Accion sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Que debo revisar hoy?", "Como va la meta mensual?", "Que productos necesitan atencion?", "Que riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => { setQuestion(prompt); setAnswer(`Mi recomendacion: ${recommendedAction()}`); }}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Pregunta: que debo revisar hoy?" /><button type="button" onClick={answerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
         </section>
 
         </div>
