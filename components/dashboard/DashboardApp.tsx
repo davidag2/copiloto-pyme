@@ -39,6 +39,7 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { CashModule } from "@/components/dashboard/CashModule";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
+import { InventoryModule } from "@/components/dashboard/InventoryModule";
 import { SalesModule } from "@/components/dashboard/SalesModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
@@ -2130,27 +2131,31 @@ ${recommendedAction()}`;
           </div>
         </section>
 
-        {moduleVisibility.inventario && visible.integrations && (
-          <section className="integrations-panel dashboard-module-section">
-            <div className="panel-heading"><div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div><button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={syncIntegrations} disabled={!permissions.canManageIntegrations}><RefreshCw aria-hidden="true" />Sincronizar</button></div>
-            {connectedIntegrations === 0 && (
-              <EmptyState
-                icon={Link2}
-                title="Aun no hay integraciones conectadas"
-                text="Conecta tu primera fuente para que ventas, caja e inventario empiecen a actualizarse con menos trabajo manual."
-                action={<button className="primary-button" type="button" onClick={() => connectIntegration("sheets")} disabled={!permissions.canManageIntegrations}>Conectar Google Sheets</button>}
-              />
-            )}
-            <div className="integrations-grid">
-              {integrations.map((integration) => (
-                <article className="integration-card" data-future={integration.id === "banking"} data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
-                  <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
-                  <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => connectIntegration(integration.id)} disabled={integration.id === "banking" || !permissions.canManageIntegrations}>{integration.id === "banking" ? "Próximamente" : integration.status === "Conectado" ? "Reconectar" : "Conectar"}</button>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
+        <InventoryModule
+          isActive={moduleVisibility.inventario}
+          showIntegrations={visible.integrations}
+          showImporter={visible.importer}
+          integrations={integrations}
+          connectedIntegrations={connectedIntegrations}
+          activeIntegrationId={activeIntegrationId}
+          canManageIntegrations={permissions.canManageIntegrations}
+          canImportData={permissions.canImportData}
+          microAction={microAction}
+          importStatus={importStatus}
+          importPreview={importPreview}
+          csvMapping={csvMapping}
+          csvHeaders={csvHeaders}
+          csvRows={csvRows}
+          importValidation={importValidation}
+          importHistory={importHistory}
+          onSyncIntegrations={() => { void syncIntegrations(); }}
+          onConnectIntegration={(id) => { void connectIntegration(id); }}
+          onCsvMappingChange={(field, value) => setCsvMapping((current) => ({ ...current, [field]: value }))}
+          onApplyCsvImport={() => { void applyCsvImport(); }}
+          onDownloadTemplate={downloadTemplate}
+          onRefreshImportHistory={() => { void loadImportHistory(); }}
+          onReverseImport={(batchId) => { void reverseImport(batchId); }}
+        />
 
         {moduleVisibility.reportes && visible.reports && (
           <section className="reports-panel dashboard-module-section">
@@ -2216,57 +2221,6 @@ ${recommendedAction()}`;
             <label><span>Inventario critico</span><input type="number" value={rules.stock} onChange={(event) => setRules({ ...rules, stock: Number(event.target.value) })} /><small>SKU maximos en riesgo</small></label>
           </div>
         </section>
-
-        {moduleVisibility.inventario && visible.importer && (
-          <section className="importer-panel dashboard-module-section">
-            <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
-            <div className="importer-grid">
-              <div>
-                <p>Mapea las columnas del archivo para detectar errores, duplicados y guardar solo filas validas.</p>
-                <div className="mapping-grid">
-                  {(Object.keys(csvMapping) as Array<keyof CsvColumnMapping>).map((field) => (
-                    <label key={field}>{field}<select value={csvMapping[field]} onChange={(event) => setCsvMapping({ ...csvMapping, [field]: event.target.value })}><option value="">No mapear</option>{csvHeaders.map((header) => <option value={header} key={header}>{header}</option>)}</select></label>
-                  ))}
-                </div>
-                <div className={`import-validation ${importValidation?.errors.length ? "has-errors" : ""}`}>{importPreview}</div>
-              </div>
-              <div className="preview-box">
-                <div className="preview-heading"><span>Vista previa y validacion</span><button className="primary-button" type="button" onClick={applyCsvImport} disabled={!permissions.canImportData || !csvRows.length}><Database aria-hidden="true" />Aplicar importacion</button></div>
-                <div className="preview-table">
-                  {csvRows.length ? (
-                    <table><thead><tr>{csvHeaders.slice(0, 5).map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{csvRows.slice(0, 4).map((row, index) => <tr key={`${row[csvHeaders[0]]}-${index}`}>{csvHeaders.slice(0, 5).map((header) => <td key={header}>{row[header]}</td>)}</tr>)}</tbody></table>
-                  ) : (
-                    <EmptyState
-                      icon={Upload}
-                      title="Carga tu primer archivo"
-                      text="Importa un CSV para mapear columnas, detectar errores por fila y guardar datos reales en esta empresa."
-                      action={<button className="secondary-button" type="button" onClick={downloadTemplate}>Descargar plantilla CSV</button>}
-                    />
-                  )}
-                </div>
-                {importValidation?.errors.length ? <div className="row-errors">{importValidation.errors.slice(0, 5).map((error) => <span key={error.rowNumber}>Fila {error.rowNumber}: {error.errors.join(", ")}</span>)}</div> : null}
-              </div>
-            </div>
-            <div className="import-history">
-              <div className="preview-heading"><span>Historial de cargas</span><button className="secondary-button" type="button" onClick={() => { void loadImportHistory(); }}>Actualizar historial</button></div>
-              <div className="history-list">
-                {importHistory.length ? importHistory.map((batch) => (
-                  <article key={batch.id} data-status={batch.status}>
-                    <div><strong>{batch.fileName || "CSV sin nombre"}</strong><span>{batch.validCount}/{batch.rowCount} validas · {batch.errorCount} errores · {batch.duplicateCount} duplicados</span></div>
-                    <small>{new Date(batch.createdAt).toLocaleString("es-CO")} · {batch.status}</small>
-                    <button className="secondary-button" type="button" disabled={batch.status === "reversed"} onClick={() => { void reverseImport(batch.id); }}>Reversar</button>
-                  </article>
-                )) : (
-                  <EmptyState
-                    icon={Database}
-                    title="Sin historial de cargas"
-                    text="Cuando apliques una importacion, aqui veras filas validas, errores, duplicados y la opcion de reversar."
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
 
         <section className="content-grid dashboard-module-section" data-active={isCommercialModule}>
           <article className="panel alerts-panel priority-panel dashboard-module-panel" data-active={moduleVisibility.alertas}><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
