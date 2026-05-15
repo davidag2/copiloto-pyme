@@ -2788,11 +2788,16 @@ ${recommendedAction()}`;
         </footer>
       </main>
 
-      <nav className="mobile-quick-nav">
-        <button aria-current={activeModule === "inicio" ? "page" : undefined} type="button" onClick={() => navigateModule("inicio")}><Target aria-hidden="true" /><span>Inicio</span></button>
-        <button aria-current={activeModule === "ventas" ? "page" : undefined} type="button" onClick={() => navigateModule("ventas")}><BarChart3 aria-hidden="true" /><span>Ventas</span></button>
-        <button aria-current={activeModule === "inventario" ? "page" : undefined} type="button" onClick={() => navigateModule("inventario")}><Database aria-hidden="true" /><span>Datos</span></button>
-        <button aria-current={activeModule === "reportes" ? "page" : undefined} type="button" onClick={() => navigateModule("reportes")}><FileText aria-hidden="true" /><span>Reportes</span></button>
+      <nav className="mobile-quick-nav" aria-label="Módulos principales móviles">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button aria-current={activeModule === item.id ? "page" : undefined} type="button" onClick={() => navigateModule(item.id)} key={item.id}>
+              <Icon aria-hidden="true" />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );
