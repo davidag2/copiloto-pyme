@@ -44,6 +44,7 @@ import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { InventoryModule } from "@/components/dashboard/InventoryModule";
 import { ReportsModule } from "@/components/dashboard/ReportsModule";
 import { SalesModule } from "@/components/dashboard/SalesModule";
+import { SettingsModule } from "@/components/dashboard/SettingsModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
@@ -2074,16 +2075,13 @@ ${recommendedAction()}`;
           onInviteTeamMember={inviteTeamMember}
         />
 
-        <section className="customizer-panel dashboard-module-section" data-active={moduleVisibility.configuracion}>
-          <div className="panel-heading"><div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige que ve cada usuario</h2></div>
-            <select value={focus} onChange={(event) => setFocus(event.target.value)}><option value="owner">Propietario / Gerencia</option><option value="admin">Administrador</option><option value="finance">Contador</option><option value="sales">Ventas</option></select>
-          </div>
-          <div className="customizer-grid">
-            {Object.keys(visible).map((key) => (
-              <label key={key}><input type="checkbox" checked={visible[key as keyof typeof visible]} onChange={(event) => setVisible({ ...visible, [key]: event.target.checked })} /> {key}</label>
-            ))}
-          </div>
-        </section>
+        <SettingsModule
+          isActive={moduleVisibility.configuracion}
+          focus={focus}
+          visible={visible}
+          onFocusChange={setFocus}
+          onVisibleChange={setVisible}
+        />
 
         <InventoryModule
           isActive={moduleVisibility.inventario}
