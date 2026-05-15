@@ -37,6 +37,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { AlertsModule } from "@/components/dashboard/AlertsModule";
 import { CashModule } from "@/components/dashboard/CashModule";
 import { ClientsModule } from "@/components/dashboard/ClientsModule";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
@@ -2139,18 +2140,16 @@ ${recommendedAction()}`;
           cashDays={cashDays}
         />
 
-        <section className="rules-panel dashboard-module-section" data-active={moduleVisibility.alertas}>
-          <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }} disabled={!permissions.canManageRules}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
-          <div className="rules-grid" data-motion={microAction === "rules" ? "active" : undefined}>
-            <label><span>Ventas bajo meta</span><input type="number" value={rules.sales} onChange={(event) => setRules({ ...rules, sales: Number(event.target.value) })} /><small>% minimo de avance mensual</small></label>
-            <label><span>Caja insuficiente</span><input type="number" value={rules.cash} onChange={(event) => setRules({ ...rules, cash: Number(event.target.value) })} /><small>Dias minimos de cobertura</small></label>
-            <label><span>Margen bajo</span><input type="number" value={rules.margin} onChange={(event) => setRules({ ...rules, margin: Number(event.target.value) })} /><small>% minimo de margen bruto</small></label>
-            <label><span>Inventario critico</span><input type="number" value={rules.stock} onChange={(event) => setRules({ ...rules, stock: Number(event.target.value) })} /><small>SKU maximos en riesgo</small></label>
-          </div>
-        </section>
-
         <section className="content-grid dashboard-module-section" data-active={isCommercialModule}>
-          <article className="panel alerts-panel priority-panel dashboard-module-panel" data-active={moduleVisibility.alertas}><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
+          <AlertsModule
+            isActive={moduleVisibility.alertas}
+            alerts={alerts}
+            rules={rules}
+            microAction={microAction}
+            canManageRules={permissions.canManageRules}
+            onRulesChange={setRules}
+            onApplyRules={() => { void applyRules(); }}
+          />
           <SalesModule
             isActive={moduleVisibility.ventas}
             visibleProducts={visible.products}
