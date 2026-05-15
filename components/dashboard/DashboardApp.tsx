@@ -37,6 +37,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { CashModule } from "@/components/dashboard/CashModule";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { SalesModule } from "@/components/dashboard/SalesModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
@@ -508,11 +509,6 @@ const formatCopCompact = (value: number) => {
   if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
   return `$${Math.round(value)}`;
 };
-
-function statusForSales(sales: number, goal: number) {
-  const percent = goal ? (sales / (goal / 1_000_000)) * 100 : 0;
-  return percent >= 80 ? "green" : percent >= 55 ? "yellow" : "red";
-}
 
 function statusClass(status: string) {
   return status === "green" ? "positive" : status === "yellow" ? "warning" : "danger";
@@ -2197,22 +2193,19 @@ ${recommendedAction()}`;
           </section>
         )}
 
-        <section className="goals-panel dashboard-module-section" data-active={moduleVisibility.caja}>
-          <div className="panel-heading"><div><span><Target aria-hidden="true" />Metas y semaforos</span><h2>Avance contra objetivos</h2></div><button className="secondary-button" type="button"><RefreshCw aria-hidden="true" />Recalcular</button></div>
-          <div className="goals-grid">
-            {[
-              ["sales", "Meta mensual de ventas", `${formatMoney(metrics.sales)} de ${formatGoal(customer.monthlyGoal)}`, salesPercent],
-              ["cash", "Caja disponible", `${cashDays(metrics.cash)} dias de cobertura`, Math.min((cashDays(metrics.cash) / 25) * 100, 100)],
-              ["margin", "Margen minimo", `${metrics.margin.toFixed(1)}% contra meta de ${rules.margin}%`, Math.min((metrics.margin / 35) * 100, 100)],
-              ["stock", "Inventario critico", `${metrics.criticalStock} SKU requieren atencion`, Math.max(0, 100 - metrics.criticalStock * 12)]
-            ].map(([key, title, text, percent]) => (
-              <article className="goal-card" data-status={key === "sales" ? statusForSales(metrics.sales, customer.monthlyGoal) : "yellow"} key={String(key)}>
-                <div className="goal-topline"><span className="traffic-light" data-status={key === "sales" ? statusForSales(metrics.sales, customer.monthlyGoal) : "yellow"} /><strong>{title}</strong></div>
-                <p>{text}</p><div className="progress-track"><span data-status={key === "sales" ? statusForSales(metrics.sales, customer.monthlyGoal) : "yellow"} style={{ width: `${percent}%` }} /></div>
-              </article>
-            ))}
-          </div>
-        </section>
+        <CashModule
+          isActive={moduleVisibility.caja}
+          metrics={metrics}
+          monthlyGoal={customer.monthlyGoal}
+          salesPercent={salesPercent}
+          marginRule={rules.margin}
+          stockRule={rules.stock}
+          showMargin={visible.margin}
+          showStock={visible.stock}
+          formatMoney={formatMoney}
+          formatGoal={formatGoal}
+          cashDays={cashDays}
+        />
 
         <section className="rules-panel dashboard-module-section" data-active={moduleVisibility.alertas}>
           <div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Alertas configurables</span><h2>Reglas de riesgo del negocio</h2></div><button className="primary-button micro-button" data-motion={microAction === "rules" ? "active" : undefined} type="button" onClick={() => { void applyRules(); }} disabled={!permissions.canManageRules}><Settings2 aria-hidden="true" />Aplicar reglas</button></div>
@@ -2274,11 +2267,6 @@ ${recommendedAction()}`;
             </div>
           </section>
         )}
-
-        <section className="kpi-grid secondary-kpi-grid dashboard-module-section" data-active={moduleVisibility.caja}>
-          {visible.margin && <article className="metric-card" data-status={metrics.margin >= rules.margin ? "green" : "yellow"}><span><Banknote aria-hidden="true" />Margen bruto</span><strong>{metrics.margin.toFixed(1)}%</strong><small className="positive">{(metrics.margin - rules.margin).toFixed(1)} pts vs meta</small></article>}
-          {visible.stock && <article className="metric-card" data-status={metrics.criticalStock > rules.stock ? "red" : "green"}><span><Boxes aria-hidden="true" />Inventario critico</span><strong>{metrics.criticalStock} SKU</strong><small className="danger">Requiere atencion hoy</small></article>}
-        </section>
 
         <section className="content-grid dashboard-module-section" data-active={isCommercialModule}>
           <article className="panel alerts-panel priority-panel dashboard-module-panel" data-active={moduleVisibility.alertas}><div className="panel-heading"><div><span><AlertTriangle aria-hidden="true" />Atencion requerida</span><h2>Alertas inteligentes</h2></div></div><div className="alerts-list">{alerts.map((alert) => <div className="alert-item" data-level={alert.level} key={alert.title}><strong className={alert.level}>{alert.title}</strong><p>{alert.text}</p></div>)}</div></article>
