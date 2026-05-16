@@ -13,6 +13,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   Clock3,
   Database,
@@ -705,6 +706,7 @@ export default function Home() {
   const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
+  const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
   const [customRange, setCustomRange] = useState(() => {
     const end = new Date();
@@ -1928,13 +1930,13 @@ ${recommendedAction()}`;
       </aside>
 
       <main className="main-panel">
-        <header className="topbar">
+        <header className={`topbar ${topbarCollapsed ? "topbar--collapsed" : ""}`}>
           <div className="topbar-greeting">
             <h1>¡Hola, {userFirstName}! <Sparkles aria-hidden="true" /></h1>
             <p>{currentDateLabel}</p>
             <span className="active-module-pill">Módulo: {activeNavItem.label}</span>
           </div>
-          <div className="topbar-actions">
+          <div className="topbar-actions" aria-hidden={topbarCollapsed}>
             <label className="topbar-range-control">
               <CalendarDays aria-hidden="true" />
               <select value={dateRange} onChange={(event) => setDateRange(event.target.value as DateRangeMode)} aria-label="Rango de fechas">
@@ -2017,6 +2019,16 @@ ${recommendedAction()}`;
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Cerrar sesión</button>
           </div>
+          <button
+            className="topbar-collapse-button"
+            type="button"
+            aria-expanded={!topbarCollapsed}
+            aria-label={topbarCollapsed ? "Maximizar barra superior" : "Minimizar barra superior"}
+            onClick={() => setTopbarCollapsed((current) => !current)}
+          >
+            {topbarCollapsed ? <ChevronDown aria-hidden="true" /> : <ChevronUp aria-hidden="true" />}
+            <span>{topbarCollapsed ? "Maximizar" : "Minimizar"}</span>
+          </button>
         </header>
 
         <div className="dashboard-module-content" aria-live="polite">
