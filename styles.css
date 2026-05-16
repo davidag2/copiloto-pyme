@@ -8919,6 +8919,11 @@ select,
   }
 
   .app-shell {
+    height: 100dvh;
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell--sidebar-collapsed {
     grid-template-columns: 1fr;
   }
 
@@ -8932,6 +8937,134 @@ select,
 
   .sidebar {
     display: none;
+  }
+
+  .main-panel {
+    padding: 82px 18px 96px;
+  }
+
+  .dashboard-fullscreen .main-panel {
+    padding: 74px 14px 88px;
+  }
+
+  .mobile-app-bar {
+    align-items: center;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    left: 0;
+    padding: 10px 14px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 30;
+    backdrop-filter: blur(14px);
+  }
+
+  .mobile-app-bar .brand {
+    min-width: 0;
+  }
+
+  .mobile-app-bar .brand > div:last-child {
+    min-width: 0;
+  }
+
+  .mobile-app-bar .brand strong,
+  .mobile-app-bar .brand span {
+    max-width: min(42vw, 320px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-app-bar .brand-mark {
+    height: 36px;
+    width: 36px;
+  }
+
+  .mobile-app-actions {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .mobile-app-bar .secondary-button {
+    padding: 9px 11px;
+    width: auto;
+  }
+
+  .mobile-app-bar .theme-toggle {
+    min-height: 38px;
+    padding: 8px 10px 8px 8px;
+  }
+
+  .mobile-app-bar .theme-toggle::before {
+    height: 18px;
+    width: 18px;
+  }
+
+  .mobile-quick-nav {
+    background: rgba(16, 26, 39, 0.94);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    bottom: 0;
+    display: flex;
+    gap: 6px;
+    left: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    position: fixed;
+    right: 0;
+    z-index: 30;
+    backdrop-filter: blur(18px);
+    scrollbar-width: none;
+  }
+
+  .mobile-quick-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-quick-nav button {
+    align-items: center;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: #dce7f3;
+    cursor: pointer;
+    display: grid;
+    flex: 0 0 90px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    gap: 4px;
+    justify-items: center;
+    min-height: 52px;
+    padding: 7px 6px;
+    text-align: center;
+    touch-action: manipulation;
+  }
+
+  .mobile-quick-nav span {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-quick-nav svg {
+    height: 19px;
+    width: 19px;
+  }
+
+  .mobile-quick-nav button:active,
+  .mobile-quick-nav button:hover,
+  .mobile-quick-nav button[aria-current="page"] {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
   }
 
   .kpi-grid,
@@ -8988,6 +9121,35 @@ select,
   .chart-panel,
   .copilot-panel {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app-shell {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  .app-shell--sidebar-collapsed {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .main-panel {
+    padding: 34px 36px 112px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .main-panel {
+    padding-left: clamp(36px, 3vw, 72px);
+    padding-right: clamp(36px, 3vw, 72px);
+  }
+
+  .dashboard-module-content {
+    gap: 26px;
+  }
+
+  .topbar {
+    border-radius: 24px;
   }
 }
 
@@ -9109,27 +9271,12 @@ select,
     padding: 78px 10px 92px;
   }
 
-  .app-shell {
-    height: 100dvh;
-  }
-
   .app-context-bar {
     display: none;
   }
 
   .mobile-app-bar {
-    align-items: center;
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    justify-content: space-between;
-    left: 0;
     padding: 10px 12px;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 30;
-    backdrop-filter: blur(14px);
   }
 
   .mobile-app-bar .brand-mark {
@@ -9156,46 +9303,8 @@ select,
     width: 18px;
   }
 
-  .mobile-quick-nav {
-    background: rgba(16, 26, 39, 0.94);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    bottom: 0;
-    display: flex;
-    gap: 6px;
-    left: 0;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-    position: fixed;
-    right: 0;
-    z-index: 30;
-    backdrop-filter: blur(18px);
-    scrollbar-width: none;
-  }
-
-  .mobile-quick-nav::-webkit-scrollbar {
-    display: none;
-  }
-
   .mobile-quick-nav button {
-    align-items: center;
-    appearance: none;
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
-    color: #dce7f3;
-    cursor: pointer;
-    display: grid;
     flex: 0 0 78px;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 800;
-    gap: 4px;
-    justify-items: center;
-    min-height: 52px;
-    padding: 7px 6px;
-    text-align: center;
-    touch-action: manipulation;
   }
 
   .mobile-quick-nav span {
