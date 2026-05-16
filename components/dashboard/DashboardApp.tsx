@@ -21,6 +21,8 @@ import {
   Link2,
   LogOut,
   LockKeyhole,
+  Maximize2,
+  Minimize2,
   Moon,
   PackageCheck,
   PanelLeftClose,
@@ -709,6 +711,7 @@ export default function Home() {
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
   const [customRange, setCustomRange] = useState(() => {
     const end = new Date();
@@ -756,6 +759,14 @@ export default function Home() {
       window.localStorage.setItem("copiloto-pyme-user", JSON.stringify(authUser));
     }
   }, [authUser]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     if (!microAction) return;
@@ -1870,8 +1881,16 @@ ${recommendedAction()}`;
     });
   }
 
+  async function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    await document.documentElement.requestFullscreen();
+  }
+
   return (
-    <div id="appView" className={`app-shell theme-${theme} ${sidebarCollapsed ? "app-shell--sidebar-collapsed" : ""}`}>
+    <div id="appView" className={`app-shell theme-${theme} ${sidebarCollapsed ? "app-shell--sidebar-collapsed" : ""} ${isFullscreen ? "dashboard-fullscreen" : ""}`}>
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
@@ -2021,6 +2040,10 @@ ${recommendedAction()}`;
               <span>{userInitials}</span>
               <div><strong>{userDisplayName}</strong><small>{activeRoleLabel}</small></div>
               <UserCircle aria-hidden="true" />
+            </button>
+            <button className="secondary-button fullscreen-button" type="button" onClick={() => { void toggleFullscreen(); }}>
+              {isFullscreen ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}
+              {isFullscreen ? "Salir pantalla completa" : "Pantalla completa"}
             </button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Cerrar sesión</button>

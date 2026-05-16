@@ -5357,6 +5357,25 @@ select:focus-visible {
   grid-template-columns: 88px minmax(0, 1fr);
 }
 
+.dashboard-fullscreen {
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
+.dashboard-fullscreen .main-panel {
+  padding: 18px 18px 72px;
+  scroll-padding-top: 82px;
+}
+
+.dashboard-fullscreen .sidebar {
+  padding-bottom: 18px;
+  padding-top: 18px;
+}
+
+.dashboard-fullscreen .topbar {
+  top: 10px;
+}
+
 .app-shell.theme-dark {
   --bg: #07111f;
   --surface: #0f1b2d;
@@ -5942,9 +5961,14 @@ h2 {
   white-space: nowrap;
 }
 
-.topbar-logout svg {
+.topbar-logout svg,
+.fullscreen-button svg {
   height: 18px;
   width: 18px;
+}
+
+.fullscreen-button {
+  white-space: nowrap;
 }
 
 .topbar-range-control,
