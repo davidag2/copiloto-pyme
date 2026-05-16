@@ -2219,22 +2219,6 @@ ${recommendedAction()}`;
 
         </div>
 
-        <footer className="app-context-bar" aria-label="Acciones contextuales del dashboard">
-          <div>
-            <span>Copiloto activo</span>
-            <strong>{criticalAlerts.length ? `${criticalAlerts.length} alerta(s) por revisar` : "Operación bajo control"}</strong>
-          </div>
-          <div>
-            <span>Datos conectados</span>
-            <strong>{connectedIntegrations}/{integrations.length} integraciones</strong>
-          </div>
-          <div>
-            <span>Siguiente acción</span>
-            <strong>{recommendedAction()}</strong>
-          </div>
-          <a className="secondary-button" href="/billing"><FileText aria-hidden="true" />Facturación</a>
-          <button className="primary-button" type="button" onClick={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}><Sparkles aria-hidden="true" />Generar brief</button>
-        </footer>
       </main>
 
       <nav className="mobile-quick-nav" aria-label="Módulos principales móviles">
