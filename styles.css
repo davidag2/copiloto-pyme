@@ -5524,16 +5524,16 @@ select:focus-visible {
   width: 20px;
 }
 
-.company-switcher select {
-  appearance: none;
-  background: transparent;
-  border: 0;
+.company-switcher-name {
   color: var(--ink);
-  cursor: pointer;
-  font: inherit;
+  display: block;
+  font-size: 16px;
   font-weight: 900;
+  line-height: 1.25;
   min-width: 0;
-  outline: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: normal;
 }
 
 .company-switcher small {

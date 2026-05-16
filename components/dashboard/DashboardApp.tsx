@@ -1883,19 +1883,13 @@ ${recommendedAction()}`;
             <div className="brand-mark" aria-hidden="true">CP</div>
             <div><strong>Copiloto Pyme</strong><span>AI Command Center</span></div>
           </div>
-          <div className="sidebar-product-status">
-            <span data-status={overallStatusTone} />
-            <strong>{overallStatusTone === "red" ? "Atención alta" : overallStatusTone === "yellow" ? "Revisión activa" : "Operación estable"}</strong>
-          </div>
         </div>
 
         <div className="company-switcher" aria-label="Empresa activa">
-          <label htmlFor="companySwitcher">Empresa activa</label>
+          <label>Empresa activa</label>
           <div>
             <Building2 aria-hidden="true" />
-            <select id="companySwitcher" value={customer.companyName} onChange={(event) => setCustomer((current) => ({ ...current, companyName: event.target.value }))}>
-              <option value={customer.companyName}>{customer.companyName}</option>
-            </select>
+            <strong className="company-switcher-name">{customer.companyName}</strong>
           </div>
           <small>{customer.businessType} · {customer.country} · Plan {customer.plan.toUpperCase()}</small>
         </div>
@@ -1919,7 +1913,7 @@ ${recommendedAction()}`;
         </nav>
         <div className="tenant-card">
           <span>Sesión empresarial</span>
-          <strong>{authUser?.name || "Usuario demo"}</strong>
+          <strong>{userDisplayName || "Usuario demo"}</strong>
           <small>{activeRoleLabel} · Tenant {tenantShortId}</small>
           <div className="tenant-card-metrics">
             <span>{connectedIntegrations}/{integrations.length} fuentes</span>
