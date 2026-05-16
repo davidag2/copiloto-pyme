@@ -1872,7 +1872,7 @@ ${recommendedAction()}`;
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
           <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
-          <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Salir</button>
+          <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Cerrar sesión</button>
         </div>
       </header>
 
