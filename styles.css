@@ -5757,6 +5757,15 @@ h2 {
   gap: 10px;
 }
 
+.topbar-logout {
+  white-space: nowrap;
+}
+
+.topbar-logout svg {
+  height: 18px;
+  width: 18px;
+}
+
 .topbar-range-control,
 .custom-date-range,
 .notification-button,

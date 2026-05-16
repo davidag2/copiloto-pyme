@@ -18,6 +18,7 @@ import {
   Database,
   FileText,
   Link2,
+  LogOut,
   LockKeyhole,
   Moon,
   PackageCheck,
@@ -28,7 +29,6 @@ import {
   Sun,
   Target,
   TrendingUp,
-  Upload,
   UserCircle,
   Users,
   WalletCards,
@@ -515,6 +515,13 @@ const formatCopCompact = (value: number) => {
   return `$${Math.round(value)}`;
 };
 
+function repairDisplayName(value: string) {
+  return value
+    .replace(/Andr.s/gi, (match) => match[0] === "A" ? "Andrés" : "andrés")
+    .replace(/V.lez/gi, (match) => match[0] === "V" ? "Vélez" : "vélez")
+    .replace(/\uFFFD/g, "");
+}
+
 function statusClass(status: string) {
   return status === "green" ? "positive" : status === "yellow" ? "warning" : "danger";
 }
@@ -804,7 +811,7 @@ export default function Home() {
       : "Controlado";
   const overallStatusTone = overallStatus === "Riesgo alto" ? "red" : overallStatus === "Atencion" ? "yellow" : "green";
   const currentDateLabel = new Date().toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const userDisplayName = authUser?.name || customer.ownerName || "Andrés Vélez";
+  const userDisplayName = repairDisplayName(authUser?.name || customer.ownerName || "Andrés Vélez");
   const userFirstName = userDisplayName.split(" ")[0] || "Equipo";
   const userInitials = userDisplayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CP";
   const notificationCount = companyId && authUser ? notificationsUnreadCount : criticalAlerts.length + openDecisions;
@@ -1865,7 +1872,7 @@ ${recommendedAction()}`;
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
           <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Claro" : "Oscuro"}</span></button>
-          <a className="secondary-button" href="/">Portal</a>
+          <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Salir</button>
         </div>
       </header>
 
@@ -2006,11 +2013,9 @@ ${recommendedAction()}`;
               <div><strong>{userDisplayName}</strong><small>{activeRoleLabel}</small></div>
               <UserCircle aria-hidden="true" />
             </button>
-            <label className="upload-button" aria-disabled={!permissions.canImportData}><input type="file" accept=".csv" disabled={!permissions.canImportData} onChange={handleCsvUpload} /><Upload aria-hidden="true" />Importar CSV</label>
-            <button className="secondary-button" type="button" onClick={downloadTemplate}><FileText aria-hidden="true" />Plantilla CSV</button>
             <button className="primary-button" type="button" onClick={() => { void refreshMetrics(); }} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
-            <a className="secondary-button" href="/">Portal</a>
+            <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Cerrar sesión</button>
           </div>
         </header>
 
