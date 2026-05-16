@@ -23,7 +23,6 @@ import {
   LockKeyhole,
   Moon,
   PackageCheck,
-  RefreshCw,
   ShieldCheck,
   Sparkles,
   Settings2,
@@ -2015,7 +2014,6 @@ ${recommendedAction()}`;
               <div><strong>{userDisplayName}</strong><small>{activeRoleLabel}</small></div>
               <UserCircle aria-hidden="true" />
             </button>
-            <button className="primary-button" type="button" onClick={() => { void refreshMetrics(); }} disabled={!permissions.canImportData}><RefreshCw aria-hidden="true" />Actualizar datos</button>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}>{theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}<span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span></button>
             <button className="secondary-button topbar-logout" type="button" onClick={() => { void logout(); }}><LogOut aria-hidden="true" />Cerrar sesión</button>
           </div>

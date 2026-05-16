@@ -5666,12 +5666,43 @@ select:focus-visible {
   align-items: center;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(10, 37, 64, 0.05);
-  padding: 10px 12px 10px 16px;
+  gap: 12px;
+  min-height: 54px;
+  padding: 7px 10px 7px 14px;
 }
 
 .topbar--collapsed .topbar-actions,
 .topbar--collapsed .topbar-greeting p {
   display: none;
+}
+
+.topbar--collapsed .topbar-greeting {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.topbar--collapsed .topbar-greeting h1 {
+  font-size: 18px;
+  gap: 7px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.topbar--collapsed .topbar-greeting h1 svg {
+  height: 18px;
+  width: 18px;
+}
+
+.topbar--collapsed .active-module-pill {
+  margin-top: 0;
+  padding: 5px 9px;
+}
+
+.topbar--collapsed .topbar-collapse-button {
+  min-height: 36px;
+  padding: 0 11px;
 }
 
 .topbar-greeting {
