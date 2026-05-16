@@ -23,6 +23,8 @@ import {
   LockKeyhole,
   Moon,
   PackageCheck,
+  PanelLeftClose,
+  PanelLeftOpen,
   ShieldCheck,
   Sparkles,
   Settings2,
@@ -706,6 +708,7 @@ export default function Home() {
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeMode>("7d");
   const [customRange, setCustomRange] = useState(() => {
     const end = new Date();
@@ -1868,7 +1871,7 @@ ${recommendedAction()}`;
   }
 
   return (
-    <div id="appView" className={`app-shell theme-${theme}`}>
+    <div id="appView" className={`app-shell theme-${theme} ${sidebarCollapsed ? "app-shell--sidebar-collapsed" : ""}`}>
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">
@@ -1877,12 +1880,22 @@ ${recommendedAction()}`;
         </div>
       </header>
 
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarCollapsed ? "sidebar--collapsed" : ""}`}>
         <div className="sidebar-brand-panel">
           <div className="brand">
             <div className="brand-mark" aria-hidden="true">CP</div>
             <div><strong>Copiloto Pyme</strong><span>AI Command Center</span></div>
           </div>
+          <button
+            className="sidebar-collapse-button"
+            type="button"
+            aria-expanded={!sidebarCollapsed}
+            aria-label={sidebarCollapsed ? "Maximizar menú lateral" : "Minimizar menú lateral"}
+            onClick={() => setSidebarCollapsed((current) => !current)}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
+            <span>{sidebarCollapsed ? "Maximizar" : "Minimizar"}</span>
+          </button>
         </div>
 
         <div className="company-switcher" aria-label="Empresa activa">
@@ -1904,9 +1917,10 @@ ${recommendedAction()}`;
                 className={`nav-item ${activeModule === item.id ? "active" : ""}`}
                 onClick={() => navigateModule(item.id)}
                 type="button"
+                title={item.label}
                 key={item.id}
               >
-                <Icon aria-hidden="true" />{item.label}
+                <Icon aria-hidden="true" /><span>{item.label}</span>
               </button>
             );
           })}

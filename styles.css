@@ -5349,7 +5349,12 @@ select:focus-visible {
   overflow: hidden;
   transition:
     background 220ms ease,
-    color 220ms ease;
+    color 220ms ease,
+    grid-template-columns 220ms ease;
+}
+
+.app-shell--sidebar-collapsed {
+  grid-template-columns: 88px minmax(0, 1fr);
 }
 
 .app-shell.theme-dark {
@@ -5386,6 +5391,13 @@ select:focus-visible {
   padding: 28px 20px;
   position: sticky;
   top: 0;
+  transition: gap 220ms ease, padding 220ms ease, width 220ms ease;
+}
+
+.sidebar--collapsed {
+  gap: 14px;
+  overflow-x: hidden;
+  padding: 24px 14px;
 }
 
 .theme-dark .sidebar {
@@ -5411,6 +5423,65 @@ select:focus-visible {
 .sidebar-brand-panel {
   display: grid;
   gap: 14px;
+}
+
+.sidebar-collapse-button {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 12px;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.sidebar-collapse-button:hover {
+  border-color: color-mix(in srgb, var(--brand-blue) 34%, var(--line));
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar-collapse-button svg {
+  color: var(--brand-blue);
+  height: 18px;
+  width: 18px;
+}
+
+.sidebar--collapsed .sidebar-brand-panel {
+  justify-items: center;
+}
+
+.sidebar--collapsed .brand {
+  justify-content: center;
+}
+
+.sidebar--collapsed .brand > div:last-child,
+.sidebar--collapsed .sidebar-collapse-button span,
+.sidebar--collapsed .company-switcher label,
+.sidebar--collapsed .company-switcher-name,
+.sidebar--collapsed .company-switcher small,
+.sidebar--collapsed .sidebar-section-label,
+.sidebar--collapsed .tenant-card {
+  display: none;
+}
+
+.sidebar--collapsed .brand-mark {
+  height: 46px;
+  width: 46px;
+}
+
+.sidebar--collapsed .sidebar-collapse-button {
+  min-height: 40px;
+  padding: 0;
+  width: 46px;
 }
 
 .brand-mark {
@@ -5502,6 +5573,12 @@ select:focus-visible {
   padding: 14px;
 }
 
+.sidebar--collapsed .company-switcher {
+  border-radius: 14px;
+  justify-items: center;
+  padding: 12px 0;
+}
+
 .company-switcher label,
 .sidebar-section-label {
   color: var(--muted);
@@ -5516,6 +5593,11 @@ select:focus-visible {
   display: grid;
   gap: 8px;
   grid-template-columns: 22px 1fr;
+}
+
+.sidebar--collapsed .company-switcher div {
+  display: flex;
+  justify-content: center;
 }
 
 .company-switcher svg {
@@ -5566,6 +5648,31 @@ select:focus-visible {
   padding: 12px 14px;
   text-align: left;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.nav-item span {
+  min-width: 0;
+}
+
+.sidebar--collapsed .nav-list {
+  justify-items: center;
+}
+
+.sidebar--collapsed .nav-item {
+  align-items: center;
+  border-radius: 14px;
+  height: 48px;
+  justify-content: center;
+  padding: 0;
+  width: 48px;
+}
+
+.sidebar--collapsed .nav-item span {
+  display: none;
+}
+
+.sidebar--collapsed .nav-item[aria-current="page"] {
+  box-shadow: inset 0 -3px 0 var(--brand-blue);
 }
 
 .nav-item svg {
