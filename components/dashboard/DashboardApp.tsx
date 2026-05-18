@@ -2072,14 +2072,6 @@ ${recommendedAction()}`;
           isActive={moduleVisibility.configuracion}
           focus={focus}
           visible={visible}
-          onFocusChange={setFocus}
-          onVisibleChange={setVisible}
-        />
-
-        <InventoryModule
-          isActive={moduleVisibility.inventario}
-          showIntegrations={visible.integrations}
-          showImporter={visible.importer}
           integrations={integrations}
           connectedIntegrations={connectedIntegrations}
           activeIntegrationId={activeIntegrationId}
@@ -2100,6 +2092,15 @@ ${recommendedAction()}`;
           onDownloadTemplate={downloadTemplate}
           onRefreshImportHistory={() => { void loadImportHistory(); }}
           onReverseImport={(batchId) => { void reverseImport(batchId); }}
+          onFocusChange={setFocus}
+          onVisibleChange={setVisible}
+        />
+
+        <InventoryModule
+          isActive={moduleVisibility.inventario}
+          metrics={metrics}
+          products={products}
+          formatMoney={formatMoney}
         />
 
         <ReportsModule
