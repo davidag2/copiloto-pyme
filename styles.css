@@ -10814,3 +10814,165 @@ select,
     grid-column: auto;
   }
 }
+
+.sales-command-center {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.sales-kpi-row,
+.sales-workspace {
+  width: 100%;
+}
+
+.sales-kpi-row {
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+.sales-kpi-card {
+  gap: 14px;
+  min-height: 104px;
+  padding: 16px;
+}
+
+.sales-kpi-card > span {
+  height: 46px;
+  width: 46px;
+}
+
+.sales-kpi-card strong {
+  font-size: clamp(22px, 1.8vw, 30px);
+}
+
+.sales-ai-banner {
+  gap: 18px;
+  grid-template-columns: 96px minmax(0, 1fr) minmax(220px, 0.34fr);
+  padding: 18px;
+}
+
+.sales-ai-orb {
+  border-width: 12px;
+  height: 96px;
+  width: 96px;
+}
+
+.sales-ai-banner h3 {
+  font-size: clamp(22px, 2vw, 30px);
+}
+
+.sales-ai-banner aside {
+  padding-left: 18px;
+}
+
+.sales-ai-banner aside strong {
+  font-size: clamp(24px, 2vw, 30px);
+}
+
+.sales-work-tabs {
+  gap: 16px;
+  padding-inline: 16px;
+}
+
+.sales-work-tabs button {
+  min-height: 52px;
+}
+
+.sales-workspace {
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+}
+
+.sales-register-card {
+  gap: 20px;
+  padding: 20px;
+}
+
+.sales-form-grid {
+  gap: 16px;
+}
+
+.sales-form-grid input,
+.sales-form-grid select,
+.sales-form-grid textarea,
+.sales-advanced-panel input,
+.sales-advanced-panel select {
+  min-height: 42px;
+}
+
+.sales-side-panels {
+  gap: 14px;
+}
+
+.sales-side-card {
+  padding: 16px;
+}
+
+.sales-channel-card {
+  grid-template-columns: 92px minmax(0, 1fr);
+}
+
+.sales-register-footer {
+  padding-top: 18px;
+}
+
+.sales-register-footer strong {
+  font-size: 26px;
+}
+
+@media (max-width: 1500px) {
+  .sales-workspace {
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.75fr);
+  }
+
+  .sales-ai-banner {
+    grid-template-columns: 88px minmax(0, 1fr) minmax(200px, 0.34fr);
+  }
+
+  .sales-ai-orb {
+    height: 88px;
+    width: 88px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .sales-ai-banner,
+  .sales-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-ai-banner aside {
+    border-left: 0;
+    border-top: 1px solid rgba(109, 93, 252, 0.24);
+    padding-left: 0;
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 980px) {
+  .sales-kpi-row,
+  .sales-form-grid,
+  .sales-mini-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .sales-kpi-row,
+  .sales-form-grid,
+  .sales-mini-grid,
+  .sales-channel-card {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-register-card,
+  .sales-side-card {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .sales-notes-field {
+    grid-column: auto;
+  }
+}

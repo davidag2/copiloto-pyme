@@ -3,7 +3,6 @@
 import type { CSSProperties, FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  AlertTriangle,
   BarChart3,
   Bot,
   CalendarDays,
@@ -13,7 +12,6 @@ import {
   FileText,
   PackageCheck,
   ShoppingCart,
-  Sparkles,
   TrendingUp,
   Users
 } from "lucide-react";
@@ -189,12 +187,7 @@ function topBy<T extends string>(sales: RecentSale[], selector: (sale: RecentSal
 
 export function SalesModule({
   isActive,
-  visibleProducts,
-  visibleDecisions,
-  visibleCopilot,
   canRegisterSales,
-  canRegisterDecisions,
-  salesInsightCards,
   manualSaleForm,
   manualSaleStatus,
   salesCatalogs,
@@ -206,18 +199,9 @@ export function SalesModule({
   editingSale,
   weeklyVariation,
   weeklyTotal,
-  bestDay,
-  selectedSalesCount,
   salesPercent,
   salesRule,
   products,
-  decisions,
-  activeDecisionId,
-  microAction,
-  customerCompanyName,
-  openDecisions,
-  question,
-  answer,
   onSubmitManualSale,
   onManualProductChange,
   onManualFieldChange,
@@ -228,13 +212,7 @@ export function SalesModule({
   onEditingSaleChange,
   onSaveQuickSaleEdit,
   onCancelEdit,
-  onAddDecision,
-  onUpdateDecisionStatus,
   onGenerateSalesReading,
-  onGenerateBrief,
-  onQuestionChange,
-  onAnswerQuestion,
-  onPromptSelect,
   recommendedAction,
   formatMoney,
   formatShortDate
@@ -406,27 +384,6 @@ export function SalesModule({
         </div>
       </details>
 
-      {isActive && visibleProducts && <article className="panel"><div className="panel-heading"><div><span><PackageCheck aria-hidden="true" />Productos</span><h2>Más vendidos</h2></div></div><div className="table-list">{products.map((product) => <div className="table-row" key={product.name}><div><strong>{product.name}</strong><span>Stock: {product.stock}</span></div><strong>{product.sales}</strong></div>)}</div></article>}
-      {isActive && visibleDecisions && (
-        <article className="panel decisions-panel">
-          <div className="panel-heading"><div><span><ClipboardCheck aria-hidden="true" />Historial</span><h2>Decisiones tomadas</h2></div></div>
-          <form className="decision-form" data-motion={microAction === "decision" ? "active" : undefined} onSubmit={onAddDecision}>
-            <input name="decision" required disabled={!canRegisterDecisions} placeholder="Ej. Reponer Panela Orgánica esta semana" />
-            <select name="owner" disabled={!canRegisterDecisions}><option>Propietario</option><option>Administrador</option><option>Contador</option><option>Ventas</option></select>
-            <select name="impact" disabled={!canRegisterDecisions}><option>Inventario</option><option>Caja</option><option>Ventas</option><option>Margen</option></select>
-            <button className="primary-button micro-button" data-motion={microAction === "decision" ? "active" : undefined} type="submit" disabled={!canRegisterDecisions}><ClipboardCheck aria-hidden="true" />Registrar</button>
-          </form>
-          <div className="decisions-list">
-            {decisions.map((decision) => (
-              <div className="decision-item" data-motion={activeDecisionId === decision.id ? "active" : undefined} data-status={decision.status} key={decision.id}>
-                <div><strong>{decision.text}</strong><span>{decision.impact} · {decision.owner} · {decision.date}</span></div>
-                <select value={decision.status} onChange={(event) => onUpdateDecisionStatus(decision.id, event.target.value as Decision["status"])}><option>Pendiente</option><option>En curso</option><option>Completada</option></select>
-              </div>
-            ))}
-          </div>
-        </article>
-      )}
-      {isActive && visibleCopilot && <article className="panel copilot-panel"><div className="panel-heading"><div><span><Bot aria-hidden="true" />Copiloto IA</span><h2>Resumen ejecutivo</h2></div><button className="secondary-button" type="button" onClick={onGenerateBrief}><Bot aria-hidden="true" />Generar brief</button></div><div className="ai-summary"><div className="summary-card"><strong>Lectura de hoy</strong><p>{customerCompanyName} va en {salesPercent}% de la meta mensual. El mejor día reciente fue {bestDay.day} con {formatMoney(bestDay.value)}.</p></div><div className="summary-card"><strong>Acción sugerida</strong><p>{recommendedAction()} Hay {openDecisions} decisiones abiertas.</p></div></div><div className="quick-prompts">{["Qué debo revisar hoy?", "Cómo va la meta mensual?", "Qué productos necesitan atención?", "Qué riesgo tiene la caja?"].map((prompt) => <button type="button" key={prompt} onClick={() => onPromptSelect(prompt)}>{prompt.replace("?", "")}</button>)}</div><div className="prompt-box"><input value={question} onChange={(event) => onQuestionChange(event.target.value)} placeholder="Pregunta: qué debo revisar hoy?" /><button type="button" onClick={onAnswerQuestion}><Bot aria-hidden="true" />Preguntar</button></div><p className="answer-box">{answer}</p></article>}
     </section>
   );
 }
