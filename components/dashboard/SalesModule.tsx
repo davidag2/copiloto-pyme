@@ -238,6 +238,11 @@ export function SalesModule({
           <h2>Ventas</h2>
           <p>Registra, consulta y analiza las ventas de tu negocio en un solo lugar.</p>
         </div>
+        <div className="sales-page-actions">
+          <button className="sales-date-button" type="button"><CalendarDays aria-hidden="true" />14 may - 20 may, 2026</button>
+          <button className="sales-icon-button" type="button" onClick={onRefreshSalesData} aria-label="Actualizar ventas"><TrendingUp aria-hidden="true" /></button>
+          <button className="primary-button" type="button"><ShoppingCart aria-hidden="true" />Nueva venta</button>
+        </div>
       </header>
 
       <div className="sales-kpi-row">
