@@ -928,7 +928,6 @@ export default function Home() {
     alertas: activeModule === "alertas",
     configuracion: activeModule === "configuracion"
   }), [activeModule]);
-  const isCommercialModule = moduleVisibility.ventas || moduleVisibility.alertas;
   const fallbackAiSuggestions: AiSuggestionCard[] = [
     {
       tone: "high",
@@ -2132,79 +2131,78 @@ ${recommendedAction()}`;
           cashDays={cashDays}
         />
 
-        <section className="content-grid dashboard-module-section" data-active={isCommercialModule}>
-          <AlertsModule
-            isActive={moduleVisibility.alertas}
-            alerts={alerts}
-            rules={rules}
-            microAction={microAction}
-            canManageRules={permissions.canManageRules}
-            onRulesChange={setRules}
-            onApplyRules={() => { void applyRules(); }}
-          />
-          <SalesModule
-            isActive={moduleVisibility.ventas}
-            visibleProducts={visible.products}
-            visibleDecisions={visible.decisions}
-            visibleCopilot={visible.copilot}
-            canRegisterSales={permissions.canRegisterSales}
-            canRegisterDecisions={permissions.canRegisterDecisions}
-            salesInsightCards={salesInsightCards}
-            quickSaleForm={quickSaleForm}
-            quickSaleStatus={quickSaleStatus}
-            manualSaleForm={manualSaleForm}
-            manualSaleStatus={manualSaleStatus}
-            salesCatalogs={salesCatalogs}
-            salesSummaryCards={salesSummaryCards}
-            filteredSales={filteredSales}
-            filteredSalesTotal={filteredSalesTotal}
-            salesFilters={salesFilters}
-            editingSaleId={editingSaleId}
-            editingSale={editingSale}
-            chartData={chartData}
-            trendCards={trendCards}
-            weeklyVariation={weeklyVariation}
-            weeklyTotal={weeklyTotal}
-            bestDay={bestDay}
-            selectedSalesCount={selectedSales.length}
-            salesPercent={salesPercent}
-            salesRule={rules.sales}
-            products={products}
-            decisions={decisions}
-            activeDecisionId={activeDecisionId}
-            microAction={microAction}
-            customerCompanyName={customer.companyName}
-            openDecisions={openDecisions}
-            question={question}
-            answer={answer}
-            onSubmitQuickSale={submitQuickSale}
-            onQuickProductChange={selectProductForQuickSale}
-            onQuickFieldChange={updateQuickSaleField}
-            onSubmitManualSale={submitManualSale}
-            onManualProductChange={selectProductForManualSale}
-            onManualFieldChange={updateManualSaleField}
-            onFilterChange={updateSalesFilter}
-            onClearFilters={() => setSalesFilters({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" })}
-            onRefreshSalesData={() => { void loadSalesData(); }}
-            onStartEditingSale={startEditingSale}
-            onEditingSaleChange={(patch) => setEditingSale((current) => ({ ...current, ...patch }))}
-            onSaveQuickSaleEdit={(saleId) => { void saveQuickSaleEdit(saleId); }}
-            onCancelEdit={() => setEditingSaleId("")}
-            onAddDecision={addDecision}
-            onUpdateDecisionStatus={(decisionId, status) => { void updateDecisionStatus(decisionId, status); }}
-            onGenerateSalesReading={() => setAnswer(`Ventas: ${formatMoney(weeklyTotal)} en ${dateRangeLabel}. Mejor dia: ${bestDay.day}. ${recommendedAction()}`)}
-            onGenerateBrief={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}
-            onQuestionChange={setQuestion}
-            onAnswerQuestion={answerQuestion}
-            onPromptSelect={(prompt) => {
-              setQuestion(prompt);
-              setAnswer(`Mi recomendacion: ${recommendedAction()}`);
-            }}
-            recommendedAction={recommendedAction}
-            formatMoney={formatMoney}
-            formatShortDate={formatShortDate}
-          />
-        </section>
+        <AlertsModule
+          isActive={moduleVisibility.alertas}
+          alerts={alerts}
+          rules={rules}
+          microAction={microAction}
+          canManageRules={permissions.canManageRules}
+          onRulesChange={setRules}
+          onApplyRules={() => { void applyRules(); }}
+        />
+
+        <SalesModule
+          isActive={moduleVisibility.ventas}
+          visibleProducts={visible.products}
+          visibleDecisions={visible.decisions}
+          visibleCopilot={visible.copilot}
+          canRegisterSales={permissions.canRegisterSales}
+          canRegisterDecisions={permissions.canRegisterDecisions}
+          salesInsightCards={salesInsightCards}
+          quickSaleForm={quickSaleForm}
+          quickSaleStatus={quickSaleStatus}
+          manualSaleForm={manualSaleForm}
+          manualSaleStatus={manualSaleStatus}
+          salesCatalogs={salesCatalogs}
+          salesSummaryCards={salesSummaryCards}
+          filteredSales={filteredSales}
+          filteredSalesTotal={filteredSalesTotal}
+          salesFilters={salesFilters}
+          editingSaleId={editingSaleId}
+          editingSale={editingSale}
+          chartData={chartData}
+          trendCards={trendCards}
+          weeklyVariation={weeklyVariation}
+          weeklyTotal={weeklyTotal}
+          bestDay={bestDay}
+          selectedSalesCount={selectedSales.length}
+          salesPercent={salesPercent}
+          salesRule={rules.sales}
+          products={products}
+          decisions={decisions}
+          activeDecisionId={activeDecisionId}
+          microAction={microAction}
+          customerCompanyName={customer.companyName}
+          openDecisions={openDecisions}
+          question={question}
+          answer={answer}
+          onSubmitQuickSale={submitQuickSale}
+          onQuickProductChange={selectProductForQuickSale}
+          onQuickFieldChange={updateQuickSaleField}
+          onSubmitManualSale={submitManualSale}
+          onManualProductChange={selectProductForManualSale}
+          onManualFieldChange={updateManualSaleField}
+          onFilterChange={updateSalesFilter}
+          onClearFilters={() => setSalesFilters({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" })}
+          onRefreshSalesData={() => { void loadSalesData(); }}
+          onStartEditingSale={startEditingSale}
+          onEditingSaleChange={(patch) => setEditingSale((current) => ({ ...current, ...patch }))}
+          onSaveQuickSaleEdit={(saleId) => { void saveQuickSaleEdit(saleId); }}
+          onCancelEdit={() => setEditingSaleId("")}
+          onAddDecision={addDecision}
+          onUpdateDecisionStatus={(decisionId, status) => { void updateDecisionStatus(decisionId, status); }}
+          onGenerateSalesReading={() => setAnswer(`Ventas: ${formatMoney(weeklyTotal)} en ${dateRangeLabel}. Mejor dia: ${bestDay.day}. ${recommendedAction()}`)}
+          onGenerateBrief={() => setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`)}
+          onQuestionChange={setQuestion}
+          onAnswerQuestion={answerQuestion}
+          onPromptSelect={(prompt) => {
+            setQuestion(prompt);
+            setAnswer(`Mi recomendacion: ${recommendedAction()}`);
+          }}
+          recommendedAction={recommendedAction}
+          formatMoney={formatMoney}
+          formatShortDate={formatShortDate}
+        />
 
         </div>
 
