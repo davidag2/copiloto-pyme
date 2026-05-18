@@ -1,8 +1,24 @@
 "use client";
 
-import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Database, Link2, RefreshCw, Settings2, Upload } from "lucide-react";
+import {
+  Bell,
+  Brain,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Crown,
+  FileText,
+  HelpCircle,
+  Mail,
+  MoreHorizontal,
+  Plus,
+  Settings2,
+  Sparkles,
+  Table2,
+  Users,
+  WalletCards
+} from "lucide-react";
 
 type DashboardVisibility = {
   sales: boolean;
@@ -88,172 +104,150 @@ type SettingsModuleProps = {
   onReverseImport: (batchId: string) => void;
 };
 
-const visibilityLabels: Record<keyof DashboardVisibility, string> = {
-  sales: "Ventas",
-  cash: "Caja",
-  margin: "Margen",
-  stock: "Inventario crítico",
-  importer: "Importador CSV",
-  products: "Productos",
-  copilot: "Copiloto IA",
-  decisions: "Decisiones",
-  integrations: "Integraciones",
-  reports: "Reportes"
+const users: Array<[string, string, string, string, string]> = [
+  ["Andrés Vélez", "andres@cafeoriente.com", "Administrador", "purple", "AV"],
+  ["María Gómez", "maria@cafeoriente.com", "Ventas", "blue", "MG"],
+  ["Juan Pablo Ruiz", "juan@cafeoriente.com", "Inventario", "orange", "JR"]
+];
+
+const notificationChannels: Array<[string, string, string, LucideIcon]> = [
+  ["WhatsApp", "Recibe alertas importantes", "green", Bell],
+  ["Email", "Recibe reportes y novedades", "blue", Mail],
+  ["Alertas de IA", "Recomendaciones y riesgos", "purple", Sparkles]
+];
+
+const integrationIcons: Record<string, LucideIcon> = {
+  sheets: Table2,
+  whatsapp: Bell,
+  siigo: FileText,
+  banking: WalletCards
 };
 
-function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; title: string; text: string; action?: ReactNode }) {
-  return (
-    <div className="empty-state">
-      <Icon aria-hidden="true" />
-      <strong>{title}</strong>
-      <p>{text}</p>
-      {action}
-    </div>
-  );
-}
+const aiPreferences: Array<[string, string, LucideIcon]> = [
+  ["Resumen ejecutivo diario", "Recibe un resumen de tu negocio cada día", CalendarDays],
+  ["Alertas automáticas", "La IA te avisa sobre riesgos importantes", Bell],
+  ["Recomendaciones IA", "Sugerencias para mejorar tus ventas y operación", Sparkles]
+];
 
 export function SettingsModule({
   isActive,
-  focus,
-  visible,
   integrations,
   connectedIntegrations,
   activeIntegrationId,
   canManageIntegrations,
-  canImportData,
   microAction,
-  importStatus,
-  importPreview,
-  csvMapping,
-  csvHeaders,
-  csvRows,
-  importValidation,
-  importHistory,
-  onFocusChange,
-  onVisibleChange,
-  onSyncIntegrations,
   onConnectIntegration,
-  onCsvMappingChange,
-  onApplyCsvImport,
-  onDownloadTemplate,
-  onRefreshImportHistory,
-  onReverseImport
+  onSyncIntegrations
 }: SettingsModuleProps) {
+  const visibleIntegrations = integrations.filter((integration) => integration.id !== "banking").slice(0, 3);
+
   return (
-    <section className="settings-command-center dashboard-module-section" data-active={isActive}>
-      <section className="customizer-panel">
-        <div className="panel-heading">
-          <div><span><Settings2 aria-hidden="true" />Dashboard personalizable</span><h2>Elige qué ve cada usuario</h2></div>
-          <select value={focus} onChange={(event) => onFocusChange(event.target.value)}>
-            <option value="owner">Propietario / Gerencia</option>
-            <option value="admin">Administrador</option>
-            <option value="finance">Contador</option>
-            <option value="sales">Ventas</option>
-          </select>
+    <section className="settings-command-center settings-2026 dashboard-module-section" data-active={isActive}>
+      <header className="settings-page-heading">
+        <div>
+          <h2>Configuración</h2>
+          <p>Administra tu cuenta, usuarios, integraciones y preferencias.</p>
         </div>
-        <div className="customizer-grid">
-          {(Object.keys(visible) as Array<keyof DashboardVisibility>).map((key) => (
-            <label key={key}>
-              <input
-                type="checkbox"
-                checked={visible[key]}
-                onChange={(event) => onVisibleChange({ ...visible, [key]: event.target.checked })}
-              />
-              {visibilityLabels[key]}
-            </label>
-          ))}
-        </div>
-      </section>
+        <button className="settings-help-button" type="button"><HelpCircle aria-hidden="true" />Centro de ayuda</button>
+      </header>
 
-      <section className="integrations-panel">
-        <div className="panel-heading">
-          <div><span><Link2 aria-hidden="true" />Integraciones latinoamericanas</span><h2>Conecta tus fuentes de datos</h2></div>
-          <button className="primary-button micro-button" data-motion={microAction === "sync" ? "active" : undefined} type="button" onClick={onSyncIntegrations} disabled={!canManageIntegrations}>
-            <RefreshCw aria-hidden="true" />Sincronizar
-          </button>
-        </div>
-        {connectedIntegrations === 0 && (
-          <EmptyState
-            icon={Link2}
-            title="Aún no hay integraciones conectadas"
-            text="Conecta tu primera fuente para que ventas, caja e inventario empiecen a actualizarse con menos trabajo manual."
-            action={<button className="primary-button" type="button" onClick={() => onConnectIntegration("sheets")} disabled={!canManageIntegrations}>Conectar Google Sheets</button>}
-          />
-        )}
-        <div className="integrations-grid">
-          {integrations.map((integration) => (
-            <article className="integration-card" data-future={integration.id === "banking"} data-motion={activeIntegrationId === integration.id ? "active" : undefined} data-status={integration.status} key={integration.id}>
-              <div><span><Database aria-hidden="true" />{integration.category}</span><strong>{integration.name}</strong><small>{integration.sync}</small></div>
-              <button className="secondary-button micro-button" data-motion={activeIntegrationId === integration.id ? "active" : undefined} type="button" onClick={() => onConnectIntegration(integration.id)} disabled={integration.id === "banking" || !canManageIntegrations}>
-                {integration.id === "banking" ? "Próximamente" : integration.status === "Conectado" ? "Reconectar" : "Conectar"}
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
+      <div className="settings-top-grid">
+        <article className="settings-card settings-billing-card">
+          <header><span><Crown aria-hidden="true" /></span><strong>Plan y facturación</strong></header>
+          <div className="settings-plan-box">
+            <small>Plan actual</small>
+            <h3>Pyme Pro</h3>
+            <em>Activo</em>
+            <p>Próximo pago</p>
+            <strong><CalendarDays aria-hidden="true" />18 de junio de 2026</strong>
+          </div>
+          <div className="settings-payment-row">
+            <div><small>Método de pago</small><strong>VISA</strong><span>•••• 4242</span></div>
+            <em>Predeterminado</em>
+          </div>
+          <footer>
+            <button type="button">Cambiar plan</button>
+            <button type="button">Ver facturas</button>
+          </footer>
+        </article>
 
-      <section className="importer-panel">
-        <div className="panel-heading"><div><span><Upload aria-hidden="true" />Importador real CSV</span><h2>Ventas, caja, gastos e inventario</h2></div><strong>{importStatus}</strong></div>
-        <div className="importer-grid">
+        <article className="settings-card settings-users-card">
+          <header><span><Users aria-hidden="true" /></span><strong>Usuarios</strong><button type="button"><Plus aria-hidden="true" />Agregar usuario</button></header>
           <div>
-            <p>Mapea las columnas del archivo para detectar errores, duplicados y guardar solo filas válidas.</p>
-            <div className="mapping-grid">
-              {(Object.keys(csvMapping) as Array<keyof CsvColumnMapping>).map((field) => (
-                <label key={field}>
-                  {field}
-                  <select value={csvMapping[field]} onChange={(event) => onCsvMappingChange(field, event.target.value)}>
-                    <option value="">No mapear</option>
-                    {csvHeaders.map((header) => <option value={header} key={header}>{header}</option>)}
-                  </select>
-                </label>
-              ))}
-            </div>
-            <div className={`import-validation ${importValidation?.errors.length ? "has-errors" : ""}`}>{importPreview}</div>
-          </div>
-          <div className="preview-box">
-            <div className="preview-heading">
-              <span>Vista previa y validación</span>
-              <button className="primary-button" type="button" onClick={onApplyCsvImport} disabled={!canImportData || !csvRows.length}>
-                <Database aria-hidden="true" />Aplicar importación
-              </button>
-            </div>
-            <div className="preview-table">
-              {csvRows.length ? (
-                <table>
-                  <thead><tr>{csvHeaders.slice(0, 5).map((header) => <th key={header}>{header}</th>)}</tr></thead>
-                  <tbody>{csvRows.slice(0, 4).map((row, index) => <tr key={`${row[csvHeaders[0]]}-${index}`}>{csvHeaders.slice(0, 5).map((header) => <td key={header}>{row[header]}</td>)}</tr>)}</tbody>
-                </table>
-              ) : (
-                <EmptyState
-                  icon={Upload}
-                  title="Carga tu primer archivo"
-                  text="Importa un CSV para mapear columnas, detectar errores por fila y guardar datos reales en esta empresa."
-                  action={<button className="secondary-button" type="button" onClick={onDownloadTemplate}>Descargar plantilla CSV</button>}
-                />
-              )}
-            </div>
-            {importValidation?.errors.length ? <div className="row-errors">{importValidation.errors.slice(0, 5).map((error) => <span key={error.rowNumber}>Fila {error.rowNumber}: {error.errors.join(", ")}</span>)}</div> : null}
-          </div>
-        </div>
-        <div className="import-history">
-          <div className="preview-heading"><span>Historial de cargas</span><button className="secondary-button" type="button" onClick={onRefreshImportHistory}>Actualizar historial</button></div>
-          <div className="history-list">
-            {importHistory.length ? importHistory.map((batch) => (
-              <article key={batch.id} data-status={batch.status}>
-                <div><strong>{batch.fileName || "CSV sin nombre"}</strong><span>{batch.validCount}/{batch.rowCount} válidas · {batch.errorCount} errores · {batch.duplicateCount} duplicados</span></div>
-                <small>{new Date(batch.createdAt).toLocaleString("es-CO")} · {batch.status}</small>
-                <button className="secondary-button" type="button" disabled={batch.status === "reversed"} onClick={() => onReverseImport(batch.id)}>Reversar</button>
+            {users.map(([name, email, role, tone, initials]) => (
+              <article key={email}>
+                <i data-tone={tone}>{initials}</i>
+                <div><strong>{name}</strong><p>{email}</p></div>
+                <em data-tone={tone}>{role}</em>
+                <button aria-label={`Opciones de ${name}`} type="button"><MoreHorizontal aria-hidden="true" /></button>
               </article>
-            )) : (
-              <EmptyState
-                icon={Database}
-                title="Sin historial de cargas"
-                text="Cuando apliques una importación, aquí verás filas válidas, errores, duplicados y la opción de reversar."
-              />
-            )}
+            ))}
           </div>
-        </div>
-      </section>
+          <a href="#equipo">Ver todos los usuarios <ChevronRight aria-hidden="true" /></a>
+        </article>
+
+        <article className="settings-card settings-notifications-card">
+          <header><span><Bell aria-hidden="true" /></span><strong>Notificaciones</strong></header>
+          <div>
+            {notificationChannels.map(([title, text, tone, Icon]) => (
+              <article key={title}>
+                <Icon aria-hidden="true" data-tone={tone} />
+                <div><strong>{title}</strong><p>{text}</p></div>
+                <button aria-label={`Activar ${title}`} className="settings-toggle is-on" type="button"><span /></button>
+              </article>
+            ))}
+          </div>
+          <a href="#alertas">Configurar preferencias <ChevronRight aria-hidden="true" /></a>
+        </article>
+      </div>
+
+      <div className="settings-bottom-grid">
+        <article className="settings-card settings-integrations-card">
+          <header>
+            <span><Settings2 aria-hidden="true" /></span>
+            <strong>Integraciones</strong>
+            <button type="button" onClick={onSyncIntegrations} disabled={!canManageIntegrations}>
+              {connectedIntegrations ? "Ver todas" : "Sincronizar"}
+            </button>
+          </header>
+          <div className="settings-integration-list">
+            {visibleIntegrations.map((integration) => {
+              const Icon = integrationIcons[integration.id] ?? Settings2;
+              const isActiveIntegration = activeIntegrationId === integration.id;
+              return (
+                <button
+                  data-motion={isActiveIntegration || microAction === "sync" ? "active" : undefined}
+                  key={integration.id}
+                  onClick={() => onConnectIntegration(integration.id)}
+                  disabled={!canManageIntegrations}
+                  type="button"
+                >
+                  <Icon aria-hidden="true" />
+                  <strong>{integration.name}</strong>
+                  <span>{integration.status === "Conectado" ? "Conectado" : "Disponible"}</span>
+                  <CheckCircle2 aria-hidden="true" />
+                  <ChevronRight aria-hidden="true" />
+                </button>
+              );
+            })}
+          </div>
+          <a href="#datos">Gestionar integraciones <ChevronRight aria-hidden="true" /></a>
+        </article>
+
+        <article className="settings-card settings-ai-card">
+          <header><span><Brain aria-hidden="true" /></span><strong>Inteligencia Artificial</strong></header>
+          <div>
+            {aiPreferences.map(([title, text, Icon]) => (
+              <article key={title}>
+                <Icon aria-hidden="true" />
+                <div><strong>{title}</strong><p>{text}</p></div>
+                <button aria-label={`Activar ${title}`} className="settings-toggle is-on" type="button"><span /></button>
+              </article>
+            ))}
+          </div>
+          <a href="#ai">Personalizar IA <ChevronRight aria-hidden="true" /></a>
+        </article>
+      </div>
     </section>
   );
 }

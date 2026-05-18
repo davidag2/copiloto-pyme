@@ -15078,3 +15078,501 @@ select,
     grid-column: 2;
   }
 }
+
+/* Settings module 2026 */
+.settings-2026 {
+  box-sizing: border-box;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.settings-2026 * {
+  box-sizing: border-box;
+}
+
+.settings-page-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.settings-page-heading h2 {
+  color: var(--ink);
+  font-size: clamp(34px, 3.2vw, 48px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0 0 10px;
+}
+
+.settings-page-heading p {
+  color: var(--muted);
+  font-size: clamp(14px, 1.1vw, 17px);
+  font-weight: 700;
+  margin: 0;
+}
+
+.settings-help-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 18px;
+}
+
+.settings-help-button svg {
+  color: var(--brand-blue);
+  height: 18px;
+  width: 18px;
+}
+
+.settings-top-grid,
+.settings-bottom-grid {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.settings-top-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-bottom-grid {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.settings-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+  padding: 28px;
+}
+
+.settings-card > header {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.settings-card > header > span {
+  align-items: center;
+  background: rgba(109, 93, 252, 0.12);
+  border-radius: 999px;
+  color: #4f46e5;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 54px;
+  justify-content: center;
+  width: 54px;
+}
+
+.settings-card > header strong {
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.settings-card > header button,
+.settings-card > a,
+.settings-notifications-card > a,
+.settings-ai-card > a,
+.settings-integrations-card > a {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--brand-blue);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 950;
+  gap: 8px;
+  justify-self: center;
+  text-decoration: none;
+}
+
+.settings-card > header button {
+  justify-self: auto;
+  margin-left: auto;
+}
+
+.settings-plan-box {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 93, 252, 0.13), transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 247, 255, 0.86));
+  border: 1px solid rgba(109, 93, 252, 0.22);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  position: relative;
+}
+
+.settings-plan-box small,
+.settings-payment-row small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settings-plan-box h3 {
+  color: #4f46e5;
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1;
+  margin: 0;
+}
+
+.settings-plan-box em,
+.settings-payment-row em {
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.settings-plan-box em {
+  position: absolute;
+  right: 18px;
+  top: 50px;
+}
+
+.settings-plan-box p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  margin: 18px 0 0;
+}
+
+.settings-plan-box strong {
+  align-items: center;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.settings-payment-row {
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 8px 10px 22px;
+}
+
+.settings-payment-row div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.settings-payment-row strong {
+  background: rgba(109, 93, 252, 0.12);
+  border-radius: 8px;
+  color: #172554;
+  font-size: 13px;
+  font-style: italic;
+  padding: 4px 8px;
+}
+
+.settings-payment-row span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.settings-billing-card footer {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-billing-card footer button {
+  border: 1px solid rgba(109, 93, 252, 0.42);
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  min-height: 50px;
+}
+
+.settings-billing-card footer button:first-child {
+  background: white;
+  color: #4f46e5;
+}
+
+.settings-billing-card footer button:last-child {
+  background: linear-gradient(135deg, #6d5dfc, #4f46e5);
+  color: white;
+}
+
+.settings-users-card > div,
+.settings-notifications-card > div,
+.settings-ai-card > div,
+.settings-integration-list {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-users-card article {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 48px minmax(0, 1fr) auto 34px;
+  padding: 8px 0;
+}
+
+.settings-users-card i {
+  align-items: center;
+  background: linear-gradient(135deg, #6d5dfc, #4f46e5);
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-style: normal;
+  font-weight: 950;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.settings-users-card i[data-tone="blue"] { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+.settings-users-card i[data-tone="orange"] { background: linear-gradient(135deg, #fb923c, #f97316); }
+
+.settings-users-card article strong,
+.settings-notifications-card article strong,
+.settings-ai-card article strong,
+.settings-integration-list strong {
+  color: var(--ink);
+  display: block;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.settings-users-card article p,
+.settings-notifications-card article p,
+.settings-ai-card article p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
+.settings-users-card article em {
+  border-radius: 999px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.settings-users-card article em[data-tone="purple"] { background: rgba(109, 93, 252, 0.14); color: #4f46e5; }
+.settings-users-card article em[data-tone="blue"] { background: rgba(37, 99, 235, 0.12); color: var(--brand-blue); }
+.settings-users-card article em[data-tone="orange"] { background: rgba(249, 115, 22, 0.14); color: #f97316; }
+
+.settings-users-card article button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.settings-notifications-card article,
+.settings-ai-card article {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  padding: 18px 0;
+}
+
+.settings-notifications-card article:last-child,
+.settings-ai-card article:last-child {
+  border-bottom: 0;
+}
+
+.settings-notifications-card article > svg,
+.settings-ai-card article > svg {
+  background: rgba(109, 93, 252, 0.12);
+  border-radius: 999px;
+  color: #4f46e5;
+  height: 44px;
+  padding: 10px;
+  width: 44px;
+}
+
+.settings-notifications-card article > svg[data-tone="green"] {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.settings-notifications-card article > svg[data-tone="blue"] {
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--brand-blue);
+}
+
+.settings-toggle {
+  align-items: center;
+  background: linear-gradient(135deg, #6d5dfc, #4f46e5);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  height: 26px;
+  justify-content: flex-end;
+  padding: 3px;
+  width: 48px;
+}
+
+.settings-toggle span {
+  background: white;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+  height: 20px;
+  width: 20px;
+}
+
+.settings-integration-list {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.settings-integration-list button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 14px;
+  grid-template-columns: 44px minmax(0, 1fr) auto 22px 18px;
+  min-height: 74px;
+  padding: 0 22px;
+  text-align: left;
+}
+
+.settings-integration-list button:last-child {
+  border-bottom: 0;
+}
+
+.settings-integration-list button > svg:first-child {
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 10px;
+  color: var(--green);
+  height: 40px;
+  padding: 9px;
+  width: 40px;
+}
+
+.settings-integration-list button span {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.settings-integration-list button > svg:nth-last-child(2) {
+  color: var(--green);
+  height: 20px;
+  width: 20px;
+}
+
+.settings-integration-list button > svg:last-child {
+  color: var(--brand-blue);
+  height: 18px;
+  width: 18px;
+}
+
+.settings-ai-card article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.theme-dark .settings-card,
+.theme-dark .settings-help-button,
+.theme-dark .settings-plan-box,
+.theme-dark .settings-billing-card footer button:first-child,
+.theme-dark .settings-integration-list,
+.theme-dark .settings-integration-list button,
+.theme-dark .settings-ai-card article {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+@media (max-width: 1500px) {
+  .settings-top-grid,
+  .settings-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .settings-page-heading {
+    display: grid;
+  }
+
+  .settings-help-button {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .settings-help-button,
+  .settings-billing-card footer button {
+    width: 100%;
+  }
+
+  .settings-billing-card footer,
+  .settings-users-card article,
+  .settings-notifications-card article,
+  .settings-ai-card article,
+  .settings-integration-list button {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-users-card article em,
+  .settings-users-card article button,
+  .settings-toggle {
+    justify-self: start;
+  }
+
+  .settings-payment-row {
+    align-items: start;
+    display: grid;
+  }
+}
