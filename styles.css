@@ -16019,3 +16019,136 @@ select,
     display: grid;
   }
 }
+
+/* Cross-browser dashboard hardening for Chrome, Edge, Opera and Firefox. */
+html {
+  -moz-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  text-size-adjust: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="date"],
+input[type="number"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.app-shell,
+.main-panel,
+.sidebar,
+.topbar,
+.mobile-app-bar,
+.dashboard-module-content,
+.dashboard-module-section {
+  min-width: 0;
+}
+
+.app-shell {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+@supports (height: 100dvh) {
+  .app-shell,
+  .main-panel {
+    height: 100dvh;
+  }
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mobile-app-bar,
+  .sidebar,
+  .topbar {
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mobile-app-bar,
+  .sidebar,
+  .topbar {
+    background: rgba(248, 250, 252, 0.96);
+  }
+
+  .theme-dark .mobile-app-bar,
+  .theme-dark .sidebar,
+  .theme-dark .topbar {
+    background: rgba(15, 23, 42, 0.96);
+  }
+}
+
+.dashboard-module-section table {
+  border-collapse: collapse;
+}
+
+.dashboard-module-section img,
+.dashboard-module-section svg {
+  flex-shrink: 0;
+}
+
+.dashboard-module-section button,
+.dashboard-module-section a,
+.dashboard-module-section input,
+.dashboard-module-section select,
+.dashboard-module-section textarea {
+  touch-action: manipulation;
+}
+
+.dashboard-module-section input:focus,
+.dashboard-module-section select:focus,
+.dashboard-module-section textarea:focus,
+.dashboard-module-section button:focus-visible,
+.dashboard-module-section a:focus-visible {
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
