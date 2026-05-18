@@ -4,7 +4,6 @@ import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 
 import {
   AlertTriangle,
   ArrowRight,
-  Banknote,
   BarChart3,
   Bell,
   Boxes,
@@ -35,8 +34,7 @@ import {
   TrendingUp,
   UserCircle,
   Users,
-  WalletCards,
-  X
+  WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
@@ -215,15 +213,6 @@ type AiActivityItem = {
   icon: LucideIcon;
   tone: string;
   href?: string;
-};
-type SmartAction = {
-  id: string;
-  kind: "integration" | "future" | "dismiss";
-  icon: LucideIcon;
-  title: string;
-  text: string;
-  buttonLabel: string;
-  featured?: boolean;
 };
 type SalesCatalogOption = { id: string; name: string; unitPrice?: string | number };
 type RecentSale = {
@@ -708,7 +697,6 @@ export default function Home() {
   const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
   const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
-  const [showAutomationStrip, setShowAutomationStrip] = useState(true);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1018,33 +1006,6 @@ export default function Home() {
     { id: "demo-alert", title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
   ];
   const aiActivity = activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity;
-  const automationActions: SmartAction[] = [
-    {
-      id: "siigo",
-      kind: "integration",
-      icon: FileText,
-      title: "Conecta tu facturación electrónica",
-      text: "Acción destacada: conecta SIIGO para traer ventas, facturas, cartera e impuestos al resumen diario.",
-      buttonLabel: "Conectar SIIGO",
-      featured: true
-    },
-    {
-      id: "banking",
-      kind: "future",
-      icon: Banknote,
-      title: "Sincroniza tu banco",
-      text: "Módulo futuro para conectar movimientos bancarios y mejorar la proyección de caja.",
-      buttonLabel: "Próximamente"
-    },
-    {
-      id: "dismiss-suggestion",
-      kind: "dismiss",
-      icon: X,
-      title: "Cerrar esta sugerencia",
-      text: "Oculta esta barra cuando el equipo ya tenga claro el siguiente paso.",
-      buttonLabel: "Cerrar"
-    }
-  ];
   const salesGoalGap = Math.max(0, (customer.monthlyGoal / 1_000_000) - metrics.sales);
   const salesInsightCards = [
     {
@@ -1599,12 +1560,6 @@ export default function Home() {
     setRecommendation(`${connected.length} integracion(es) sincronizadas. Revisa alertas y decisiones sugeridas.`);
   }
 
-  function dismissSmartSuggestion() {
-    setShowAutomationStrip(false);
-    triggerMicroInteraction("decision", "Sugerencia cerrada. Puedes seguir trabajando en el dashboard.");
-    setRecommendation("Barra de acciones inteligentes cerrada. SIIGO y banco siguen disponibles en Integraciones.");
-  }
-
   async function addDecision(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -2078,11 +2033,6 @@ ${recommendedAction()}`;
           aiCategoryMaxImpact={aiCategoryMaxImpact}
           aiActivity={aiActivity}
           activityStatus={activityStatus}
-          showAutomationStrip={showAutomationStrip}
-          automationActions={automationActions}
-          integrations={integrations}
-          activeIntegrationId={activeIntegrationId}
-          canManageIntegrations={permissions.canManageIntegrations}
           companyId={companyId}
           tenantShortId={tenantShortId}
           activeRoleLabel={activeRoleLabel}
@@ -2097,9 +2047,6 @@ ${recommendedAction()}`;
           }}
           onShowAllCategories={() => setAnswer(`Sugerencias por categoria: ${aiImpactCategories.map((category) => `${category.label} ${category.count}`).join(", ")}.`)}
           onRefreshActivity={() => { void loadActivity(); }}
-          onConnectIntegration={(id) => { void connectIntegration(id); }}
-          onDismissSmartSuggestion={dismissSmartSuggestion}
-          onCloseAutomationStrip={() => setShowAutomationStrip(false)}
           formatCopCompact={formatCopCompact}
           formatMoney={formatMoney}
           />

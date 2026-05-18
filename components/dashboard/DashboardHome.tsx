@@ -8,8 +8,7 @@ import {
   Database,
   RefreshCw,
   Sparkles,
-  Target,
-  X
+  Target
 } from "lucide-react";
 import {
   CartesianGrid,
@@ -71,21 +70,6 @@ type ActivityItem = {
   href?: string;
 };
 
-type SmartAction = {
-  id: string;
-  kind: "integration" | "future" | "dismiss";
-  icon: LucideIcon;
-  title: string;
-  text: string;
-  buttonLabel: string;
-  featured?: boolean;
-};
-
-type IntegrationStatus = {
-  id: string;
-  status: "Disponible" | "Conectado";
-};
-
 type DashboardHomeProps = {
   isActive: boolean;
   overallStatusTone: string;
@@ -103,11 +87,6 @@ type DashboardHomeProps = {
   aiCategoryMaxImpact: number;
   aiActivity: ActivityItem[];
   activityStatus: string;
-  showAutomationStrip: boolean;
-  automationActions: SmartAction[];
-  integrations: IntegrationStatus[];
-  activeIntegrationId: string;
-  canManageIntegrations: boolean;
   companyId: string;
   tenantShortId: string;
   activeRoleLabel: string;
@@ -119,9 +98,6 @@ type DashboardHomeProps = {
   onRefreshSuggestions: () => void;
   onShowAllCategories: () => void;
   onRefreshActivity: () => void;
-  onConnectIntegration: (id: string) => void;
-  onDismissSmartSuggestion: () => void;
-  onCloseAutomationStrip: () => void;
   formatCopCompact: (value: number) => string;
   formatMoney: (value: number) => string;
 };
@@ -163,11 +139,6 @@ export function DashboardHome({
   aiCategoryMaxImpact,
   aiActivity,
   activityStatus,
-  showAutomationStrip,
-  automationActions,
-  integrations,
-  activeIntegrationId,
-  canManageIntegrations,
   companyId,
   tenantShortId,
   activeRoleLabel,
@@ -179,9 +150,6 @@ export function DashboardHome({
   onRefreshSuggestions,
   onShowAllCategories,
   onRefreshActivity,
-  onConnectIntegration,
-  onDismissSmartSuggestion,
-  onCloseAutomationStrip,
   formatCopCompact,
   formatMoney
 }: DashboardHomeProps) {
@@ -348,48 +316,6 @@ export function DashboardHome({
           <p className="ai-activity-status">{activityStatus}</p>
         </article>
       </section>
-
-      {isActive && showAutomationStrip && (
-        <section className="ai-automation-strip smart-actions-bar" aria-label="Acciones inteligentes del dashboard">
-          <div className="ai-automation-intro">
-            <span><Sparkles aria-hidden="true" /></span>
-            <div>
-              <strong>Acciones inteligentes</strong>
-              <p>Conecta datos clave, mejora la lectura diaria y cierra esta sugerencia cuando ya no la necesites.</p>
-            </div>
-          </div>
-          <div className="ai-automation-actions">
-            {automationActions.map((action) => {
-              const Icon = action.icon;
-              const integration = integrations.find((item) => item.id === action.id);
-              const isConnected = integration?.status === "Conectado";
-              const isFuture = action.kind === "future";
-              const isDismiss = action.kind === "dismiss";
-              return (
-                <article className="ai-automation-card" data-connected={isConnected} data-featured={action.featured} data-future={isFuture} key={action.id}>
-                  <Icon aria-hidden="true" />
-                  <div><strong>{action.title}</strong><small>{isConnected ? "Conectado y sincronizado" : action.text}</small></div>
-                  <button
-                    className={action.featured ? "primary-button micro-button" : "secondary-button micro-button"}
-                    data-motion={activeIntegrationId === action.id ? "active" : undefined}
-                    type="button"
-                    onClick={() => {
-                      if (isDismiss) onDismissSmartSuggestion();
-                      else onConnectIntegration(action.id);
-                    }}
-                    disabled={isFuture || (!isDismiss && !canManageIntegrations)}
-                  >
-                    {isConnected ? "Reconectar" : action.buttonLabel}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
-          <button className="ai-automation-close" type="button" onClick={onCloseAutomationStrip} aria-label="Ocultar sugerencia de integraciones">
-            <X aria-hidden="true" />
-          </button>
-        </section>
-      )}
 
       <section className="setup-summary dashboard-module-section" data-active={isActive}>
         <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
