@@ -16152,3 +16152,99 @@ input[type="number"]::-webkit-outer-spin-button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Apple ecosystem hardening: iPhone, iPad, iMac, MacBook and Safari. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+  min-height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overscroll-behavior-y: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .app-shell {
+    min-height: -webkit-fill-available;
+  }
+
+  .main-panel {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-app-bar,
+  .topbar {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+
+  .main-panel {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .mobile-quick-nav {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  input[type="date"] {
+    min-height: 44px;
+  }
+
+  button,
+  [role="button"],
+  .nav-item,
+  .mobile-nav-item,
+  .company-switcher {
+    cursor: pointer;
+  }
+
+  .dashboard-module-section {
+    transform: translateZ(0);
+  }
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .mobile-app-bar,
+  .sidebar,
+  .topbar {
+    -webkit-backdrop-filter: saturate(145%) blur(18px);
+    backdrop-filter: saturate(145%) blur(18px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .dashboard-module-section button,
+  .dashboard-module-section a,
+  .nav-item,
+  .mobile-nav-item,
+  .company-switcher {
+    min-height: 44px;
+  }
+
+  .sales-work-tabs,
+  .mobile-quick-nav {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  .app-shell {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
