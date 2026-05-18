@@ -6,19 +6,14 @@ import {
   CheckCircle2,
   Clock3,
   Database,
-  RefreshCw,
   Sparkles,
   Target
 } from "lucide-react";
 import {
-  CartesianGrid,
   Line,
   LineChart,
-  Legend,
   ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
+  Tooltip
 } from "recharts";
 
 type HomeSuggestion = {
@@ -131,14 +126,10 @@ export function DashboardHome({
   aiSuggestionsStatus,
   aiSuggestions,
   aiHomeKpis,
-  aiImpactSummaryCards,
   aiImpactLift,
   hasRealAiSuggestions,
   aiImpactData,
   aiImpactCategories,
-  aiCategoryMaxImpact,
-  aiActivity,
-  activityStatus,
   companyId,
   tenantShortId,
   activeRoleLabel,
@@ -149,39 +140,156 @@ export function DashboardHome({
   microAction,
   onRefreshSuggestions,
   onShowAllCategories,
-  onRefreshActivity,
   formatCopCompact,
   formatMoney
 }: DashboardHomeProps) {
   const totalActiveCategories = aiImpactCategories.reduce((total, item) => total + item.count, 0);
+  const primarySuggestion = aiSuggestions[0];
+  const secondarySuggestions = aiSuggestions.slice(1, 4);
+  const PrimaryIcon = primarySuggestion?.icon ?? Sparkles;
+  const weekKpis = aiHomeKpis.slice(0, 4);
+  const processSteps = [
+    {
+      title: "Detectamos oportunidades",
+      text: "La IA analiza tus ventas, caja, inventario, precios y comportamiento de clientes.",
+      icon: Sparkles
+    },
+    {
+      title: "Generamos sugerencias",
+      text: "Priorizamos las acciones con mayor impacto y factibilidad para tu equipo.",
+      icon: Target
+    },
+    {
+      title: "Obtienes mejores resultados",
+      text: "Ejecutas la recomendación, mides el avance y mantienes el negocio bajo control.",
+      icon: CheckCircle2
+    }
+  ];
 
   return (
     <>
-      <section className="ai-home-hero dashboard-module-section" data-active={isActive} data-status={overallStatusTone} aria-label="Inicio Copiloto AI">
-        <div className="ai-home-copy">
-          <span className="ai-home-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
-          <h2>Tu negocio, mejor cada día.</h2>
-          <strong>Sugerencias inteligentes para hoy</strong>
-          <p>Analizamos ventas, caja e inventario para mostrarte la prioridad del día, el impacto esperado y la acción exacta que debe ejecutar tu equipo.</p>
-          <div className="ai-home-meta">
-            <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
-            <span data-status={overallStatusTone}>{overallStatus}</span>
-            <span><Database aria-hidden="true" />{kpiSourceStatus}</span>
-            <span><Database aria-hidden="true" />{aiSuggestionsStatus}</span>
-          </div>
-          <button className="primary-button ai-home-action" type="button" onClick={onRefreshSuggestions}>
-            <Sparkles aria-hidden="true" />Actualizar sugerencias <ArrowRight aria-hidden="true" />
-          </button>
+      <section className="ai-command-home dashboard-module-section" data-active={isActive} aria-label="Inicio Copiloto AI">
+        <div className="ai-command-main">
+          <article className="ai-command-hero" data-status={overallStatusTone}>
+            <div className="ai-command-copy">
+              <span className="ai-command-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
+              <h2>Tu AI encontró la mejor acción para impulsar tu negocio</h2>
+              <p>Basado en ventas, caja e inventario, esta es la acción con mayor impacto para esta semana.</p>
+              <div className="ai-command-meta">
+                <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
+                <span data-status={overallStatusTone}>{overallStatus}</span>
+                <span><Database aria-hidden="true" />{hasRealAiSuggestions ? "Datos reales conectados" : "Vista demo"}</span>
+              </div>
+              <button className="primary-button ai-command-action" type="button" onClick={onRefreshSuggestions}>
+                Ver detalle de la sugerencia <ArrowRight aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="ai-orb-stage" aria-hidden="true">
+              <span className="ai-orb-ring" />
+              <span className="ai-orb-core"><Sparkles /></span>
+              <span className="ai-orb-shadow" />
+            </div>
+
+            <article className="ai-priority-card" data-tone={primarySuggestion?.tone ?? "priority"}>
+              <span className="ai-priority-badge">{primarySuggestion?.label ?? "Prioridad alta"}</span>
+              <div className="ai-priority-title">
+                <span><PrimaryIcon aria-hidden="true" /></span>
+                <div>
+                  <strong>{primarySuggestion?.title ?? "Reponer Panela Orgánica"}</strong>
+                  <small>{primarySuggestion?.text ?? "Quedan pocas unidades y las ventas subieron esta semana."}</small>
+                </div>
+              </div>
+              <div className="ai-confidence-bars" aria-label="Confianza alta">
+                <span />
+                <span />
+                <span />
+                <span data-muted="true" />
+                <span data-muted="true" />
+              </div>
+              <p><span>Impacto estimado</span><strong>{primarySuggestion?.impact ?? formatCopCompact(aiImpactLift)}</strong></p>
+              {primarySuggestion?.id ? <a href={`/dashboard/suggestions/${primarySuggestion.id}`}>Abrir sugerencia</a> : null}
+            </article>
+          </article>
+
+          <article className="ai-process-panel">
+            <div className="ai-section-heading">
+              <strong>Así impactarán las sugerencias en tu negocio</strong>
+              <span>{kpiSourceStatus}</span>
+            </div>
+            <div className="ai-process-steps">
+              {processSteps.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <article className="ai-process-card" key={step.title}>
+                    <span><Icon aria-hidden="true" /></span>
+                    <strong>{index + 1}. {step.title}</strong>
+                    <p>{step.text}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </article>
         </div>
-        <div className="ai-suggestion-grid">
-          {aiSuggestions.map((suggestion) => {
+
+        <aside className="ai-command-side">
+          <article className="ai-potential-card">
+            <div>
+              <span>Impacto potencial total</span>
+              <strong>{formatCopCompact(aiImpactLift)}</strong>
+              <small>{hasRealAiSuggestions ? "Calculado desde PostgreSQL" : "Estimado hasta conectar datos"}</small>
+            </div>
+            <div className="ai-potential-chart">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={aiImpactData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <Tooltip formatter={(value, name) => [formatMoney(Number(value ?? 0)), String(name)]} />
+                  <Line type="monotone" dataKey="withAi" name="Con sugerencias AI" stroke="#6d5dfc" strokeWidth={3} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <button className="ai-side-link" type="button" onClick={onShowAllCategories}>
+              <b>{totalActiveCategories}</b>
+              <span>Sugerencias activas</span>
+              <ArrowRight aria-hidden="true" />
+            </button>
+          </article>
+
+          <article className="ai-week-card">
+            <div className="ai-section-heading">
+              <strong>Tu negocio esta semana</strong>
+              <span>{aiSuggestionsStatus}</span>
+            </div>
+            <div className="ai-week-list">
+              {weekKpis.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div className="ai-week-item" data-tone={item.tone} key={item.label}>
+                    <span><Icon aria-hidden="true" /></span>
+                    <div><strong>{item.label}</strong><small>{item.helper}</small></div>
+                    <b>{item.value}</b>
+                    <em>{item.delta}</em>
+                    <MiniSparkline data={item.trend} tone={item.tone} />
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        </aside>
+      </section>
+
+      <section className="ai-suggestion-board dashboard-module-section" data-active={isActive} aria-label="Otras sugerencias para ti">
+        <div className="ai-section-heading ai-board-heading">
+          <strong>Otras sugerencias para ti</strong>
+          <button className="ghost-button" type="button" onClick={onShowAllCategories}>Ver todas las sugerencias <ArrowRight aria-hidden="true" /></button>
+        </div>
+        <div className="ai-suggestion-board-grid">
+          {(secondarySuggestions.length ? secondarySuggestions : aiSuggestions).map((suggestion) => {
             const Icon = suggestion.icon;
             return (
               <article className="ai-suggestion-card" data-tone={suggestion.tone} key={suggestion.title}>
                 <div className="ai-suggestion-top">
                   <span className="ai-suggestion-icon"><Icon aria-hidden="true" /></span>
                   <span className="ai-suggestion-label">{suggestion.label}</span>
-                  <ArrowRight aria-hidden="true" />
                 </div>
                 <strong>{suggestion.title}</strong>
                 <p>{suggestion.text}</p>
@@ -192,132 +300,9 @@ export function DashboardHome({
             );
           })}
         </div>
-        <div className="ai-home-kpi-row" aria-label="Datos rápidos de Inicio">
-          {aiHomeKpis.map((item) => {
-            const Icon = item.icon;
-            return (
-              <article className="ai-home-kpi-card" data-tone={item.tone} key={item.label}>
-                <div>
-                  <span>{item.label}</span>
-                  <strong>{item.value}</strong>
-                  <small>{item.helper}</small>
-                  <em>{item.delta}</em>
-                </div>
-                <Icon aria-hidden="true" />
-                <MiniSparkline data={item.trend} tone={item.tone} />
-              </article>
-            );
-          })}
-        </div>
       </section>
 
-      <section className="ai-impact-section dashboard-module-section" data-active={isActive} aria-label="Impacto de las sugerencias AI">
-        <article className="ai-impact-chart-card">
-          <div className="panel-heading">
-            <div>
-              <span><Sparkles aria-hidden="true" />Impacto de las sugerencias AI</span>
-              <h2>Si aplicas las sugerencias de alta prioridad, podrías lograr:</h2>
-            </div>
-          </div>
-          <div className="ai-impact-summary">
-            {aiImpactSummaryCards.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div data-tone={item.tone} key={item.type}>
-                  <Icon aria-hidden="true" />
-                  <strong>{item.value ? formatCopCompact(item.value) : "$0"}</strong>
-                  <span>{item.label}</span>
-                  <small>{item.helper}</small>
-                </div>
-              );
-            })}
-          </div>
-          <div className="ai-impact-total">
-            <span>Impacto total estimado</span>
-            <strong>{formatCopCompact(aiImpactLift)}</strong>
-            <small>{hasRealAiSuggestions ? "Calculado desde PostgreSQL" : "Estimado demo hasta conectar datos"}</small>
-          </div>
-          <div className="ai-impact-chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={aiImpactData} margin={{ top: 8, right: 18, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value}M`} />
-                <Tooltip formatter={(value, name) => [formatMoney(Number(value ?? 0)), String(name)]} />
-                <Line type="monotone" dataKey="actual" name="Ventas actuales" stroke="#6d5dfc" strokeWidth={3} dot={false} />
-                <Line type="monotone" dataKey="withAi" name="Con sugerencias AI" stroke="#22c55e" strokeWidth={3} strokeDasharray="6 6" dot={false} />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </article>
-
-        <article className="ai-impact-side-card">
-          <div className="panel-heading">
-            <div><span><Target aria-hidden="true" />Sugerencias por categoría</span><h2>Prioriza dónde actuar</h2></div>
-            <button className="ghost-button" type="button" onClick={onShowAllCategories}>Ver todas</button>
-          </div>
-          <div className="ai-category-panel-summary">
-            <strong>{totalActiveCategories}</strong>
-            <span>categorías con sugerencias activas</span>
-            <small>{hasRealAiSuggestions ? "Datos desde PostgreSQL" : "Vista demo sin datos cargados"}</small>
-          </div>
-          <div className="ai-category-list" aria-label="Sugerencias agrupadas por categoría">
-            {aiImpactCategories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <div className="ai-category-row" data-tone={category.tone} key={category.label}>
-                  <div className="ai-category-main">
-                    <span><Icon aria-hidden="true" />{category.label}</span>
-                    <strong>{category.count} sugerencia(s)</strong>
-                    <small>{category.tag}</small>
-                  </div>
-                  <div className="ai-category-impact">
-                    <strong>{formatCopCompact(category.impactTotal)}</strong>
-                    <em>impacto</em>
-                  </div>
-                  <div className="ai-category-progress" aria-hidden="true">
-                    <span style={{ width: `${Math.max(8, (category.impactTotal / aiCategoryMaxImpact) * 100)}%` }} />
-                  </div>
-                  {category.firstSuggestionId ? <a href={`/dashboard/suggestions/${category.firstSuggestionId}`}>Abrir</a> : null}
-                </div>
-              );
-            })}
-          </div>
-          <div className="ai-impact-footnote">
-            <Sparkles aria-hidden="true" />
-            <span>{totalActiveCategories} sugerencias activas</span>
-            <small>Actualizadas hoy a las 8:30 a. m.</small>
-          </div>
-        </article>
-
-        <article className="ai-impact-side-card">
-          <div className="panel-heading">
-            <div><span><Clock3 aria-hidden="true" />Actividad reciente de AI</span><h2>Últimas señales</h2></div>
-            <button className="secondary-button compact-button" type="button" onClick={onRefreshActivity}>
-              <RefreshCw aria-hidden="true" />Actualizar
-            </button>
-          </div>
-          <div className="ai-activity-list">
-            {aiActivity.map((activity) => {
-              const Icon = activity.icon;
-              return (
-                <div className="ai-activity-item" data-tone={activity.tone} key={activity.id}>
-                  <span><Icon aria-hidden="true" /></span>
-                  <div><strong>{activity.title}</strong><small>{activity.text}</small></div>
-                  <div className="ai-activity-meta">
-                    <time>{activity.time}</time>
-                    {activity.href ? <a href={activity.href}>Ver</a> : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <p className="ai-activity-status">{activityStatus}</p>
-        </article>
-      </section>
-
-      <section className="setup-summary dashboard-module-section" data-active={isActive}>
+      <section className="setup-summary dashboard-module-section home-context-summary" data-active={isActive}>
         <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
         <div><span>Rol activo</span><strong>{activeRoleLabel}</strong></div>
         <div><span>Moneda</span><strong>{currencyLabel}</strong></div>
