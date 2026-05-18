@@ -32,6 +32,8 @@ import {
   Sun,
   Target,
   TrendingUp,
+  TableProperties,
+  UserRoundCog,
   UserCircle,
   Users,
   WalletCards
@@ -42,11 +44,13 @@ import { Button } from "@/components/ui/button";
 import { AlertsModule } from "@/components/dashboard/AlertsModule";
 import { CashModule } from "@/components/dashboard/CashModule";
 import { ClientsModule } from "@/components/dashboard/ClientsModule";
+import { DataModule } from "@/components/dashboard/DataModule";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { InventoryModule } from "@/components/dashboard/InventoryModule";
 import { ReportsModule } from "@/components/dashboard/ReportsModule";
 import { SalesModule } from "@/components/dashboard/SalesModule";
 import { SettingsModule } from "@/components/dashboard/SettingsModule";
+import { TeamModule } from "@/components/dashboard/TeamModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
@@ -98,7 +102,7 @@ type DashboardSalesReportRow = {
 type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
-type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "reportes" | "alertas" | "configuracion";
+type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "equipo" | "datos" | "reportes" | "alertas" | "configuracion";
 type NavItem = { id: DashboardModule; label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
@@ -291,6 +295,8 @@ const navItems: NavItem[] = [
   { id: "caja", label: "Caja", icon: WalletCards },
   { id: "inventario", label: "Inventario", icon: Boxes },
   { id: "clientes", label: "Clientes", icon: Users },
+  { id: "equipo", label: "Equipo", icon: UserRoundCog },
+  { id: "datos", label: "Datos", icon: TableProperties },
   { id: "reportes", label: "Reportes", icon: FileText },
   { id: "alertas", label: "Alertas", icon: AlertTriangle },
   { id: "configuracion", label: "Configuración", icon: Settings2 }
@@ -924,6 +930,8 @@ export default function Home() {
     caja: activeModule === "caja",
     inventario: activeModule === "inventario",
     clientes: activeModule === "clientes",
+    equipo: activeModule === "equipo",
+    datos: activeModule === "datos",
     reportes: activeModule === "reportes",
     alertas: activeModule === "alertas",
     configuracion: activeModule === "configuracion"
@@ -2065,6 +2073,14 @@ ${recommendedAction()}`;
           onLogout={() => { void logout(); }}
           onInviteFormChange={setInviteForm}
           onInviteTeamMember={inviteTeamMember}
+        />
+
+        <TeamModule
+          isActive={moduleVisibility.equipo}
+        />
+
+        <DataModule
+          isActive={moduleVisibility.datos}
         />
 
         <SettingsModule
