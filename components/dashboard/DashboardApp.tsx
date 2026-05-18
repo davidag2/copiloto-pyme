@@ -1879,14 +1879,15 @@ ${recommendedAction()}`;
           </button>
         </div>
 
-        <div className="company-switcher" aria-label="Empresa activa">
-          <label>Empresa activa</label>
+        <button className="company-switcher" aria-label="Editar detalles y datos de la empresa activa" onClick={() => navigateModule("configuracion")} type="button">
+          <span className="company-switcher-label">Empresa activa</span>
           <div>
             <Building2 aria-hidden="true" />
             <strong className="company-switcher-name">{customer.companyName}</strong>
+            <Settings2 className="company-switcher-action" aria-hidden="true" />
           </div>
           <small>{customer.businessType} · {customer.country} · Plan {customer.plan.toUpperCase()}</small>
-        </div>
+        </button>
 
         <span className="sidebar-section-label">Módulos</span>
         <nav className="nav-list" aria-label="Principal">

@@ -5484,9 +5484,10 @@ select:focus-visible {
 
 .sidebar--collapsed .brand > div:last-child,
 .sidebar--collapsed .sidebar-collapse-button span,
-.sidebar--collapsed .company-switcher label,
+.sidebar--collapsed .company-switcher-label,
 .sidebar--collapsed .company-switcher-name,
 .sidebar--collapsed .company-switcher small,
+.sidebar--collapsed .company-switcher-action,
 .sidebar--collapsed .sidebar-section-label,
 .sidebar--collapsed .tenant-card {
   display: none;
@@ -5587,9 +5588,26 @@ select:focus-visible {
   border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: var(--shadow-sm);
+  color: inherit;
+  cursor: pointer;
   display: grid;
+  font: inherit;
   gap: 10px;
   padding: 14px;
+  text-align: left;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  width: 100%;
+}
+
+.company-switcher:hover {
+  border-color: rgba(37, 99, 235, 0.34);
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.company-switcher:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 3px;
 }
 
 .sidebar--collapsed .company-switcher {
@@ -5598,7 +5616,7 @@ select:focus-visible {
   padding: 12px 0;
 }
 
-.company-switcher label,
+.company-switcher-label,
 .sidebar-section-label {
   color: var(--muted);
   font-size: 11px;
@@ -5611,7 +5629,7 @@ select:focus-visible {
   align-items: center;
   display: grid;
   gap: 8px;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 22px minmax(0, 1fr) 18px;
 }
 
 .sidebar--collapsed .company-switcher div {
@@ -5623,6 +5641,21 @@ select:focus-visible {
   color: var(--brand-blue);
   height: 20px;
   width: 20px;
+}
+
+.company-switcher-action {
+  color: var(--muted) !important;
+  height: 16px !important;
+  opacity: 0.65;
+  transition: color 160ms ease, opacity 160ms ease, transform 160ms ease;
+  width: 16px !important;
+}
+
+.company-switcher:hover .company-switcher-action,
+.company-switcher:focus-visible .company-switcher-action {
+  color: var(--brand-blue) !important;
+  opacity: 1;
+  transform: rotate(18deg);
 }
 
 .company-switcher-name {
