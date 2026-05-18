@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   Brain,
+  Building2,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
@@ -76,8 +78,22 @@ type ImportValidation = {
   sample: Array<Record<string, unknown>>;
 };
 
+type CompanySettings = {
+  ownerName: string;
+  ownerEmail: string;
+  companyName: string;
+  country: string;
+  plan: string;
+  businessType: string;
+  currency: string;
+  monthlyGoal: number;
+  minimumStock: number;
+  dataSource: string;
+};
+
 type SettingsModuleProps = {
   isActive: boolean;
+  customer: CompanySettings;
   focus: string;
   visible: DashboardVisibility;
   integrations: Integration[];
@@ -102,6 +118,7 @@ type SettingsModuleProps = {
   onDownloadTemplate: () => void;
   onRefreshImportHistory: () => void;
   onReverseImport: (batchId: string) => void;
+  onCustomerChange: (customer: CompanySettings) => void;
 };
 
 const users: Array<[string, string, string, string, string]> = [
@@ -131,15 +148,18 @@ const aiPreferences: Array<[string, string, LucideIcon]> = [
 
 export function SettingsModule({
   isActive,
+  customer,
   integrations,
   connectedIntegrations,
   activeIntegrationId,
   canManageIntegrations,
   microAction,
+  onCustomerChange,
   onConnectIntegration,
   onSyncIntegrations
 }: SettingsModuleProps) {
   const visibleIntegrations = integrations.filter((integration) => integration.id !== "banking").slice(0, 3);
+  const [editingCompany, setEditingCompany] = useState(false);
 
   return (
     <section className="settings-command-center settings-2026 dashboard-module-section" data-active={isActive}>
@@ -150,6 +170,37 @@ export function SettingsModule({
         </div>
         <button className="settings-help-button" type="button"><HelpCircle aria-hidden="true" />Centro de ayuda</button>
       </header>
+
+      <article className="settings-card settings-company-card" id="empresa">
+        <header>
+          <span><Building2 aria-hidden="true" /></span>
+          <div>
+            <strong>Datos de la empresa</strong>
+            <p>Actualiza la información principal que usa Copiloto Pyme para personalizar el dashboard.</p>
+          </div>
+          <button type="button" onClick={() => setEditingCompany((current) => !current)}>
+            {editingCompany ? "Cerrar edición" : "Editar empresa"}
+          </button>
+        </header>
+        <div className="settings-company-summary">
+          <article><small>Empresa</small><strong>{customer.companyName}</strong></article>
+          <article><small>Tipo</small><strong>{customer.businessType}</strong></article>
+          <article><small>País</small><strong>{customer.country}</strong></article>
+          <article><small>Plan</small><strong>{customer.plan.toUpperCase()}</strong></article>
+        </div>
+        {editingCompany ? (
+          <form className="settings-company-form" onSubmit={(event) => { event.preventDefault(); setEditingCompany(false); }}>
+            <label>Nombre de la empresa<input value={customer.companyName} onChange={(event) => onCustomerChange({ ...customer, companyName: event.target.value })} /></label>
+            <label>Tipo de negocio<input value={customer.businessType} onChange={(event) => onCustomerChange({ ...customer, businessType: event.target.value })} /></label>
+            <label>País<input value={customer.country} onChange={(event) => onCustomerChange({ ...customer, country: event.target.value })} /></label>
+            <label>Moneda<input value={customer.currency} onChange={(event) => onCustomerChange({ ...customer, currency: event.target.value })} /></label>
+            <label>Meta mensual<input type="number" value={customer.monthlyGoal} onChange={(event) => onCustomerChange({ ...customer, monthlyGoal: Number(event.target.value) })} /></label>
+            <label>Stock mínimo<input type="number" value={customer.minimumStock} onChange={(event) => onCustomerChange({ ...customer, minimumStock: Number(event.target.value) })} /></label>
+            <label>Fuente principal<input value={customer.dataSource} onChange={(event) => onCustomerChange({ ...customer, dataSource: event.target.value })} /></label>
+            <button type="submit">Guardar cambios</button>
+          </form>
+        ) : null}
+      </article>
 
       <div className="settings-top-grid">
         <article className="settings-card settings-billing-card">

@@ -15363,6 +15363,101 @@ select,
   color: white;
 }
 
+.settings-company-card {
+  gap: 18px;
+}
+
+.settings-company-card > header {
+  align-items: start;
+}
+
+.settings-company-card > header > div {
+  min-width: 0;
+}
+
+.settings-company-card > header p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 5px 0 0;
+}
+
+.settings-company-summary {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.settings-company-summary article {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(109, 93, 252, 0.12), transparent 38%),
+    rgba(248, 250, 252, 0.76);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.settings-company-summary small,
+.settings-company-form label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.settings-company-summary strong {
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+.settings-company-form {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 18px;
+}
+
+.settings-company-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.settings-company-form input {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.settings-company-form input:focus {
+  border-color: rgba(37, 99, 235, 0.5);
+  outline: 3px solid rgba(37, 99, 235, 0.14);
+}
+
+.settings-company-form button {
+  align-self: end;
+  background: linear-gradient(135deg, #6d5dfc, #4f46e5);
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
 .settings-users-card > div,
 .settings-notifications-card > div,
 .settings-ai-card > div,
@@ -15555,6 +15650,8 @@ select,
 .theme-dark .settings-help-button,
 .theme-dark .settings-plan-box,
 .theme-dark .settings-billing-card footer button:first-child,
+.theme-dark .settings-company-summary article,
+.theme-dark .settings-company-form input,
 .theme-dark .settings-integration-list,
 .theme-dark .settings-integration-list button,
 .theme-dark .settings-ai-card article {
@@ -15577,6 +15674,11 @@ select,
   .settings-help-button {
     justify-self: start;
   }
+
+  .settings-company-summary,
+  .settings-company-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -15591,6 +15693,8 @@ select,
   }
 
   .settings-billing-card footer,
+  .settings-company-summary,
+  .settings-company-form,
   .settings-users-card article,
   .settings-notifications-card article,
   .settings-ai-card article,

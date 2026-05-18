@@ -2086,6 +2086,7 @@ ${recommendedAction()}`;
 
         <SettingsModule
           isActive={moduleVisibility.configuracion}
+          customer={customer}
           focus={focus}
           visible={visible}
           integrations={integrations}
@@ -2110,6 +2111,7 @@ ${recommendedAction()}`;
           onReverseImport={(batchId) => { void reverseImport(batchId); }}
           onFocusChange={setFocus}
           onVisibleChange={setVisible}
+          onCustomerChange={setCustomer}
         />
 
         <InventoryModule
