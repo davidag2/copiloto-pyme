@@ -360,7 +360,9 @@ Flujos del frontend conectados:
 ├── prisma/
 │   └── schema.prisma
 ├── index.html
-├── styles.css
+├── styles/
+│   ├── marketing.css
+│   └── dashboard.css
 ├── app.js
 ├── plantilla-copiloto-pyme.csv
 ├── package.json
