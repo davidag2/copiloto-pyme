@@ -40,8 +40,6 @@ import {
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
