@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   AlertTriangle,
   ArrowRight,
@@ -41,19 +42,29 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { AlertsModule } from "@/components/dashboard/AlertsModule";
-import { CashModule } from "@/components/dashboard/CashModule";
-import { ClientsModule } from "@/components/dashboard/ClientsModule";
-import { DataModule } from "@/components/dashboard/DataModule";
-import { DashboardHome } from "@/components/dashboard/DashboardHome";
-import { InventoryModule } from "@/components/dashboard/InventoryModule";
-import { ReportsModule } from "@/components/dashboard/ReportsModule";
-import { SalesModule } from "@/components/dashboard/SalesModule";
-import { SettingsModule } from "@/components/dashboard/SettingsModule";
-import { TeamModule } from "@/components/dashboard/TeamModule";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
+
+function DashboardModuleLoader() {
+  return (
+    <section className="dashboard-module-loader dashboard-module-section" data-active="true">
+      <span />
+      <strong>Cargando módulo...</strong>
+    </section>
+  );
+}
+
+const DashboardHome = dynamic(() => import("@/components/dashboard/DashboardHome").then((module) => module.DashboardHome), { loading: DashboardModuleLoader, ssr: false });
+const ClientsModule = dynamic(() => import("@/components/dashboard/ClientsModule").then((module) => module.ClientsModule), { loading: DashboardModuleLoader, ssr: false });
+const TeamModule = dynamic(() => import("@/components/dashboard/TeamModule").then((module) => module.TeamModule), { loading: DashboardModuleLoader, ssr: false });
+const DataModule = dynamic(() => import("@/components/dashboard/DataModule").then((module) => module.DataModule), { loading: DashboardModuleLoader, ssr: false });
+const SettingsModule = dynamic(() => import("@/components/dashboard/SettingsModule").then((module) => module.SettingsModule), { loading: DashboardModuleLoader, ssr: false });
+const InventoryModule = dynamic(() => import("@/components/dashboard/InventoryModule").then((module) => module.InventoryModule), { loading: DashboardModuleLoader, ssr: false });
+const ReportsModule = dynamic(() => import("@/components/dashboard/ReportsModule").then((module) => module.ReportsModule), { loading: DashboardModuleLoader, ssr: false });
+const CashModule = dynamic(() => import("@/components/dashboard/CashModule").then((module) => module.CashModule), { loading: DashboardModuleLoader, ssr: false });
+const AlertsModule = dynamic(() => import("@/components/dashboard/AlertsModule").then((module) => module.AlertsModule), { loading: DashboardModuleLoader, ssr: false });
+const SalesModule = dynamic(() => import("@/components/dashboard/SalesModule").then((module) => module.SalesModule), { loading: DashboardModuleLoader, ssr: false });
 
 type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -2024,8 +2035,9 @@ ${recommendedAction()}`;
         </header>
 
         <div className="dashboard-module-content" aria-live="polite">
+          {activeModule === "inicio" ? (
           <DashboardHome
-          isActive={moduleVisibility.inicio}
+          isActive
           overallStatusTone={overallStatusTone}
           dateRangeLabel={dateRangeLabel}
           overallStatus={overallStatus}
@@ -2058,9 +2070,11 @@ ${recommendedAction()}`;
           formatCopCompact={formatCopCompact}
           formatMoney={formatMoney}
           />
+          ) : null}
 
+        {activeModule === "clientes" ? (
         <ClientsModule
-          isActive={moduleVisibility.clientes}
+          isActive
           companyName={customer.companyName}
           tenantShortId={tenantShortId}
           authUser={authUser}
@@ -2075,17 +2089,23 @@ ${recommendedAction()}`;
           onInviteFormChange={setInviteForm}
           onInviteTeamMember={inviteTeamMember}
         />
+        ) : null}
 
+        {activeModule === "equipo" ? (
         <TeamModule
-          isActive={moduleVisibility.equipo}
+          isActive
         />
+        ) : null}
 
+        {activeModule === "datos" ? (
         <DataModule
-          isActive={moduleVisibility.datos}
+          isActive
         />
+        ) : null}
 
+        {activeModule === "configuracion" ? (
         <SettingsModule
-          isActive={moduleVisibility.configuracion}
+          isActive
           customer={customer}
           focus={focus}
           visible={visible}
@@ -2113,16 +2133,20 @@ ${recommendedAction()}`;
           onVisibleChange={setVisible}
           onCustomerChange={setCustomer}
         />
+        ) : null}
 
+        {activeModule === "inventario" ? (
         <InventoryModule
-          isActive={moduleVisibility.inventario}
+          isActive
           metrics={metrics}
           products={products}
           formatMoney={formatMoney}
         />
+        ) : null}
 
+        {activeModule === "reportes" ? (
         <ReportsModule
-          isActive={moduleVisibility.reportes}
+          isActive
           showReports={visible.reports}
           reportSettings={reportSettings}
           report={report}
@@ -2135,9 +2159,11 @@ ${recommendedAction()}`;
           onDownloadReport={downloadReport}
           formatCop={formatCop}
         />
+        ) : null}
 
+        {activeModule === "caja" ? (
         <CashModule
-          isActive={moduleVisibility.caja}
+          isActive
           metrics={metrics}
           monthlyGoal={customer.monthlyGoal}
           salesPercent={salesPercent}
@@ -2149,9 +2175,11 @@ ${recommendedAction()}`;
           formatGoal={formatGoal}
           cashDays={cashDays}
         />
+        ) : null}
 
+        {activeModule === "alertas" ? (
         <AlertsModule
-          isActive={moduleVisibility.alertas}
+          isActive
           alerts={alerts}
           rules={rules}
           microAction={microAction}
@@ -2159,9 +2187,11 @@ ${recommendedAction()}`;
           onRulesChange={setRules}
           onApplyRules={() => { void applyRules(); }}
         />
+        ) : null}
 
+        {activeModule === "ventas" ? (
         <SalesModule
-          isActive={moduleVisibility.ventas}
+          isActive
           visibleProducts={visible.products}
           visibleDecisions={visible.decisions}
           visibleCopilot={visible.copilot}
@@ -2222,6 +2252,7 @@ ${recommendedAction()}`;
           formatMoney={formatMoney}
           formatShortDate={formatShortDate}
         />
+        ) : null}
 
         </div>
 
