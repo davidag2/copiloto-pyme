@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   AlertTriangle,
@@ -802,8 +802,8 @@ export default function Home() {
   }, [companyId, authUser, dateRange, customRange.start, customRange.end]);
 
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
-  const connectedIntegrations = integrations.filter((integration) => integration.status === "Conectado").length;
-  const openDecisions = decisions.filter((decision) => decision.status !== "Completada").length;
+  const connectedIntegrations = useMemo(() => integrations.filter((integration) => integration.status === "Conectado").length, [integrations]);
+  const openDecisions = useMemo(() => decisions.filter((decision) => decision.status !== "Completada").length, [decisions]);
   const activeRoleLabel = roleLabel(authUser?.role);
   const permissions = roleCapabilities(authUser?.role);
   const tenantShortId = companyId ? companyId.slice(0, 8) : "demo";
@@ -823,7 +823,7 @@ export default function Home() {
       criticalStockCount: metrics.criticalStock
     }, rules);
   }, [metrics, rules, salesPercent]);
-  const criticalAlerts = alerts.filter((alert) => alert.level === "danger" || alert.level === "warning");
+  const criticalAlerts = useMemo(() => alerts.filter((alert) => alert.level === "danger" || alert.level === "warning"), [alerts]);
   const overallStatus = criticalAlerts.some((alert) => alert.level === "danger")
     ? "Riesgo alto"
     : criticalAlerts.length
@@ -835,7 +835,7 @@ export default function Home() {
   const userFirstName = userDisplayName.split(" ")[0] || "Equipo";
   const userInitials = userDisplayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CP";
   const notificationCount = companyId && authUser ? notificationsUnreadCount : criticalAlerts.length + openDecisions;
-  const fallbackNotifications: NotificationRow[] = [
+  const fallbackNotifications = useMemo<NotificationRow[]>(() => [
     {
       id: "demo-ai",
       companyId: companyId || "demo",
@@ -866,13 +866,13 @@ export default function Home() {
       readAt: null,
       createdAt: new Date().toISOString()
     }
-  ];
-  const visibleNotifications = companyId && authUser ? notifications : fallbackNotifications;
+  ], [companyId, metrics.criticalStock]);
+  const visibleNotifications = useMemo(() => companyId && authUser ? notifications : fallbackNotifications, [authUser, companyId, fallbackNotifications, notifications]);
 
   const selectedSales = useMemo<SalePoint[]>(() => (kpiRowCount ? weeklySales : salesForRange(weeklySales, dateRange, customRange)), [weeklySales, dateRange, customRange, kpiRowCount]);
   const dateRangeLabel = rangeLabel(dateRange, customRange);
-  const bestDay = selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]);
-  const chartData = selectedSales.map((item, index) => {
+  const bestDay = useMemo(() => selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]), [selectedSales, weeklySales]);
+  const chartData = useMemo(() => selectedSales.map((item, index) => {
     const previous = typeof item.previous === "number" ? item.previous : Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
     const target = Number(((customer.monthlyGoal / 1_000_000) / Math.max(selectedSales.length, 1)).toFixed(1));
     return {
@@ -885,16 +885,16 @@ export default function Home() {
       criticalStock: typeof item.criticalStock === "number" ? item.criticalStock : Math.max(0, metrics.criticalStock - (index % 4)),
       variation: previous ? Number((((item.value - previous) / previous) * 100).toFixed(1)) : 0
     };
-  });
-  const weeklyTotal = selectedSales.reduce((total, item) => total + item.value, 0);
-  const previousTotal = chartData.reduce((total, item) => total + item.previous, 0);
+  }), [customer.monthlyGoal, metrics.cash, metrics.criticalStock, metrics.margin, selectedSales]);
+  const weeklyTotal = useMemo(() => selectedSales.reduce((total, item) => total + item.value, 0), [selectedSales]);
+  const previousTotal = useMemo(() => chartData.reduce((total, item) => total + item.previous, 0), [chartData]);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
-  const trendCards = [
+  const trendCards = useMemo(() => [
     { id: "cash", title: "Caja", value: `${cashDays(metrics.cash)} días`, helper: "Cobertura diaria", dataKey: "cash", color: "#22c55e", suffix: " días" },
     { id: "margin", title: "Margen", value: `${metrics.margin.toFixed(1)}%`, helper: "Margen promedio", dataKey: "margin", color: "#6d5dfc", suffix: "%" },
     { id: "stock", title: "Inventario crítico", value: `${metrics.criticalStock} SKU`, helper: "Productos en riesgo", dataKey: "criticalStock", color: "#ef4444", suffix: " SKU" }
-  ];
-  const filteredSales = recentSales.filter((sale) => {
+  ], [metrics.cash, metrics.criticalStock, metrics.margin]);
+  const filteredSales = useMemo(() => recentSales.filter((sale) => {
     const haystack = [
       sale.customerName,
       sale.productName,
@@ -914,9 +914,9 @@ export default function Home() {
     if (salesFilters.status && sale.status !== salesFilters.status) return false;
     if (salesFilters.search && !haystack.includes(salesFilters.search.toLowerCase())) return false;
     return true;
-  });
-  const filteredSalesTotal = filteredSales.reduce((total, sale) => total + Number(sale.total || 0), 0);
-  const salesSummaryCards = [
+  }), [recentSales, salesFilters]);
+  const filteredSalesTotal = useMemo(() => filteredSales.reduce((total, sale) => total + Number(sale.total || 0), 0), [filteredSales]);
+  const salesSummaryCards = useMemo(() => [
     { label: "Ventas del día", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.salesToday || 0)), helper: "Facturación de hoy", icon: BarChart3, tone: "blue" },
     { label: "Ventas del mes", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.salesMonth || 0)), helper: "Mes actual", icon: TrendingUp, tone: "green" },
     { label: "Ticket promedio", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.averageTicket || 0)), helper: "Promedio por venta", icon: WalletCards, tone: "purple" },
@@ -924,16 +924,16 @@ export default function Home() {
     { label: "Cliente más frecuente", value: salesSummary.topCustomer || "Sin clientes", helper: "Más compras del mes", icon: Users, tone: "green" },
     { label: "Canal más rentable", value: salesSummary.topChannel || "Sin canal", helper: "Mayor margen bruto", icon: Link2, tone: "purple" },
     { label: "Pendiente por cobrar", value: new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(Number(salesSummary.pendingReceivables || 0)), helper: "Ventas pendientes", icon: AlertTriangle, tone: Number(salesSummary.pendingReceivables || 0) > 0 ? "red" : "green" }
-  ];
-  const salesReportGroups = dashboardSalesReports.reduce<Record<DashboardSalesReportRow["type"], DashboardSalesReportRow[]>>((groups, row) => {
+  ], [salesSummary]);
+  const salesReportGroups = useMemo(() => dashboardSalesReports.reduce<Record<DashboardSalesReportRow["type"], DashboardSalesReportRow[]>>((groups, row) => {
     groups[row.type].push(row);
     return groups;
-  }, { vendedor: [], producto: [], cliente: [], canal: [] });
-  const salesReportHighlights = (["vendedor", "producto", "cliente", "canal"] as const).map((type) => ({
+  }, { vendedor: [], producto: [], cliente: [], canal: [] }), [dashboardSalesReports]);
+  const salesReportHighlights = useMemo(() => (["vendedor", "producto", "cliente", "canal"] as const).map((type) => ({
     type,
     label: type === "vendedor" ? "Por vendedor" : type === "producto" ? "Por producto" : type === "cliente" ? "Por cliente" : "Por canal",
     rows: salesReportGroups[type].slice(0, 3)
-  }));
+  })), [salesReportGroups]);
   const activeNavItem = navItems.find((item) => item.id === activeModule) || navItems[0];
   const moduleVisibility = useMemo<Record<DashboardModule, boolean>>(() => ({
     inicio: activeModule === "inicio",
@@ -947,7 +947,7 @@ export default function Home() {
     alertas: activeModule === "alertas",
     configuracion: activeModule === "configuracion"
   }), [activeModule]);
-  const fallbackAiSuggestions: AiSuggestionCard[] = [
+  const fallbackAiSuggestions = useMemo<AiSuggestionCard[]>(() => [
     {
       tone: "high",
       label: "Prioridad alta",
@@ -972,34 +972,34 @@ export default function Home() {
       text: "Riesgo de quiebre de inventario en los próximos 5 días.",
       impact: "Revisar compras hoy"
     }
-  ];
-  const aiSuggestions = aiSuggestionRows.length ? aiSuggestionRows.slice(0, 3).map(mapSuggestionCard) : fallbackAiSuggestions;
-  const aiHomeKpis = [
+  ], [metrics.criticalStock]);
+  const aiSuggestions = useMemo(() => aiSuggestionRows.length ? aiSuggestionRows.slice(0, 3).map(mapSuggestionCard) : fallbackAiSuggestions, [aiSuggestionRows, fallbackAiSuggestions]);
+  const aiHomeKpis = useMemo(() => [
     { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue", trend: selectedSales.map((item) => item.value), delta: weeklyVariation >= 0 ? `+${weeklyVariation}% vs periodo anterior` : `${weeklyVariation}% vs periodo anterior` },
     { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green", trend: [18, 18.5, 18.1, 19.2, 20.1, 21.4, cashDays(metrics.cash)], delta: "Suficiente para operar" },
     { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red", trend: [7, 6, 6, 5, 6, 5, metrics.criticalStock], delta: "Comprar antes de quiebre" },
     { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple", trend: [2, 3, 4, 3, 5, 6, openDecisions + criticalAlerts.length], delta: "Priorizadas por IA" }
-  ];
-  const aiImpactData = chartData.map((item, index) => ({
+  ], [criticalAlerts.length, metrics, openDecisions, salesPercent, selectedSales, weeklyVariation]);
+  const aiImpactData = useMemo(() => chartData.map((item, index) => ({
     day: item.day,
     actual: item.actual,
     withAi: Number((item.actual * (1.08 + index * 0.012)).toFixed(1))
-  }));
-  const fallbackAiImpactLift = Math.max(0, Math.round((aiImpactData.reduce((total, item) => total + item.withAi, 0) - weeklyTotal) * 1_000_000));
-  const impactValueByType = aiSuggestionRows.reduce<Record<AiSuggestionRow["impactType"], number>>((totals, suggestion) => {
+  })), [chartData]);
+  const fallbackAiImpactLift = useMemo(() => Math.max(0, Math.round((aiImpactData.reduce((total, item) => total + item.withAi, 0) - weeklyTotal) * 1_000_000)), [aiImpactData, weeklyTotal]);
+  const impactValueByType = useMemo(() => aiSuggestionRows.reduce<Record<AiSuggestionRow["impactType"], number>>((totals, suggestion) => {
     const value = Number(suggestion.impactValueCop || 0);
     totals[suggestion.impactType] += Number.isFinite(value) ? value : 0;
     return totals;
-  }, { ventas_adicionales: 0, margen: 0, ahorro: 0, riesgo_evitado: 0 });
-  const totalRealAiImpact = Object.values(impactValueByType).reduce((total, value) => total + value, 0);
+  }, { ventas_adicionales: 0, margen: 0, ahorro: 0, riesgo_evitado: 0 }), [aiSuggestionRows]);
+  const totalRealAiImpact = useMemo(() => Object.values(impactValueByType).reduce((total, value) => total + value, 0), [impactValueByType]);
   const aiImpactLift = totalRealAiImpact || fallbackAiImpactLift;
-  const aiImpactSummaryCards = [
+  const aiImpactSummaryCards = useMemo(() => [
     { type: "ventas_adicionales" as const, label: "Ventas adicionales", value: impactValueByType.ventas_adicionales || fallbackAiImpactLift, helper: "ingreso potencial", icon: BarChart3, tone: "blue" },
     { type: "margen" as const, label: "Margen", value: impactValueByType.margen, helper: "mejora por precios", icon: TrendingUp, tone: "green" },
     { type: "ahorro" as const, label: "Ahorro", value: impactValueByType.ahorro, helper: "costos evitables", icon: WalletCards, tone: "purple" },
     { type: "riesgo_evitado" as const, label: "Riesgo evitado", value: impactValueByType.riesgo_evitado, helper: "inventario y caja", icon: ShieldCheck, tone: "red" }
-  ];
-  const aiImpactCategories = aiSuggestionRows.length
+  ], [fallbackAiImpactLift, impactValueByType]);
+  const aiImpactCategories = useMemo(() => aiSuggestionRows.length
     ? (["inventario", "precios", "ventas", "caja"] as const).map((category) => {
       const rows = aiSuggestionRows.filter((suggestion) => suggestion.category === category);
       const impactTotal = rows.reduce((total, suggestion) => {
@@ -1016,16 +1016,16 @@ export default function Home() {
       { label: "Precios", count: 2, tag: "Oportunidad", impactTotal: Math.round(fallbackAiImpactLift * 0.24), firstSuggestionId: "", icon: TrendingUp, tone: "green" },
       { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", impactTotal: Math.round(fallbackAiImpactLift * 0.3), firstSuggestionId: "", icon: BarChart3, tone: "blue" },
       { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", impactTotal: Math.round(fallbackAiImpactLift * 0.12), firstSuggestionId: "", icon: WalletCards, tone: "purple" }
-    ];
-  const aiCategoryMaxImpact = Math.max(...aiImpactCategories.map((category) => category.impactTotal), 1);
-  const fallbackAiActivity: AiActivityItem[] = [
+    ], [aiSuggestionRows, fallbackAiImpactLift, metrics.cash, metrics.criticalStock, rules.cash, salesPercent]);
+  const aiCategoryMaxImpact = useMemo(() => Math.max(...aiImpactCategories.map((category) => category.impactTotal), 1), [aiImpactCategories]);
+  const fallbackAiActivity = useMemo<AiActivityItem[]>(() => [
     { id: "demo-suggestion", title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
     { id: "demo-opportunity", title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
     { id: "demo-alert", title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
-  ];
-  const aiActivity = activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity;
+  ], []);
+  const aiActivity = useMemo(() => activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity, [activityRows, fallbackAiActivity]);
   const salesGoalGap = Math.max(0, (customer.monthlyGoal / 1_000_000) - metrics.sales);
-  const salesInsightCards = [
+  const salesInsightCards = useMemo(() => [
     {
       label: "Ritmo de ventas",
       value: weeklyVariation >= 0 ? `+${weeklyVariation}%` : `${weeklyVariation}%`,
@@ -1047,7 +1047,7 @@ export default function Home() {
       icon: PackageCheck,
       tone: "purple"
     }
-  ];
+  ], [products, salesGoalGap, weeklyVariation]);
 
   function recommendedAction() {
     if (metrics.criticalStock > rules.stock) return `Reponer los SKU criticos antes de lanzar promociones. Hay ${metrics.criticalStock} SKU en riesgo.`;
@@ -1847,12 +1847,12 @@ ${recommendedAction()}`;
     await loadSalesData(companyId);
   }
 
-  function navigateModule(moduleId: DashboardModule) {
+  const navigateModule = useCallback((moduleId: DashboardModule) => {
     setActiveModule(moduleId);
     window.requestAnimationFrame(() => {
       document.querySelector(".main-panel")?.scrollTo({ top: 0, behavior: "smooth" });
     });
-  }
+  }, []);
 
   async function toggleFullscreen() {
     if (document.fullscreenElement) {
