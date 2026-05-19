@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { AlertTriangle, ArrowRight, BarChart3, Brain, ClipboardCheck, Database, Eye, LockKeyhole, MessageSquareText, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 import { ContactForm } from "./ContactForm";
@@ -59,16 +60,24 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
             </section>
 
             <section className="mkt-infographic-section" aria-label="Infografía de cómo funciona Copiloto Pyme">
-              <img
+              <Image
                 alt="Infografía: así funciona Copiloto Pyme en tres pasos, conectas tus datos, la IA analiza y recibes una decisión"
+                height={1024}
+                quality={76}
+                sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
                 src="/images/infografia-como-funciona-copiloto-pyme.png"
+                width={1536}
               />
             </section>
 
             <section className="mkt-infographic-section" aria-label="Infografía antes y después de usar Copiloto Pyme">
-              <img
+              <Image
                 alt="Infografía: de revisar datos a tomar decisiones con Copiloto Pyme, comparando antes y después"
+                height={1024}
+                quality={76}
+                sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
                 src="/images/infografia-antes-despues-copiloto-pyme.png"
+                width={1536}
               />
             </section>
 
@@ -159,9 +168,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
                 <p>Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas. La ventaja es simple: menos revisión manual y más decisiones correctas en el momento adecuado.</p>
               </div>
               <section className="mkt-infographic-section" aria-label="Infografía sobre cómo la IA entiende cada parte del negocio">
-                <img
+                <Image
                   alt="Infografía: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
+                  height={1024}
+                  quality={76}
+                  sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
                   src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
+                  width={1536}
                 />
               </section>
               <div className="mkt-section-heading">
@@ -170,9 +183,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
                 <p>El valor no está solo en ver gráficas bonitas. Está en ahorrar tiempo, evitar pérdidas, mantener el negocio bajo control y convertir cada resumen diario en una acción que mejora los resultados.</p>
               </div>
               <section className="mkt-infographic-section" aria-label="Infografía sobre el impacto real de Copiloto Pyme">
-                <img
+                <Image
                   alt="Infografía: impacto real de Copiloto Pyme en ahorro de tiempo, reducción de pérdidas, control y crecimiento"
+                  height={1024}
+                  quality={76}
+                  sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
                   src="/images/infografia-impacto-real-copiloto-pyme.png"
+                  width={1536}
                 />
               </section>
             </div>
