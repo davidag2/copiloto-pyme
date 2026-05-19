@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 export async function GET(request: Request) {
@@ -8,8 +9,9 @@ export async function GET(request: Request) {
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const decisions = await query(
-      `SELECT id,
+    const data = await withServerCache(`company:${companyId}:decisions:${session.session.userId}`, 30_000, async () => {
+      const decisions = await query(
+        `SELECT id,
               company_id AS "companyId",
               text,
               owner,
@@ -22,9 +24,11 @@ export async function GET(request: Request) {
        WHERE company_id = $1
        ORDER BY decision_date DESC, created_at DESC
        LIMIT 100`,
-      [companyId]
-    );
-    return ok({ decisions: decisions.rows });
+        [companyId]
+      );
+      return { decisions: decisions.rows };
+    });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -54,6 +58,7 @@ export async function POST(request: Request) {
                  updated_at AS "updatedAt"`,
       [companyId, text, owner, impact, body.status || "Pendiente", body.date || null]
     );
+    clearCompanyServerCache(companyId);
     return ok({ decision: decision.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);
@@ -96,6 +101,7 @@ export async function PATCH(request: Request) {
       return fail(new Error("Decisión no encontrada"), 404);
     }
 
+    clearCompanyServerCache(companyId);
     return ok({ decision: decision.rows[0] });
   } catch (error) {
     return fail(error, 400);

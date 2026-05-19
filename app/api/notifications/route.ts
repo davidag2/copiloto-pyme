@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 const allowedTypes = new Set([
@@ -38,8 +39,9 @@ export async function GET(request: Request) {
     const unreadOnly = searchParams.get("unreadOnly") === "true";
     const type = searchParams.get("type");
 
-    const notifications = await query(
-      `SELECT id,
+    const data = await withServerCache(`company:${companyId}:notifications:${session.session.userId}:${limit}:${unreadOnly}:${type || "all"}`, 10_000, async () => {
+      const notifications = await query(
+        `SELECT id,
               company_id AS "companyId",
               target_user_id AS "targetUserId",
               type,
@@ -59,22 +61,25 @@ export async function GET(request: Request) {
          AND ($4::boolean = FALSE OR read_at IS NULL)
        ORDER BY created_at DESC
        LIMIT $5`,
-      [companyId, session.session.userId, type || null, unreadOnly, limit]
-    );
+        [companyId, session.session.userId, type || null, unreadOnly, limit]
+      );
 
-    const unread = await query<{ count: string }>(
-      `SELECT COUNT(*)::text AS count
+      const unread = await query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count
        FROM notifications
        WHERE company_id = $1
          AND (target_user_id IS NULL OR target_user_id = $2)
          AND read_at IS NULL`,
-      [companyId, session.session.userId]
-    );
+        [companyId, session.session.userId]
+      );
 
-    return ok({
-      notifications: notifications.rows,
-      unreadCount: Number(unread.rows[0]?.count || 0)
+      return {
+        notifications: notifications.rows,
+        unreadCount: Number(unread.rows[0]?.count || 0)
+      };
     });
+
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -138,6 +143,7 @@ export async function POST(request: Request) {
       ]
     );
 
+    clearCompanyServerCache(companyId);
     return ok({ notification: notification.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);
@@ -177,6 +183,7 @@ export async function PATCH(request: Request) {
         [companyId, session.session.userId, ids]
       );
 
+    clearCompanyServerCache(companyId);
     return ok({ updated: result.rowCount || 0 });
   } catch (error) {
     return fail(error, 400);

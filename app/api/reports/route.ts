@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 function resolveSalesRange(period: string) {
@@ -104,15 +105,19 @@ export async function GET(request: Request) {
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const reports = await query(
-      `SELECT * FROM reports
+    const period = searchParams.get("period") || "mensual";
+    const data = await withServerCache(`company:${companyId}:reports:${session.session.userId}:${period}`, 30_000, async () => {
+      const reports = await query(
+        `SELECT * FROM reports
        WHERE company_id = $1
        ORDER BY created_at DESC
        LIMIT 50`,
-      [companyId]
-    );
-    const salesReports = await getSalesReports(companyId, searchParams.get("period") || "mensual");
-    return ok({ reports: reports.rows, salesReports });
+        [companyId]
+      );
+      const salesReports = await getSalesReports(companyId, period);
+      return { reports: reports.rows, salesReports };
+    });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -135,6 +140,7 @@ export async function POST(request: Request) {
        RETURNING *`,
       [companyId, frequency, channel, recipient, content, body.status || "draft"]
     );
+    clearCompanyServerCache(companyId);
     return ok({ report: report.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);

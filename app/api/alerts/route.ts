@@ -1,6 +1,7 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query, transaction } from "@/lib/db";
 import { CompanyAlertRule, evaluateCompanyRules } from "@/lib/rule-engine";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 const defaultRules = {
@@ -46,8 +47,9 @@ export async function GET(request: Request) {
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const alerts = await query(
-      `SELECT alerts.*,
+    const data = await withServerCache(`company:${companyId}:alerts:${session.session.userId}`, 20_000, async () => {
+      const alerts = await query(
+        `SELECT alerts.*,
               alert_rules.metric AS "ruleMetric",
               alert_rules.threshold AS "ruleThreshold",
               alert_rules.comparator AS "ruleComparator"
@@ -56,9 +58,11 @@ export async function GET(request: Request) {
        WHERE alerts.company_id = $1
        ORDER BY alerts.created_at DESC
        LIMIT 50`,
-      [companyId]
-    );
-    return ok({ alerts: alerts.rows });
+        [companyId]
+      );
+      return { alerts: alerts.rows };
+    });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -108,6 +112,7 @@ export async function POST(request: Request) {
         return inserted;
       });
 
+      clearCompanyServerCache(companyId);
       return ok({ alerts, rules: companyRules }, 201);
     }
 
@@ -121,6 +126,7 @@ export async function POST(request: Request) {
        RETURNING *`,
       [companyId, body.ruleId || null, level, title, text, body.status || "open"]
     );
+    clearCompanyServerCache(companyId);
     return ok({ alert: alert.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);

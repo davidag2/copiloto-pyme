@@ -1,5 +1,6 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { query, transaction } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 import type { PoolClient } from "pg";
 
@@ -194,8 +195,9 @@ export async function GET(request: Request) {
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const batches = await query(
-      `SELECT id,
+    const data = await withServerCache(`company:${companyId}:imports:${session.session.userId}`, 30_000, async () => {
+      const batches = await query(
+        `SELECT id,
               source,
               file_name AS "fileName",
               row_count AS "rowCount",
@@ -211,9 +213,11 @@ export async function GET(request: Request) {
        WHERE company_id = $1
        ORDER BY created_at DESC
        LIMIT 25`,
-      [companyId]
-    );
-    return ok({ batches: batches.rows });
+        [companyId]
+      );
+      return { batches: batches.rows };
+    });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -358,6 +362,7 @@ export async function POST(request: Request) {
       return batch.rows[0];
     });
 
+    clearCompanyServerCache(companyId);
     return ok({ batch: result, validation: validationSummary }, 201);
   } catch (error) {
     return fail(error, 400);
@@ -386,6 +391,7 @@ export async function DELETE(request: Request) {
       return batch.rows[0];
     });
 
+    clearCompanyServerCache(companyId);
     return ok({ batch: result });
   } catch (error) {
     return fail(error, 400);

@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 const allowedEventTypes = new Set([
@@ -43,8 +44,9 @@ export async function GET(request: Request) {
 
     const eventType = searchParams.get("eventType");
     const limit = safeLimit(searchParams.get("limit"));
-    const activity = await query(
-      `SELECT activity_events.id,
+    const data = await withServerCache(`company:${companyId}:activity:${session.session.userId}:${eventType || "all"}:${limit}`, 15_000, async () => {
+      const activity = await query(
+        `SELECT activity_events.id,
               activity_events.company_id AS "companyId",
               activity_events.actor_user_id AS "actorUserId",
               users.name AS "actorName",
@@ -63,10 +65,13 @@ export async function GET(request: Request) {
          AND ($2::text IS NULL OR activity_events.event_type = $2)
        ORDER BY activity_events.occurred_at DESC
        LIMIT $3`,
-      [companyId, eventType || null, limit]
-    );
+        [companyId, eventType || null, limit]
+      );
 
-    return ok({ activity: activity.rows });
+      return { activity: activity.rows };
+    });
+
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -130,6 +135,7 @@ export async function POST(request: Request) {
       ]
     );
 
+    clearCompanyServerCache(companyId);
     return ok({ activityEvent: activity.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);

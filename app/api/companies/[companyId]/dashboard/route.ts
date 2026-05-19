@@ -1,5 +1,6 @@
 import { fail, ok } from "@/lib/api";
 import { query } from "@/lib/db";
+import { withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 type RouteContext = {
@@ -90,7 +91,11 @@ export async function GET(request: Request, context: RouteContext) {
     const previousEndDate = toSqlDate(previousEnd);
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, previousSummary, metricsByDay, previousSalesByDay, topProducts, salesReports] = await Promise.all([
+    const data = await withServerCache(
+      `company:${companyId}:dashboard:${session.session.userId}:${startDate}:${endDate}`,
+      30_000,
+      async () => {
+        const [company, users, latestImports, alertRules, alerts, integrations, decisions, aiSuggestions, reports, kpiSummary, previousSummary, metricsByDay, previousSalesByDay, topProducts, salesReports] = await Promise.all([
       query(`SELECT * FROM companies WHERE id = $1`, [companyId]),
       query(`SELECT id, name, email, role, created_at AS "createdAt" FROM users WHERE company_id = $1 ORDER BY created_at DESC`, [companyId]),
       query(
@@ -323,75 +328,79 @@ export async function GET(request: Request, context: RouteContext) {
          LIMIT 30`,
         [companyId, startDate, endDate]
       )
-    ]);
+        ]);
 
-    if (!company.rows[0]) {
-      return fail(new Error("Empresa no encontrada"), 404);
-    }
+        if (!company.rows[0]) {
+          throw new Error("Empresa no encontrada");
+        }
 
-    const companyRow = company.rows[0] as { minimum_stock?: number };
-    const minimumStock = Number(companyRow.minimum_stock || 0);
-    const summary = kpiSummary.rows[0] || {};
-    const start = currentStart;
-    const totalDays = rangeDays;
-    const metricsByDate = new Map(metricsByDay.rows.map((row) => [new Date(row.saleDate as string).toISOString().slice(0, 10), row]));
-    const previousByOffset = new Map(previousSalesByDay.rows.map((row) => {
-      const previousDate = new Date(row.saleDate as string);
-      return [dayDiff(previousStart, previousDate), toMillions(row.sales)];
-    }));
-    const weeklySales = Array.from({ length: totalDays }, (_, index) => {
-      const date = new Date(start);
-      date.setDate(start.getDate() + index);
-      const key = date.toISOString().slice(0, 10);
-      const metric = metricsByDate.get(key) || {};
-      return {
-        day: chartLabel(date, totalDays),
-        value: toMillions(metric.sales),
-        previous: previousByOffset.get(index) || 0,
-        cash: toMillions(metric.cash),
-        margin: Number(toNumber(metric.margin).toFixed(1)),
-        criticalStock: Number(metric.criticalStock || 0)
-      };
-    });
-    const products = topProducts.rows.map((product) => {
-      const stock = toNumber(product.stock);
-      return {
-        name: String(product.name || "Producto sin nombre"),
-        sales: `$${toMillions(product.sales).toFixed(1)}M`,
-        stock: stockLabel(stock, minimumStock)
-      };
-    });
+        const companyRow = company.rows[0] as { minimum_stock?: number };
+        const minimumStock = Number(companyRow.minimum_stock || 0);
+        const summary = kpiSummary.rows[0] || {};
+        const start = currentStart;
+        const totalDays = rangeDays;
+        const metricsByDate = new Map(metricsByDay.rows.map((row) => [new Date(row.saleDate as string).toISOString().slice(0, 10), row]));
+        const previousByOffset = new Map(previousSalesByDay.rows.map((row) => {
+          const previousDate = new Date(row.saleDate as string);
+          return [dayDiff(previousStart, previousDate), toMillions(row.sales)];
+        }));
+        const weeklySales = Array.from({ length: totalDays }, (_, index) => {
+          const date = new Date(start);
+          date.setDate(start.getDate() + index);
+          const key = date.toISOString().slice(0, 10);
+          const metric = metricsByDate.get(key) || {};
+          return {
+            day: chartLabel(date, totalDays),
+            value: toMillions(metric.sales),
+            previous: previousByOffset.get(index) || 0,
+            cash: toMillions(metric.cash),
+            margin: Number(toNumber(metric.margin).toFixed(1)),
+            criticalStock: Number(metric.criticalStock || 0)
+          };
+        });
+        const products = topProducts.rows.map((product) => {
+          const stock = toNumber(product.stock);
+          return {
+            name: String(product.name || "Producto sin nombre"),
+            sales: `$${toMillions(product.sales).toFixed(1)}M`,
+            stock: stockLabel(stock, minimumStock)
+          };
+        });
 
-    return ok({
-      company: company.rows[0],
-      users: users.rows,
-      imports: latestImports.rows,
-      kpis: {
-        metrics: {
-          sales: toMillions(summary.sales30d),
-          cash: toMillions(summary.latestCash),
-          margin: Number(toNumber(summary.avgMargin).toFixed(1)),
-          criticalStock: Number(summary.criticalStock || 0)
-        },
-        weeklySales,
-        products,
-        rowCount: Number(summary.rowCount || 0),
-        comparison: {
-          previousStartDate,
-          previousEndDate,
-          previousSales: toMillions(previousSummary.rows[0]?.sales),
-          previousMargin: Number(toNumber(previousSummary.rows[0]?.margin).toFixed(1))
-        },
-        range: { startDate, endDate }
-      },
-      alertRules: alertRules.rows,
-      alerts: alerts.rows,
-      integrations: integrations.rows,
-      decisions: decisions.rows,
-      aiSuggestions: aiSuggestions.rows,
-      reports: reports.rows,
-      salesReports: salesReports.rows
-    });
+        return {
+          company: company.rows[0],
+          users: users.rows,
+          imports: latestImports.rows,
+          kpis: {
+            metrics: {
+              sales: toMillions(summary.sales30d),
+              cash: toMillions(summary.latestCash),
+              margin: Number(toNumber(summary.avgMargin).toFixed(1)),
+              criticalStock: Number(summary.criticalStock || 0)
+            },
+            weeklySales,
+            products,
+            rowCount: Number(summary.rowCount || 0),
+            comparison: {
+              previousStartDate,
+              previousEndDate,
+              previousSales: toMillions(previousSummary.rows[0]?.sales),
+              previousMargin: Number(toNumber(previousSummary.rows[0]?.margin).toFixed(1))
+            },
+            range: { startDate, endDate }
+          },
+          alertRules: alertRules.rows,
+          alerts: alerts.rows,
+          integrations: integrations.rows,
+          decisions: decisions.rows,
+          aiSuggestions: aiSuggestions.rows,
+          reports: reports.rows,
+          salesReports: salesReports.rows
+        };
+      }
+    );
+
+    return ok(data);
   } catch (error) {
     return fail(error);
   }

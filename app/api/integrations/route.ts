@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 export async function GET(request: Request) {
@@ -8,8 +9,11 @@ export async function GET(request: Request) {
     const companyId = requiredString(searchParams.get("companyId"), "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
-    const integrations = await query(`SELECT * FROM integrations WHERE company_id = $1 ORDER BY provider ASC`, [companyId]);
-    return ok({ integrations: integrations.rows });
+    const data = await withServerCache(`company:${companyId}:integrations:${session.session.userId}`, 60_000, async () => {
+      const integrations = await query(`SELECT * FROM integrations WHERE company_id = $1 ORDER BY provider ASC`, [companyId]);
+      return { integrations: integrations.rows };
+    });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -37,6 +41,7 @@ export async function POST(request: Request) {
        RETURNING *`,
       [companyId, provider, category, body.status || "Conectado", body.syncLabel || "Sincronizado ahora", body.credentialsRef || null]
     );
+    clearCompanyServerCache(companyId);
     return ok({ integration: integration.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);

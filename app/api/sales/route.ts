@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { transaction } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 import type { PoolClient } from "pg";
 
@@ -110,7 +111,7 @@ export async function GET(request: Request) {
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
 
-    const data = await transaction(async (client) => {
+    const data = await withServerCache(`company:${companyId}:sales:${session.session.userId}`, 20_000, () => transaction(async (client) => {
       const [customers, products, channels, reps, paymentMethods, recentSales, summary] = await Promise.all([
         client.query(`SELECT id, name FROM sales_customers WHERE company_id = $1 AND status = 'active' ORDER BY name ASC LIMIT 100`, [companyId]),
         client.query(`SELECT id, name, unit_price AS "unitPrice" FROM sales_products WHERE company_id = $1 AND status = 'active' ORDER BY name ASC LIMIT 100`, [companyId]),
@@ -219,7 +220,7 @@ export async function GET(request: Request) {
         recentSales: recentSales.rows,
         summary: summary.rows[0] || {}
       };
-    });
+    }));
 
     return ok(data);
   } catch (error) {
@@ -367,6 +368,7 @@ export async function POST(request: Request) {
       };
     });
 
+    clearCompanyServerCache(companyId);
     return ok(result, 201);
   } catch (error) {
     return fail(error, 400);
@@ -487,6 +489,7 @@ export async function PATCH(request: Request) {
       return sale.rows[0];
     });
 
+    clearCompanyServerCache(companyId);
     return ok({ sale: result });
   } catch (error) {
     return fail(error, 400);

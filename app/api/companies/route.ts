@@ -1,5 +1,6 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { query, transaction } from "@/lib/db";
+import { clearCompanyServerCache } from "@/lib/server-cache";
 import { requireCompanySession, validateRequestSession } from "@/lib/session";
 
 const defaultRules = [
@@ -166,6 +167,7 @@ export async function PATCH(request: Request) {
       return fail(new Error("Empresa no encontrada"), 404);
     }
 
+    clearCompanyServerCache(companyId);
     return ok({ company: company.rows[0] });
   } catch (error) {
     return fail(error, 400);

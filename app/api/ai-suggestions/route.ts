@@ -1,6 +1,7 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { calculateSuggestionImpact } from "@/lib/ai-impact";
 import { query } from "@/lib/db";
+import { clearCompanyServerCache, withServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 const defaultSuggestions = [
@@ -702,15 +703,18 @@ export async function GET(request: Request) {
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
 
-    await generateSalesAnalysisSuggestions(companyId);
-    let suggestions = await getSuggestions(companyId);
-    if (!suggestions.rows.length) {
-      await seedDefaultSuggestions(companyId);
-    }
-    await refreshSuggestionImpacts(companyId);
-    suggestions = await getSuggestions(companyId);
+    const data = await withServerCache(`company:${companyId}:ai-suggestions:${session.session.userId}`, 20_000, async () => {
+      await generateSalesAnalysisSuggestions(companyId);
+      let suggestions = await getSuggestions(companyId);
+      if (!suggestions.rows.length) {
+        await seedDefaultSuggestions(companyId);
+      }
+      await refreshSuggestionImpacts(companyId);
+      suggestions = await getSuggestions(companyId);
+      return { suggestions: suggestions.rows };
+    });
 
-    return ok({ suggestions: suggestions.rows });
+    return ok(data);
   } catch (error) {
     return fail(error, 400);
   }
@@ -765,6 +769,7 @@ export async function POST(request: Request) {
       ]
     );
 
+    clearCompanyServerCache(companyId);
     return ok({ suggestion: suggestion.rows[0] }, 201);
   } catch (error) {
     return fail(error, 400);
