@@ -1,6 +1,7 @@
 "use client";
 
-import type { CSSProperties, FormEvent } from "react";
+import { useMemo, useState } from "react";
+import type { CSSProperties, FormEvent, UIEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -167,6 +168,10 @@ type SalesModuleProps = {
   formatShortDate: (date: string) => string;
 };
 
+const SALES_TABLE_ROW_HEIGHT = 58;
+const SALES_TABLE_VIEWPORT_HEIGHT = 520;
+const SALES_TABLE_OVERSCAN = 8;
+
 const money = (value: string | number) => Number(value || 0).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
 function sumSales(sales: RecentSale[], predicate: (sale: RecentSale) => boolean) {
@@ -226,6 +231,24 @@ export function SalesModule({
   const topProducts = topBy(filteredSales, (sale) => sale.productName).slice(0, 3);
   const channels = topBy(filteredSales, (sale) => sale.channelName).slice(0, 5);
   const channelTotal = Math.max(channels.reduce((total, channel) => total + channel.amount, 0), 1);
+  const [salesTableScrollTop, setSalesTableScrollTop] = useState(0);
+  const virtualSales = useMemo(() => {
+    const totalRows = filteredSales.length;
+    const visibleRows = Math.ceil(SALES_TABLE_VIEWPORT_HEIGHT / SALES_TABLE_ROW_HEIGHT) + SALES_TABLE_OVERSCAN * 2;
+    const startIndex = Math.max(0, Math.floor(salesTableScrollTop / SALES_TABLE_ROW_HEIGHT) - SALES_TABLE_OVERSCAN);
+    const endIndex = Math.min(totalRows, startIndex + visibleRows);
+    return {
+      bottomPadding: Math.max(0, (totalRows - endIndex) * SALES_TABLE_ROW_HEIGHT),
+      endIndex,
+      rows: filteredSales.slice(startIndex, endIndex),
+      startIndex,
+      topPadding: startIndex * SALES_TABLE_ROW_HEIGHT,
+      totalRows
+    };
+  }, [filteredSales, salesTableScrollTop]);
+  const handleSalesTableScroll = (event: UIEvent<HTMLDivElement>) => {
+    setSalesTableScrollTop(event.currentTarget.scrollTop);
+  };
   const aiSuggestion = salesPercent < salesRule
     ? `Contactar clientes que compraron ${products[0]?.name ?? "tu producto líder"} hace más de 15 días.`
     : recommendedAction();
@@ -370,9 +393,14 @@ export function SalesModule({
           <button className="secondary-button" type="button" onClick={onClearFilters}>Limpiar</button>
         </div>
 
-        <div className="sales-table-wrap">
+        <div className="sales-table-meta">
+          <span>Mostrando {virtualSales.totalRows ? virtualSales.startIndex + 1 : 0}-{virtualSales.endIndex} de {virtualSales.totalRows} ventas filtradas</span>
+        </div>
+        <div className="sales-table-wrap sales-virtual-table-wrap" onScroll={handleSalesTableScroll}>
           <table className="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Estado</th><th>Total</th><th>Edición</th></tr></thead>
-            <tbody>{filteredSales.map((sale) => {
+            <tbody>
+              {virtualSales.topPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={6} style={{ height: virtualSales.topPadding }} /></tr> : null}
+              {virtualSales.rows.map((sale) => {
               const isEditing = editingSaleId === sale.id;
               return (
                 <tr data-status={sale.status} key={sale.id}>
@@ -384,7 +412,9 @@ export function SalesModule({
                   <td>{isEditing ? <div className="quick-edit-controls"><input value={editingSale.notes} onChange={(event) => onEditingSaleChange({ notes: event.target.value })} placeholder="Notas" /><button className="primary-button" type="button" onClick={() => onSaveQuickSaleEdit(sale.id)}>Guardar</button><button className="secondary-button" type="button" onClick={onCancelEdit}>Cancelar</button></div> : <button className="secondary-button" type="button" onClick={() => onStartEditingSale(sale)}>Editar</button>}</td>
                 </tr>
               );
-            })}</tbody>
+            })}
+              {virtualSales.bottomPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={6} style={{ height: virtualSales.bottomPadding }} /></tr> : null}
+            </tbody>
           </table>
         </div>
       </details>

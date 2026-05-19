@@ -11142,6 +11142,30 @@ select,
   overflow-x: auto;
 }
 
+.sales-table-meta {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  margin: 14px 0 8px;
+}
+
+.sales-table-meta span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sales-virtual-table-wrap {
+  max-height: 520px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.sales-spacer-row td {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
 .sales-mini-grid {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
 }
