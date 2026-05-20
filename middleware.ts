@@ -6,6 +6,7 @@ export function middleware(request: NextRequest) {
 
   const isPrivateRoute =
     request.nextUrl.pathname.startsWith("/admin") ||
+    request.nextUrl.pathname.startsWith("/api/admin") ||
     request.nextUrl.pathname.startsWith("/dashboard") ||
     request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/billing");
@@ -20,5 +21,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/billing/:path*"]
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/billing/:path*"]
 };

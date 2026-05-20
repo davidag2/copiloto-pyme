@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Activity, AlertTriangle, Building2, CreditCard, FileText, ShieldCheck } from "lucide-react";
 import { adminRoleLabel, adminRoles } from "@/lib/admin-roles";
 import { validateAdminSession } from "@/lib/admin-access";
+import { validateRequestSession } from "@/lib/session";
 
 const adminModules = [
   {
@@ -30,9 +31,12 @@ const adminModules = [
 export default async function AdminPage() {
   const headerList = await headers();
   const cookie = headerList.get("cookie") || "";
-  const adminSession = await validateAdminSession(new Request("https://copiloto-pyme.local/admin", { headers: { cookie } }));
+  const request = new Request("https://copiloto-pyme.local/admin", { headers: { cookie } });
+  const session = await validateRequestSession(request);
+  if (!session) redirect("/login?next=/admin");
 
-  if (!adminSession) redirect("/login?next=/admin");
+  const adminSession = await validateAdminSession(request);
+  if (!adminSession) redirect("/admin/acceso-denegado");
 
   return (
     <main className="admin-shell">
