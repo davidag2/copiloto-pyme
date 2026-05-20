@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { Activity, AlertTriangle, Building2, CreditCard, FileText, ShieldCheck } from "lucide-react";
-import { adminRoleLabel, adminRoles } from "@/lib/admin-roles";
-import { validateAdminSession } from "@/lib/admin-access";
-import { validateRequestSession } from "@/lib/session";
+import { AlertTriangle, Building2, CreditCard, FileText } from "lucide-react";
+import { AdminNextStep, AdminShell } from "@/components/admin/AdminShell";
+import { adminRoles } from "@/lib/admin-roles";
+import { requireAdminPageSession } from "@/lib/admin-page";
 
 const adminModules = [
   {
@@ -29,49 +27,15 @@ const adminModules = [
 ];
 
 export default async function AdminPage() {
-  const headerList = await headers();
-  const cookie = headerList.get("cookie") || "";
-  const request = new Request("https://copiloto-pyme.local/admin", { headers: { cookie } });
-  const session = await validateRequestSession(request);
-  if (!session) redirect("/login?next=/admin");
-
-  const adminSession = await validateAdminSession(request);
-  if (!adminSession) redirect("/admin/acceso-denegado");
+  const adminSession = await requireAdminPageSession("/admin");
 
   return (
-    <main className="admin-shell">
-      <aside className="admin-sidebar">
-        <a className="mkt-brand" href="/admin">
-          <span>CP</span>
-          <div>
-            <strong>Copiloto Pyme</strong>
-            <small>Admin Tecnotitan</small>
-          </div>
-        </a>
-        <nav aria-label="Modulos administrativos">
-          <a aria-current="page" href="/admin">Resumen</a>
-          <a href="/admin/clientes">Clientes</a>
-          <a href="/admin/pagos">Pagos</a>
-          <a href="/admin/facturas">Facturas</a>
-          <a href="/admin/monitoreo">Monitoreo</a>
-        </nav>
-      </aside>
-
-      <section className="admin-main">
-        <header className="admin-hero">
-          <div>
-            <span><ShieldCheck size={18} /> Acceso interno protegido</span>
-            <h1>Dashboard Administrativo</h1>
-            <p>Centro de control para revisar clientes, pagos, facturas, alertas e integridad operativa de Copiloto Pyme.</p>
-          </div>
-          <div className="admin-session-card">
-            <small>Sesion activa</small>
-            <strong>{adminSession.userName}</strong>
-            <span>{adminSession.userEmail}</span>
-            <em>{adminRoleLabel(adminSession.adminRole)}</em>
-          </div>
-        </header>
-
+    <AdminShell
+      active="resumen"
+      description="Centro de control para revisar clientes, pagos, facturas, alertas e integridad operativa de Copiloto Pyme."
+      session={adminSession}
+      title="Dashboard Administrativo"
+    >
         <section className="admin-role-grid" aria-label="Roles administrativos">
           {adminRoles.map((role) => (
             <article key={role.value} data-active={role.value === adminSession.adminRole}>
@@ -120,14 +84,10 @@ export default async function AdminPage() {
           })}
         </section>
 
-        <section className="admin-next-step">
-          <Activity size={22} />
-          <div>
-            <strong>Siguiente paso</strong>
-            <p>Conectar el modulo de clientes para ver empresas registradas, plan actual, estado de pago y fecha de alta.</p>
-          </div>
-        </section>
-      </section>
-    </main>
+        <AdminNextStep>
+          <strong>Siguiente paso</strong>
+          <p>Conectar el modulo de clientes para ver empresas registradas, plan actual, estado de pago y fecha de alta.</p>
+        </AdminNextStep>
+    </AdminShell>
   );
 }

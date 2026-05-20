@@ -5365,8 +5365,11 @@ select:focus-visible {
 }
 
 .admin-sidebar nav a {
+  align-items: center;
   border-radius: 16px;
   color: #34405c;
+  display: flex;
+  gap: 10px;
   font-weight: 800;
   padding: 14px 16px;
 }
@@ -5535,6 +5538,105 @@ select:focus-visible {
   margin: 0 0 8px;
 }
 
+.admin-table-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 28px;
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+}
+
+.admin-table-card > header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.admin-table-card > header span {
+  align-items: center;
+  color: var(--brand-blue);
+  display: flex;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.admin-table-card h2 {
+  color: #071a2d;
+  font-size: 1.5rem;
+  margin: 8px 0 0;
+}
+
+.admin-table-card button,
+.admin-client-list a {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  color: var(--brand-blue);
+  font-weight: 900;
+  padding: 11px 14px;
+}
+
+.admin-client-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-client-list article {
+  align-items: center;
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  padding: 16px;
+}
+
+.admin-client-list i {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 16px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-style: normal;
+  height: 46px;
+  justify-content: center;
+  width: 46px;
+}
+
+.admin-client-list strong,
+.admin-client-list small {
+  display: block;
+}
+
+.admin-client-list small {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.admin-client-list span {
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 999px;
+  color: var(--green);
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.admin-client-list span[data-status="Pago pendiente"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.admin-client-list span[data-status="Prueba gratis"] {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--brand-blue);
+}
+
 .admin-next-step {
   justify-content: flex-start;
 }
@@ -5634,6 +5736,12 @@ select:focus-visible {
   .admin-hero {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-table-card > header,
+  .admin-client-list article {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
   }
 
   .admin-session-card {
