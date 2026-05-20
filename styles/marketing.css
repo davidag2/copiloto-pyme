@@ -5554,6 +5554,15 @@ select:focus-visible {
   margin-bottom: 18px;
 }
 
+.admin-table-card > header a {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  color: var(--brand-blue);
+  font-weight: 900;
+  padding: 11px 14px;
+}
+
 .admin-table-card > header span {
   align-items: center;
   color: var(--brand-blue);
@@ -5576,6 +5585,51 @@ select:focus-visible {
   color: var(--brand-blue);
   font-weight: 900;
   padding: 11px 14px;
+}
+
+.admin-overview-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+}
+
+.admin-health-card {
+  background: linear-gradient(135deg, rgba(10, 37, 64, 0.96), rgba(37, 99, 235, 0.92));
+  border-radius: 28px;
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.12);
+  color: white;
+  padding: 24px;
+}
+
+.admin-health-card header span {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.76);
+  display: flex;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.admin-health-card h2 {
+  font-size: 1.5rem;
+  margin: 10px 0 20px;
+}
+
+.admin-health-card div {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-health-card p {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 14px;
+}
+
+.admin-health-card strong {
+  color: white;
 }
 
 .admin-client-list {
@@ -5635,6 +5689,12 @@ select:focus-visible {
 .admin-client-list span[data-status="Prueba gratis"] {
   background: rgba(37, 99, 235, 0.1);
   color: var(--brand-blue);
+}
+
+.admin-empty-note {
+  color: var(--muted);
+  font-weight: 800;
+  margin: 0;
 }
 
 .admin-next-step {
@@ -5722,7 +5782,8 @@ select:focus-visible {
   .admin-sidebar nav,
   .admin-kpi-grid,
   .admin-module-grid,
-  .admin-role-grid {
+  .admin-role-grid,
+  .admin-overview-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -5752,7 +5813,8 @@ select:focus-visible {
   .admin-sidebar nav,
   .admin-kpi-grid,
   .admin-module-grid,
-  .admin-role-grid {
+  .admin-role-grid,
+  .admin-overview-grid {
     grid-template-columns: 1fr;
   }
 }

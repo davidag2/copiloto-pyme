@@ -1,7 +1,8 @@
-import { AlertTriangle, Building2, CreditCard, FileText } from "lucide-react";
+import { AlertTriangle, Building2, CreditCard, FileText, ShieldCheck, Users } from "lucide-react";
 import { AdminNextStep, AdminShell } from "@/components/admin/AdminShell";
 import { adminRoles } from "@/lib/admin-roles";
 import { requireAdminPageSession } from "@/lib/admin-page";
+import { formatAdminMoney, getAdminSummary } from "@/lib/admin-summary";
 
 const adminModules = [
   {
@@ -28,6 +29,8 @@ const adminModules = [
 
 export default async function AdminPage() {
   const adminSession = await requireAdminPageSession("/admin");
+  const summary = await getAdminSummary();
+  const paidOrTrial = summary.subscriptions.active + summary.subscriptions.trial;
 
   return (
     <AdminShell
@@ -49,23 +52,88 @@ export default async function AdminPage() {
         <section className="admin-kpi-grid" aria-label="Resumen administrativo">
           <article>
             <small>Clientes SaaS</small>
-            <strong>0</strong>
-            <span>Listo para conectar datos reales</span>
+            <strong>{summary.companies.total}</strong>
+            <span>{summary.companies.createdThisMonth} nuevos este mes</span>
           </article>
           <article>
             <small>Pagos pendientes</small>
-            <strong>$0</strong>
-            <span>Wompi, Bold, Mercado Pago y Efecty</span>
+            <strong>{formatAdminMoney(summary.payments.pendingAmount)}</strong>
+            <span>{summary.payments.pending} transacciones por revisar</span>
           </article>
           <article>
             <small>Facturas SIIGO</small>
-            <strong>0</strong>
-            <span>Modulo pendiente de conexion</span>
+            <strong>{summary.invoices.sent + summary.invoices.accepted}</strong>
+            <span>{summary.invoices.failed} con error · {summary.invoices.ready} listas</span>
           </article>
           <article>
             <small>Alertas servidor</small>
-            <strong>0</strong>
-            <span>Monitoreo operativo por integrar</span>
+            <strong>{summary.alerts.open}</strong>
+            <span>{summary.alerts.danger} criticas · {summary.alerts.warning} advertencias</span>
+          </article>
+        </section>
+
+        <section className="admin-kpi-grid" aria-label="Indicadores SaaS">
+          <article>
+            <small>Ingresos confirmados</small>
+            <strong>{formatAdminMoney(summary.payments.paidAmount)}</strong>
+            <span>{summary.payments.paid} pagos aprobados</span>
+          </article>
+          <article>
+            <small>Suscripciones vigentes</small>
+            <strong>{paidOrTrial}</strong>
+            <span>{summary.subscriptions.trial} en prueba · {summary.subscriptions.active} activas</span>
+          </article>
+          <article>
+            <small>Usuarios registrados</small>
+            <strong>{summary.users.total}</strong>
+            <span>{summary.users.loggedLast7Days} activos en 7 dias</span>
+          </article>
+          <article>
+            <small>Planes activos</small>
+            <strong>{summary.companies.go}/{summary.companies.basic}/{summary.companies.pro}</strong>
+            <span>GO · Basic · Pro</span>
+          </article>
+        </section>
+
+        <section className="admin-overview-grid">
+          <article className="admin-table-card">
+            <header>
+              <div>
+                <span><Building2 size={18} /> Ultimos clientes</span>
+                <h2>Empresas recientes</h2>
+              </div>
+              <a href="/admin/clientes">Ver clientes</a>
+            </header>
+            <div className="admin-client-list">
+              {summary.recentCompanies.length ? summary.recentCompanies.map((company) => (
+                <article key={company.id}>
+                  <i><Building2 size={18} /></i>
+                  <div>
+                    <strong>{company.name}</strong>
+                    <small><Users size={14} /> {company.usersCount} usuarios · Plan {String(company.plan).toUpperCase()}</small>
+                  </div>
+                  <span data-status={company.subscriptionStatus === "past_due" ? "Pago pendiente" : "Activo"}>
+                    {company.subscriptionStatus || "Sin suscripcion"}
+                  </span>
+                  <a href={`/admin/clientes?empresa=${company.id}`}>Ver ficha</a>
+                </article>
+              )) : (
+                <p className="admin-empty-note">Aun no hay empresas registradas.</p>
+              )}
+            </div>
+          </article>
+
+          <article className="admin-health-card">
+            <header>
+              <span><ShieldCheck size={18} /> Estado operativo</span>
+              <h2>Lectura rapida</h2>
+            </header>
+            <div>
+              <p><strong>Pagos:</strong> {summary.payments.failed} fallidos o expirados.</p>
+              <p><strong>Facturacion:</strong> {summary.invoices.failed} facturas con error SIIGO.</p>
+              <p><strong>Clientes:</strong> {summary.subscriptions.pastDue} suscripciones vencidas.</p>
+              <p><strong>Alertas:</strong> {summary.alerts.open} alertas abiertas.</p>
+            </div>
           </article>
         </section>
 
