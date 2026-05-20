@@ -58,6 +58,7 @@ async function getSuggestions(companyId: string) {
      FROM ai_suggestions
      WHERE company_id = $1
        AND status <> 'descartada'
+       AND COALESCE(source, '') <> 'copiloto_ai_demo_seed'
      ORDER BY
        CASE priority
          WHEN 'critical' THEN 1
@@ -706,9 +707,6 @@ export async function GET(request: Request) {
     const data = await withServerCache(`company:${companyId}:ai-suggestions:${session.session.userId}`, 20_000, async () => {
       await generateSalesAnalysisSuggestions(companyId);
       let suggestions = await getSuggestions(companyId);
-      if (!suggestions.rows.length) {
-        await seedDefaultSuggestions(companyId);
-      }
       await refreshSuggestionImpacts(companyId);
       suggestions = await getSuggestions(companyId);
       return { suggestions: suggestions.rows };

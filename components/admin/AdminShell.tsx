@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Activity, AlertTriangle, Building2, CreditCard, FileText, Gauge, ShieldCheck } from "lucide-react";
 import { adminRoleLabel } from "@/lib/admin-roles";
 import type { AdminRole } from "@/lib/admin-roles";
+import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
 type AdminSession = {
   userName: string;
@@ -61,6 +62,7 @@ export function AdminShell({ active, children, description, session, title }: Ad
             <strong>{session.userName}</strong>
             <span>{session.userEmail}</span>
             <em>{adminRoleLabel(session.adminRole)}</em>
+            <AdminLogoutButton />
           </div>
         </header>
         {children}

@@ -469,21 +469,16 @@ function EmptyState({ icon: Icon, title, text, action }: { icon: LucideIcon; tit
 }
 
 const initialWeeklySales: SalePoint[] = [
-  { day: "Lun", value: 9.8 },
-  { day: "Mar", value: 11.4 },
-  { day: "Mie", value: 10.2 },
-  { day: "Jue", value: 13.7 },
-  { day: "Vie", value: 15.1 },
-  { day: "Sab", value: 17.9 },
-  { day: "Dom", value: 6.1 }
+  { day: "Lun", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Mar", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Mie", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Jue", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Vie", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Sab", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 },
+  { day: "Dom", value: 0, previous: 0, cash: 0, margin: 0, criticalStock: 0 }
 ];
 
-const initialProducts: Product[] = [
-  { name: "Cafe Premium 500g", sales: "$18.4M", stock: "Bajo" },
-  { name: "Chocolate Familiar", sales: "$12.7M", stock: "Normal" },
-  { name: "Panela Organica", sales: "$9.8M", stock: "Critico" },
-  { name: "Avena Instantanea", sales: "$7.9M", stock: "Normal" }
-];
+const initialProducts: Product[] = [];
 
 const initialIntegrations: Integration[] = [
   { id: "sheets", name: "Google Sheets", category: "Hojas de calculo", status: "Disponible", sync: "Manual" },
@@ -598,7 +593,7 @@ function dashboardRange(range: DateRangeMode, customRange: { start: string; end:
 export default function Home() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [companyId, setCompanyId] = useState("");
-  const [persistenceStatus, setPersistenceStatus] = useState("Modo demo: aun no hay empresa guardada en PostgreSQL.");
+  const [persistenceStatus, setPersistenceStatus] = useState("Conecta tu empresa para empezar a cargar datos reales.");
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authForm, setAuthForm] = useState({ password: "", loginEmail: "", loginPassword: "", recoverEmail: "" });
   const [authStatus, setAuthStatus] = useState("Crea tu cuenta o entra con tu usuario empresarial.");
@@ -610,7 +605,7 @@ export default function Home() {
   const [customer, setCustomer] = useState({
     ownerName: "",
     ownerEmail: "",
-    companyName: "Distribuidora Andina",
+    companyName: "Tu empresa",
     country: "Colombia",
     plan: "go",
     businessType: "Distribuidora",
@@ -621,14 +616,11 @@ export default function Home() {
   });
   const [paid, setPaid] = useState(false);
   const [onboardingReady, setOnboardingReady] = useState(false);
-  const [metrics, setMetrics] = useState<Metrics>({ sales: 84.2, cash: 27.6, margin: 31.8, criticalStock: 7 });
+  const [metrics, setMetrics] = useState<Metrics>({ sales: 0, cash: 0, margin: 0, criticalStock: 0 });
   const [weeklySales, setWeeklySales] = useState(initialWeeklySales);
   const [products, setProducts] = useState(initialProducts);
   const [integrations, setIntegrations] = useState(initialIntegrations);
-  const [decisions, setDecisions] = useState<Decision[]>([
-    { id: 1, text: "Reponer Panela Organica antes del viernes", owner: "Administrador", impact: "Inventario", status: "En curso", date: "2026-04-29" },
-    { id: 2, text: "Revisar gasto de transporte con proveedor", owner: "Administrador", impact: "Margen", status: "Pendiente", date: "2026-04-29" }
-  ]);
+  const [decisions, setDecisions] = useState<Decision[]>([]);
   const [rules, setRules] = useState({ sales: 70, cash: 14, margin: 30, stock: 3 });
   const [visible, setVisible] = useState({
     sales: true,
@@ -643,7 +635,7 @@ export default function Home() {
     reports: true
   });
   const [focus, setFocus] = useState("owner");
-  const [recommendation, setRecommendation] = useState("Reponer inventario de Cafe Premium antes del viernes y revisar el gasto de transporte.");
+  const [recommendation, setRecommendation] = useState("Carga tus primeros datos para que Copiloto Pyme genere recomendaciones reales.");
   const [answer, setAnswer] = useState("");
   const [question, setQuestion] = useState("");
   const [importStatus, setImportStatus] = useState("Sin archivo cargado");
@@ -678,9 +670,9 @@ export default function Home() {
   const [activeIntegrationId, setActiveIntegrationId] = useState("");
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [aiSuggestionRows, setAiSuggestionRows] = useState<AiSuggestionRow[]>([]);
-  const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sugerencias demo listas.");
+  const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sin sugerencias todavía.");
   const [activityRows, setActivityRows] = useState<ActivityEventRow[]>([]);
-  const [activityStatus, setActivityStatus] = useState("Actividad demo lista.");
+  const [activityStatus, setActivityStatus] = useState("Sin actividad todavía.");
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
   const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
   const [notificationsStatus, setNotificationsStatus] = useState("Notificaciones listas.");
@@ -709,7 +701,7 @@ export default function Home() {
   const [salesFilters, setSalesFilters] = useState<SalesFilters>({ startDate: "", endDate: "", customer: "", product: "", channel: "", salesRep: "", status: "", search: "" });
   const [editingSaleId, setEditingSaleId] = useState("");
   const [editingSale, setEditingSale] = useState<EditingSale>({ saleDate: "", status: "pagada", discount: "0", notes: "" });
-  const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs demo hasta cargar datos reales.");
+  const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs en cero hasta cargar datos reales.");
   const [kpiRowCount, setKpiRowCount] = useState(0);
   const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
@@ -804,6 +796,8 @@ export default function Home() {
   const openDecisions = useMemo(() => decisions.filter((decision) => decision.status !== "Completada").length, [decisions]);
   const activeRoleLabel = roleLabel(authUser?.role);
   const permissions = roleCapabilities(authUser?.role);
+  const hasAuthenticatedCompany = Boolean(companyId && authUser);
+  const hasBusinessData = !hasAuthenticatedCompany || kpiRowCount > 0 || recentSales.length > 0;
   const tenantShortId = companyId ? companyId.slice(0, 8) : "demo";
   const onboardingProgress = onboardingReady ? 100 : paid ? 75 : authUser ? 50 : 25;
   const onboardingSteps: Array<{ title: string; status: string; icon: LucideIcon; text: string }> = [
@@ -814,13 +808,14 @@ export default function Home() {
   ];
 
   const alerts = useMemo<Alert[]>(() => {
+    if (hasAuthenticatedCompany && !hasBusinessData) return [];
     return evaluateBasicRules({
       salesProgressPercent: salesPercent,
       cashDays: cashDays(metrics.cash),
       marginPercent: metrics.margin,
       criticalStockCount: metrics.criticalStock
     }, rules);
-  }, [metrics, rules, salesPercent]);
+  }, [hasAuthenticatedCompany, hasBusinessData, metrics, rules, salesPercent]);
   const criticalAlerts = useMemo(() => alerts.filter((alert) => alert.level === "danger" || alert.level === "warning"), [alerts]);
   const overallStatus = criticalAlerts.some((alert) => alert.level === "danger")
     ? "Riesgo alto"
@@ -871,7 +866,9 @@ export default function Home() {
   const dateRangeLabel = rangeLabel(dateRange, customRange);
   const bestDay = useMemo(() => selectedSales.reduce((best, item) => (item.value > best.value ? item : best), selectedSales[0] ?? weeklySales[0]), [selectedSales, weeklySales]);
   const chartData = useMemo(() => selectedSales.map((item, index) => {
-    const previous = typeof item.previous === "number" ? item.previous : Math.max(4.8, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
+    const previous = !hasBusinessData
+      ? 0
+      : typeof item.previous === "number" ? item.previous : Math.max(0, Number((item.value * (0.86 + index * 0.025)).toFixed(1)));
     const target = Number(((customer.monthlyGoal / 1_000_000) / Math.max(selectedSales.length, 1)).toFixed(1));
     return {
       day: item.day,
@@ -883,7 +880,7 @@ export default function Home() {
       criticalStock: typeof item.criticalStock === "number" ? item.criticalStock : Math.max(0, metrics.criticalStock - (index % 4)),
       variation: previous ? Number((((item.value - previous) / previous) * 100).toFixed(1)) : 0
     };
-  }), [customer.monthlyGoal, metrics.cash, metrics.criticalStock, metrics.margin, selectedSales]);
+  }), [customer.monthlyGoal, hasBusinessData, metrics.cash, metrics.criticalStock, metrics.margin, selectedSales]);
   const weeklyTotal = useMemo(() => selectedSales.reduce((total, item) => total + item.value, 0), [selectedSales]);
   const previousTotal = useMemo(() => chartData.reduce((total, item) => total + item.previous, 0), [chartData]);
   const weeklyVariation = previousTotal ? Math.round(((weeklyTotal - previousTotal) / previousTotal) * 100) : 0;
@@ -971,13 +968,17 @@ export default function Home() {
       impact: "Revisar compras hoy"
     }
   ], [metrics.criticalStock]);
-  const aiSuggestions = useMemo(() => aiSuggestionRows.length ? aiSuggestionRows.slice(0, 3).map(mapSuggestionCard) : fallbackAiSuggestions, [aiSuggestionRows, fallbackAiSuggestions]);
+  const aiSuggestions = useMemo(() => {
+    if (hasAuthenticatedCompany && !hasBusinessData) return [];
+    if (aiSuggestionRows.length) return aiSuggestionRows.slice(0, 3).map(mapSuggestionCard);
+    return hasAuthenticatedCompany ? [] : fallbackAiSuggestions;
+  }, [aiSuggestionRows, fallbackAiSuggestions, hasAuthenticatedCompany, hasBusinessData]);
   const aiHomeKpis = useMemo(() => [
     { label: "Ventas hoy", value: formatMoney(metrics.sales), helper: `${salesPercent}% de la meta`, icon: BarChart3, tone: "blue", trend: selectedSales.map((item) => item.value), delta: weeklyVariation >= 0 ? `+${weeklyVariation}% vs periodo anterior` : `${weeklyVariation}% vs periodo anterior` },
-    { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green", trend: [18, 18.5, 18.1, 19.2, 20.1, 21.4, cashDays(metrics.cash)], delta: "Suficiente para operar" },
-    { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red", trend: [7, 6, 6, 5, 6, 5, metrics.criticalStock], delta: "Comprar antes de quiebre" },
-    { label: "Sugerencias activas", value: String(openDecisions + criticalAlerts.length), helper: "listas para asignar", icon: Sparkles, tone: "purple", trend: [2, 3, 4, 3, 5, 6, openDecisions + criticalAlerts.length], delta: "Priorizadas por IA" }
-  ], [criticalAlerts.length, metrics, openDecisions, salesPercent, selectedSales, weeklyVariation]);
+    { label: "Caja disponible", value: formatMoney(metrics.cash), helper: `${cashDays(metrics.cash)} días de caja`, icon: WalletCards, tone: "green", trend: hasBusinessData ? [18, 18.5, 18.1, 19.2, 20.1, 21.4, cashDays(metrics.cash)] : [0, 0, 0, 0, 0, 0, 0], delta: hasBusinessData ? "Suficiente para operar" : "Sin datos cargados" },
+    { label: "Productos críticos", value: String(metrics.criticalStock), helper: "requieren atención", icon: AlertTriangle, tone: "red", trend: hasBusinessData ? [7, 6, 6, 5, 6, 5, metrics.criticalStock] : [0, 0, 0, 0, 0, 0, 0], delta: hasBusinessData ? "Comprar antes de quiebre" : "Sin inventario cargado" },
+    { label: "Sugerencias activas", value: String(hasBusinessData ? openDecisions + criticalAlerts.length : 0), helper: "listas para asignar", icon: Sparkles, tone: "purple", trend: hasBusinessData ? [2, 3, 4, 3, 5, 6, openDecisions + criticalAlerts.length] : [0, 0, 0, 0, 0, 0, 0], delta: hasBusinessData ? "Priorizadas por IA" : "Esperando tus datos" }
+  ], [criticalAlerts.length, hasBusinessData, metrics, openDecisions, salesPercent, selectedSales, weeklyVariation]);
   const aiImpactData = useMemo(() => chartData.map((item, index) => ({
     day: item.day,
     actual: item.actual,
@@ -990,13 +991,13 @@ export default function Home() {
     return totals;
   }, { ventas_adicionales: 0, margen: 0, ahorro: 0, riesgo_evitado: 0 }), [aiSuggestionRows]);
   const totalRealAiImpact = useMemo(() => Object.values(impactValueByType).reduce((total, value) => total + value, 0), [impactValueByType]);
-  const aiImpactLift = totalRealAiImpact || fallbackAiImpactLift;
+  const aiImpactLift = hasBusinessData ? totalRealAiImpact || fallbackAiImpactLift : 0;
   const aiImpactSummaryCards = useMemo(() => [
-    { type: "ventas_adicionales" as const, label: "Ventas adicionales", value: impactValueByType.ventas_adicionales || fallbackAiImpactLift, helper: "ingreso potencial", icon: BarChart3, tone: "blue" },
+    { type: "ventas_adicionales" as const, label: "Ventas adicionales", value: hasBusinessData ? impactValueByType.ventas_adicionales || fallbackAiImpactLift : 0, helper: "ingreso potencial", icon: BarChart3, tone: "blue" },
     { type: "margen" as const, label: "Margen", value: impactValueByType.margen, helper: "mejora por precios", icon: TrendingUp, tone: "green" },
     { type: "ahorro" as const, label: "Ahorro", value: impactValueByType.ahorro, helper: "costos evitables", icon: WalletCards, tone: "purple" },
     { type: "riesgo_evitado" as const, label: "Riesgo evitado", value: impactValueByType.riesgo_evitado, helper: "inventario y caja", icon: ShieldCheck, tone: "red" }
-  ], [fallbackAiImpactLift, impactValueByType]);
+  ], [fallbackAiImpactLift, hasBusinessData, impactValueByType]);
   const aiImpactCategories = useMemo(() => aiSuggestionRows.length
     ? (["inventario", "precios", "ventas", "caja"] as const).map((category) => {
       const rows = aiSuggestionRows.filter((suggestion) => suggestion.category === category);
@@ -1009,19 +1010,22 @@ export default function Home() {
       const label = category === "inventario" ? "Inventario" : category === "precios" ? "Precios" : category === "ventas" ? "Ventas" : "Caja";
       return { label, count: rows.length, tag: rows[0]?.impactLabel || "Sin impacto activo", impactTotal, firstSuggestionId: rows[0]?.id, icon, tone };
     }).filter((category) => category.count > 0)
-    : [
+    : hasAuthenticatedCompany ? [] : [
       { label: "Inventario", count: Math.max(2, metrics.criticalStock - 3), tag: "Alta prioridad", impactTotal: Math.round(fallbackAiImpactLift * 0.34), firstSuggestionId: "", icon: PackageCheck, tone: "red" },
       { label: "Precios", count: 2, tag: "Oportunidad", impactTotal: Math.round(fallbackAiImpactLift * 0.24), firstSuggestionId: "", icon: TrendingUp, tone: "green" },
       { label: "Ventas", count: Math.max(1, Math.round(salesPercent / 45)), tag: "Optimización", impactTotal: Math.round(fallbackAiImpactLift * 0.3), firstSuggestionId: "", icon: BarChart3, tone: "blue" },
       { label: "Caja", count: cashDays(metrics.cash) < rules.cash ? 2 : 1, tag: "Revisión", impactTotal: Math.round(fallbackAiImpactLift * 0.12), firstSuggestionId: "", icon: WalletCards, tone: "purple" }
-    ], [aiSuggestionRows, fallbackAiImpactLift, metrics.cash, metrics.criticalStock, rules.cash, salesPercent]);
+    ], [aiSuggestionRows, fallbackAiImpactLift, hasAuthenticatedCompany, metrics.cash, metrics.criticalStock, rules.cash, salesPercent]);
   const aiCategoryMaxImpact = useMemo(() => Math.max(...aiImpactCategories.map((category) => category.impactTotal), 1), [aiImpactCategories]);
   const fallbackAiActivity = useMemo<AiActivityItem[]>(() => [
     { id: "demo-suggestion", title: "Nueva sugerencia generada", text: "Reponer Panela Orgánica", time: "8:30 a. m.", icon: Sparkles, tone: "purple" },
     { id: "demo-opportunity", title: "Oportunidad detectada", text: "Ajuste de precio en Café Premium", time: "7:45 a. m.", icon: TrendingUp, tone: "green" },
     { id: "demo-alert", title: "Alerta de inventario", text: "Stock bajo en Azúcar Integral", time: "Ayer, 6:20 p. m.", icon: AlertTriangle, tone: "red" }
   ], []);
-  const aiActivity = useMemo(() => activityRows.length ? activityRows.slice(0, 5).map(mapActivityEvent) : fallbackAiActivity, [activityRows, fallbackAiActivity]);
+  const aiActivity = useMemo(() => {
+    if (activityRows.length) return activityRows.slice(0, 5).map(mapActivityEvent);
+    return hasAuthenticatedCompany ? [] : fallbackAiActivity;
+  }, [activityRows, fallbackAiActivity, hasAuthenticatedCompany]);
   const salesGoalGap = Math.max(0, (customer.monthlyGoal / 1_000_000) - metrics.sales);
   const salesInsightCards = useMemo(() => [
     {
@@ -1062,7 +1066,10 @@ export default function Home() {
   function applyDashboardKpis(kpis: DashboardKpis) {
     setKpiRowCount(kpis.rowCount);
     if (!kpis.rowCount) {
-      setKpiSourceStatus("Sin filas reales importadas. KPIs en modo demo.");
+      setMetrics({ sales: 0, cash: 0, margin: 0, criticalStock: 0 });
+      setWeeklySales(initialWeeklySales);
+      setProducts([]);
+      setKpiSourceStatus("Sin filas reales todavía. KPIs en cero hasta importar o registrar datos.");
       return;
     }
     setMetrics(kpis.metrics);
@@ -1080,6 +1087,26 @@ export default function Home() {
   function applyAuthSession(data: AuthResponse) {
     setAuthUser(data.user);
     setCompanyId(data.company.id);
+    setMetrics({ sales: 0, cash: 0, margin: 0, criticalStock: 0 });
+    setWeeklySales(initialWeeklySales);
+    setProducts([]);
+    setDecisions([]);
+    setAiSuggestionRows([]);
+    setActivityRows([]);
+    setNotifications([]);
+    setNotificationsUnreadCount(0);
+    setKpiRowCount(0);
+    setDashboardSalesReports([]);
+    setRecentSales([]);
+    setSalesSummary({
+      salesToday: 0,
+      salesMonth: 0,
+      averageTicket: 0,
+      topProduct: "Sin ventas",
+      topCustomer: "Sin clientes",
+      topChannel: "Sin canal",
+      pendingReceivables: 0
+    });
     setCustomer((current) => ({
       ...current,
       ownerName: data.user.name,
@@ -1110,7 +1137,7 @@ export default function Home() {
     const params = new URLSearchParams(range);
     const result = await apiJson<DashboardDataResponse>(`/api/companies/${activeCompanyId}/dashboard?${params.toString()}`, { method: "GET" });
     if (!result.ok) {
-      setKpiSourceStatus(`KPIs demo: ${result.error}`);
+      setKpiSourceStatus(`No se pudieron cargar KPIs reales: ${result.error}`);
       return;
     }
     if (result.data.alertRules?.length) {
@@ -1135,32 +1162,34 @@ export default function Home() {
     if (!activeCompanyId) return;
     const result = await apiJson<{ suggestions: AiSuggestionRow[] }>(`/api/ai/suggestions?companyId=${activeCompanyId}`, { method: "GET" });
     if (!result.ok) {
-      setAiSuggestionsStatus(`Modo demo local: ${result.error}`);
+      setAiSuggestionsStatus(`No se pudieron cargar sugerencias reales: ${result.error}`);
       return;
     }
     setAiSuggestionRows(result.data.suggestions);
-    setAiSuggestionsStatus(`${result.data.suggestions.length} sugerencia(s) cargadas desde PostgreSQL.`);
+    setAiSuggestionsStatus(result.data.suggestions.length
+      ? `${result.data.suggestions.length} sugerencia(s) cargadas desde PostgreSQL.`
+      : "Sin sugerencias reales todavía.");
   }
 
   async function loadActivity(activeCompanyId = companyId) {
     if (!activeCompanyId) return;
     const result = await apiJson<{ activity: ActivityEventRow[] }>(`/api/activity?companyId=${activeCompanyId}&limit=6`, { method: "GET" });
     if (!result.ok) {
-      setActivityStatus(`Modo demo local: ${result.error}`);
+      setActivityStatus(`No se pudo cargar actividad real: ${result.error}`);
       return;
     }
     setActivityRows(result.data.activity);
     setActivityStatus(result.data.activity.length
       ? `${result.data.activity.length} evento(s) cargados desde PostgreSQL.`
-      : "Sin eventos reales todavía. Mostrando ejemplo de actividad AI.");
+      : "Sin eventos reales todavía.");
   }
 
   async function loadNotifications(activeCompanyId = companyId) {
     if (!activeCompanyId) return;
     const result = await apiJson<{ notifications: NotificationRow[]; unreadCount: number }>(`/api/notifications?companyId=${activeCompanyId}&limit=8`, { method: "GET" });
     if (!result.ok) {
-      setNotificationsStatus(`Modo demo local: ${result.error}`);
-      setNotificationsUnreadCount(criticalAlerts.length + openDecisions);
+      setNotificationsStatus(`No se pudieron cargar notificaciones reales: ${result.error}`);
+      setNotificationsUnreadCount(0);
       return;
     }
     setNotifications(result.data.notifications);
@@ -2046,6 +2075,7 @@ ${recommendedAction()}`;
           aiImpactSummaryCards={aiImpactSummaryCards}
           aiImpactLift={aiImpactLift}
           hasRealAiSuggestions={aiSuggestionRows.length > 0}
+          hasBusinessData={hasBusinessData}
           aiImpactData={aiImpactData}
           aiImpactCategories={aiImpactCategories}
           aiCategoryMaxImpact={aiCategoryMaxImpact}

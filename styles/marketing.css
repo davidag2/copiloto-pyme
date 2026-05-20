@@ -5458,6 +5458,36 @@ select:focus-visible {
   padding: 8px 12px;
 }
 
+.admin-logout-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 14px;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 11px 14px;
+  width: 100%;
+}
+
+.admin-logout-button:hover,
+.admin-logout-button:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  outline: 2px solid rgba(255, 255, 255, 0.42);
+  outline-offset: 2px;
+}
+
+.admin-logout-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .admin-kpi-grid,
 .admin-module-grid,
 .admin-role-grid {

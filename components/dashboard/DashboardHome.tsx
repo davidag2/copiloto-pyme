@@ -1,20 +1,8 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Database,
-  Sparkles,
-  Target
-} from "lucide-react";
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip
-} from "recharts";
+import { ArrowRight, CheckCircle2, Clock3, Database, Sparkles, Target } from "lucide-react";
+import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts";
 
 type HomeSuggestion = {
   id?: string;
@@ -77,6 +65,7 @@ type DashboardHomeProps = {
   aiImpactSummaryCards: ImpactSummaryCard[];
   aiImpactLift: number;
   hasRealAiSuggestions: boolean;
+  hasBusinessData: boolean;
   aiImpactData: Array<Record<string, string | number>>;
   aiImpactCategories: ImpactCategory[];
   aiCategoryMaxImpact: number;
@@ -128,6 +117,7 @@ export function DashboardHome({
   aiHomeKpis,
   aiImpactLift,
   hasRealAiSuggestions,
+  hasBusinessData,
   aiImpactData,
   aiImpactCategories,
   companyId,
@@ -148,6 +138,7 @@ export function DashboardHome({
   const secondarySuggestions = aiSuggestions.slice(1, 4);
   const PrimaryIcon = primarySuggestion?.icon ?? Sparkles;
   const weekKpis = aiHomeKpis.slice(0, 4);
+  const hasSuggestions = aiSuggestions.length > 0;
   const processSteps = [
     {
       title: "Detectamos oportunidades",
@@ -173,15 +164,15 @@ export function DashboardHome({
           <article className="ai-command-hero" data-status={overallStatusTone}>
             <div className="ai-command-copy">
               <span className="ai-command-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
-              <h2>Tu AI encontró la mejor acción para impulsar tu negocio</h2>
-              <p>Basado en ventas, caja e inventario, esta es la acción con mayor impacto para esta semana.</p>
+              <h2>{hasSuggestions ? "Tu IA encontró la mejor acción para impulsar tu negocio" : "Tu dashboard está listo para recibir tus datos"}</h2>
+              <p>{hasSuggestions ? "Basado en ventas, caja e inventario, esta es la acción con mayor impacto para esta semana." : "Cuando importes información o registres ventas manuales, Copiloto Pyme mostrará KPIs, alertas y sugerencias reales."}</p>
               <div className="ai-command-meta">
                 <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
                 <span data-status={overallStatusTone}>{overallStatus}</span>
-                <span><Database aria-hidden="true" />{hasRealAiSuggestions ? "Datos reales conectados" : "Vista demo"}</span>
+                <span><Database aria-hidden="true" />{hasBusinessData ? hasRealAiSuggestions ? "Datos reales conectados" : "Datos cargados" : "Sin datos cargados"}</span>
               </div>
               <button className="primary-button ai-command-action" type="button" onClick={onRefreshSuggestions}>
-                Ver detalle de la sugerencia <ArrowRight aria-hidden="true" />
+                {hasSuggestions ? "Ver detalle de la sugerencia" : "Buscar sugerencias"} <ArrowRight aria-hidden="true" />
               </button>
             </div>
 
@@ -192,12 +183,12 @@ export function DashboardHome({
             </div>
 
             <article className="ai-priority-card" data-tone={primarySuggestion?.tone ?? "priority"}>
-              <span className="ai-priority-badge">{primarySuggestion?.label ?? "Prioridad alta"}</span>
+              <span className="ai-priority-badge">{primarySuggestion?.label ?? "Sin prioridad activa"}</span>
               <div className="ai-priority-title">
                 <span><PrimaryIcon aria-hidden="true" /></span>
                 <div>
-                  <strong>{primarySuggestion?.title ?? "Reponer Panela Orgánica"}</strong>
-                  <small>{primarySuggestion?.text ?? "Quedan pocas unidades y las ventas subieron esta semana."}</small>
+                  <strong>{primarySuggestion?.title ?? "Aún no hay sugerencias IA"}</strong>
+                  <small>{primarySuggestion?.text ?? "Carga ventas, caja o inventario para que la IA analice tu negocio."}</small>
                 </div>
               </div>
               <div className="ai-confidence-bars" aria-label="Confianza alta">
@@ -237,7 +228,7 @@ export function DashboardHome({
             <div>
               <span>Impacto potencial total</span>
               <strong>{formatCopCompact(aiImpactLift)}</strong>
-              <small>{hasRealAiSuggestions ? "Calculado desde PostgreSQL" : "Estimado hasta conectar datos"}</small>
+              <small>{hasBusinessData ? hasRealAiSuggestions ? "Calculado desde PostgreSQL" : "Datos listos para análisis" : "En cero hasta cargar información"}</small>
             </div>
             <div className="ai-potential-chart">
               <ResponsiveContainer width="100%" height="100%">
@@ -299,11 +290,23 @@ export function DashboardHome({
               </article>
             );
           })}
+          {!aiSuggestions.length ? (
+            <article className="ai-suggestion-card ai-suggestion-empty">
+              <div className="ai-suggestion-top">
+                <span className="ai-suggestion-icon"><Database aria-hidden="true" /></span>
+                <span className="ai-suggestion-label">Sin datos</span>
+              </div>
+              <strong>No hay sugerencias todavía</strong>
+              <p>Registra ventas o importa información para activar recomendaciones reales de IA.</p>
+              <small>Impacto estimado</small>
+              <b>{formatCopCompact(0)}</b>
+            </article>
+          ) : null}
         </div>
       </section>
 
       <section className="setup-summary dashboard-module-section home-context-summary" data-active={isActive}>
-        <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Demo local"}</strong></div>
+        <div><span>Empresa / tenant</span><strong>{companyId ? `ID ${tenantShortId}` : "Sin sesión"}</strong></div>
         <div><span>Rol activo</span><strong>{activeRoleLabel}</strong></div>
         <div><span>Moneda</span><strong>{currencyLabel}</strong></div>
         <div><span>Meta mensual</span><strong>{monthlyGoalLabel}</strong></div>
