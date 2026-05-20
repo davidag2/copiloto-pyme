@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Activity, AlertTriangle, Building2, CreditCard, FileText, ShieldCheck } from "lucide-react";
+import { adminRoleLabel, adminRoles } from "@/lib/admin-roles";
 import { validateAdminSession } from "@/lib/admin-access";
 
 const adminModules = [
@@ -63,8 +64,19 @@ export default async function AdminPage() {
             <small>Sesion activa</small>
             <strong>{adminSession.userName}</strong>
             <span>{adminSession.userEmail}</span>
+            <em>{adminRoleLabel(adminSession.adminRole)}</em>
           </div>
         </header>
+
+        <section className="admin-role-grid" aria-label="Roles administrativos">
+          {adminRoles.map((role) => (
+            <article key={role.value} data-active={role.value === adminSession.adminRole}>
+              <strong>{role.label}</strong>
+              <p>{role.description}</p>
+              <span>{role.value}</span>
+            </article>
+          ))}
+        </section>
 
         <section className="admin-kpi-grid" aria-label="Resumen administrativo">
           <article>
@@ -108,7 +120,7 @@ export default async function AdminPage() {
           <Activity size={22} />
           <div>
             <strong>Siguiente paso</strong>
-            <p>Crear roles administrativos formales para Tecnotitan y separar permisos por soporte, finanzas y operaciones.</p>
+            <p>Conectar el modulo de clientes para ver empresas registradas, plan actual, estado de pago y fecha de alta.</p>
           </div>
         </section>
       </section>

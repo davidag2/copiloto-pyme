@@ -30,6 +30,27 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'lectura' CHECK (role IN ('super_admin', 'soporte', 'finanzas', 'operaciones', 'lectura')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+UPDATE admin_users SET role = CASE role
+  WHEN 'admin' THEN 'super_admin'
+  WHEN 'admin_soporte' THEN 'soporte'
+  WHEN 'support' THEN 'soporte'
+  WHEN 'finance' THEN 'finanzas'
+  WHEN 'operations' THEN 'operaciones'
+  WHEN 'operaciones_admin' THEN 'operaciones'
+  WHEN 'viewer' THEN 'lectura'
+  WHEN 'read_only' THEN 'lectura'
+  ELSE role
+END;
+
 CREATE TABLE IF NOT EXISTS plans (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -580,6 +601,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_company_unread ON notifications(com
 CREATE INDEX IF NOT EXISTS idx_notifications_target_user ON notifications(target_user_id, read_at, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_entity ON notifications(entity_type, entity_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_company_role ON users(company_id, role, status);
+CREATE INDEX IF NOT EXISTS idx_admin_users_role_status ON admin_users(role, status);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_company_status ON subscriptions(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_company_status ON payment_transactions(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_provider_status ON payment_transactions(provider_id, status, created_at DESC);

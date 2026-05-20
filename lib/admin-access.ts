@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
+import { adminRoleCapabilities, normalizeAdminRole, type AdminRole } from "@/lib/admin-roles";
+import { query } from "@/lib/db";
 import { validateRequestSession } from "@/lib/session";
-
-const adminRoles = new Set(["super_admin", "admin_soporte", "finanzas", "operaciones_admin"]);
 
 function allowedAdminEmails() {
   return new Set(
@@ -13,7 +13,7 @@ function allowedAdminEmails() {
 }
 
 export function isAdminRole(role: string | null | undefined) {
-  return adminRoles.has(String(role || "").toLowerCase());
+  return normalizeAdminRole(role) !== null;
 }
 
 export function isAllowedAdminEmail(email: string | null | undefined) {
@@ -21,13 +21,34 @@ export function isAllowedAdminEmail(email: string | null | undefined) {
   return allowedEmails.size > 0 && allowedEmails.has(String(email || "").toLowerCase());
 }
 
+async function storedAdminRole(userId: string) {
+  try {
+    const adminUser = await query<{ role: string }>(
+      `SELECT role
+       FROM admin_users
+       WHERE user_id = $1
+         AND status = 'active'
+       LIMIT 1`,
+      [userId]
+    );
+    return normalizeAdminRole(adminUser.rows[0]?.role);
+  } catch {
+    return null;
+  }
+}
+
 export async function validateAdminSession(request: Request | NextRequest) {
   const session = await validateRequestSession(request);
   if (!session) return null;
 
-  if (isAdminRole(session.role) || isAllowedAdminEmail(session.userEmail)) {
-    return session;
-  }
+  const roleFromUser = normalizeAdminRole(session.role);
+  const roleFromAdminTable = await storedAdminRole(session.userId);
+  const adminRole: AdminRole | null =
+    roleFromAdminTable ||
+    roleFromUser ||
+    (isAllowedAdminEmail(session.userEmail) ? "super_admin" : null);
+
+  if (adminRole) return { ...session, adminRole, adminCapabilities: adminRoleCapabilities(adminRole) };
 
   return null;
 }

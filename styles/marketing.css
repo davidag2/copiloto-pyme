@@ -5444,17 +5444,65 @@ select:focus-visible {
   margin: 8px 0;
 }
 
+.admin-session-card em {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+  margin-top: 14px;
+  padding: 8px 12px;
+}
+
 .admin-kpi-grid,
-.admin-module-grid {
+.admin-module-grid,
+.admin-role-grid {
   display: grid;
   gap: 18px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.admin-role-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .admin-kpi-grid article,
 .admin-module-grid article,
+.admin-role-grid article,
 .admin-next-step {
   padding: 24px;
+}
+
+.admin-role-grid article {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 22px;
+}
+
+.admin-role-grid article[data-active="true"] {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(34, 197, 94, 0.1));
+  border-color: rgba(37, 99, 235, 0.28);
+}
+
+.admin-role-grid strong {
+  color: #071a2d;
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.admin-role-grid p {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.admin-role-grid span {
+  color: var(--brand-blue);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .admin-kpi-grid small,
@@ -5503,7 +5551,8 @@ select:focus-visible {
 
   .admin-sidebar nav,
   .admin-kpi-grid,
-  .admin-module-grid {
+  .admin-module-grid,
+  .admin-role-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -5526,7 +5575,8 @@ select:focus-visible {
 
   .admin-sidebar nav,
   .admin-kpi-grid,
-  .admin-module-grid {
+  .admin-module-grid,
+  .admin-role-grid {
     grid-template-columns: 1fr;
   }
 }
