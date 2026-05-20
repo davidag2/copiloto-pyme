@@ -5,6 +5,7 @@ export function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get(sessionCookieName)?.value;
 
   const isPrivateRoute =
+    request.nextUrl.pathname.startsWith("/admin") ||
     request.nextUrl.pathname.startsWith("/dashboard") ||
     request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/billing");
@@ -19,5 +20,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/billing/:path*"]
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/onboarding/:path*", "/billing/:path*"]
 };

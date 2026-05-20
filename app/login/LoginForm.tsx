@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 type LoginResponse = {
@@ -32,6 +33,7 @@ type LoginResponse = {
 };
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("Ingresa con el usuario de tu empresa.");
 
@@ -67,7 +69,8 @@ export function LoginForm() {
     setStatus("success");
     setMessage("Sesión iniciada. Abriendo tu espacio...");
     window.setTimeout(() => {
-      window.location.href = data.onboarding?.status === "completed" ? "/dashboard" : "/onboarding";
+      const nextPath = searchParams.get("next");
+      window.location.href = nextPath && nextPath.startsWith("/") ? nextPath : data.onboarding?.status === "completed" ? "/dashboard" : "/onboarding";
     }, 600);
   }
 

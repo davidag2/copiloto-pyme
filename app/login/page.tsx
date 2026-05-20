@@ -1,4 +1,5 @@
 import { Footer } from "@/components/marketing/Footer";
+import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
 
 export default function LoginPage() {
@@ -10,7 +11,9 @@ export default function LoginPage() {
           <span>Acceso</span>
           <h1>Iniciar sesión</h1>
           <p>Entra al panel de Copiloto Pyme para revisar tus decisiones del día.</p>
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
           <a href="/register?plan=go">Crear una cuenta nueva</a>
         </section>
       </main>
