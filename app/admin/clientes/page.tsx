@@ -1,11 +1,12 @@
-import { Building2, CalendarDays, Mail, MapPin, ShieldCheck, Users } from "lucide-react";
+import { Building2, CalendarDays, Mail, MapPin, ShieldCheck, Trash2, Users } from "lucide-react";
 import { AdminNextStep, AdminShell } from "@/components/admin/AdminShell";
+import { AdminRestoreClientButton } from "@/components/admin/AdminRestoreClientButton";
 import { getAdminClients } from "@/lib/admin-clients";
 import { requireAdminPageSession } from "@/lib/admin-page";
 
 export default async function AdminClientsPage() {
   const adminSession = await requireAdminPageSession("/admin/clientes");
-  const { clients, summary } = await getAdminClients();
+  const { clients, deletedClients, summary } = await getAdminClients();
 
   return (
     <AdminShell
@@ -18,7 +19,7 @@ export default async function AdminClientsPage() {
         <article><small>Empresas registradas</small><strong>{summary.total}</strong><span>{summary.users} usuario(s) creados</span></article>
         <article><small>Pruebas gratis</small><strong>{summary.trial}</strong><span>Primer mes incluido</span></article>
         <article><small>Clientes activos</small><strong>{summary.active}</strong><span>Con suscripción vigente</span></article>
-        <article><small>Pago pendiente</small><strong>{summary.pastDue}</strong><span>Requieren seguimiento</span></article>
+        <article><small>Borrados</small><strong>{summary.deleted}</strong><span>Restaurables desde papelera</span></article>
       </section>
 
       <section className="admin-table-card">
@@ -47,6 +48,32 @@ export default async function AdminClientsPage() {
         </div>
       </section>
 
+      <section className="admin-table-card">
+        <header>
+          <div>
+            <span><Trash2 size={18} /> Clientes borrados</span>
+            <h2>Papelera restaurable</h2>
+          </div>
+          <a href="/admin/clientes">Actualizar</a>
+        </header>
+        <div className="admin-client-list">
+          {deletedClients.length ? deletedClients.map((client) => (
+            <article key={`${client.id}-deleted`}>
+              <i><Trash2 size={18} /></i>
+              <div>
+                <strong>{client.name}</strong>
+                <small>Eliminado: {client.deletedLabel} · {client.deletionReason || "Sin motivo"}</small>
+                <small><Mail size={14} /> {client.ownerEmail || "Sin email principal"}</small>
+              </div>
+              <span data-status="Cancelado">Borrado</span>
+              <AdminRestoreClientButton companyId={client.id} />
+            </article>
+          )) : (
+            <p className="admin-empty-note">No hay clientes borrados.</p>
+          )}
+        </div>
+      </section>
+
       <section className="admin-module-grid admin-client-insights">
         {clients.slice(0, 4).map((client) => (
           <article key={`${client.id}-insight`}>
@@ -69,7 +96,7 @@ export default async function AdminClientsPage() {
 
       <AdminNextStep>
         <strong>Siguiente paso</strong>
-        <p>Crear ficha individual de cliente para ver usuarios, pagos, facturas SIIGO, historial de soporte y estado de acceso.</p>
+        <p>Conectar recordatorios a email/WhatsApp real y convertir el reenvío de link de pago en integración directa con la pasarela activa.</p>
       </AdminNextStep>
     </AdminShell>
   );

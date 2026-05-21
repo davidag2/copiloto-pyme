@@ -11,12 +11,16 @@ type SubscriptionRow = {
 
 export type SubscriptionAccess = {
   allowed: boolean;
-  reason: "trial_active" | "subscription_active" | "trial_expired" | "subscription_expired" | "past_due" | "canceled" | "missing_subscription";
+  reason: "trial_active" | "subscription_active" | "trial_expired" | "subscription_expired" | "past_due" | "canceled" | "missing_subscription" | "access_blocked" | "company_deleted";
   redirectTo?: string;
   subscription?: SubscriptionRow;
 };
 
 export async function getSubscriptionAccess(companyId: string): Promise<SubscriptionAccess> {
+  const companyAccess = await getCompanyAccessState(companyId);
+  if (companyAccess === "deleted") return block("company_deleted");
+  if (companyAccess === "blocked") return block("access_blocked");
+
   const result = await query<SubscriptionRow>(
     `SELECT id,
             company_id AS "companyId",
@@ -54,6 +58,25 @@ export async function getSubscriptionAccess(companyId: string): Promise<Subscrip
 
   if (subscription.status === "canceled") return block("canceled", subscription);
   return block("past_due", subscription);
+}
+
+async function getCompanyAccessState(companyId: string) {
+  try {
+    const company = await query<{ deletedAt: string | null; accessBlockedAt: string | null }>(
+      `SELECT deleted_at AS "deletedAt",
+              access_blocked_at AS "accessBlockedAt"
+       FROM companies
+       WHERE id = $1
+       LIMIT 1`,
+      [companyId]
+    );
+    if (company.rows[0]?.deletedAt) return "deleted";
+    if (company.rows[0]?.accessBlockedAt) return "blocked";
+  } catch {
+    return "active";
+  }
+
+  return "active";
 }
 
 function block(reason: SubscriptionAccess["reason"], subscription?: SubscriptionRow): SubscriptionAccess {

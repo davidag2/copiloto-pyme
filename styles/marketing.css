@@ -6100,6 +6100,125 @@ select:focus-visible {
   margin: 8px 0;
 }
 
+.admin-actions-card {
+  position: relative;
+}
+
+.admin-actions-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-actions-grid form {
+  background: rgba(248, 250, 252, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.admin-actions-grid label {
+  color: var(--muted);
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.admin-actions-grid select {
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 12px;
+  color: #071a2d;
+  font-weight: 900;
+  padding: 10px 12px;
+}
+
+.admin-actions-grid button,
+.admin-restore-client button {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-weight: 950;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px 14px;
+}
+
+.admin-actions-grid button:disabled,
+.admin-restore-client button:disabled {
+  cursor: wait;
+  opacity: 0.64;
+}
+
+.admin-danger-action {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.22) !important;
+  color: var(--red) !important;
+}
+
+.admin-action-message {
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 999px;
+  color: var(--green);
+  padding: 9px 12px;
+}
+
+.admin-confirm-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.36);
+  border-radius: 28px;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 90;
+}
+
+.admin-confirm-modal {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 24px;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.22);
+  max-width: 460px;
+  padding: 24px;
+  width: 100%;
+}
+
+.admin-confirm-modal strong {
+  color: #071a2d;
+  display: block;
+  font-size: 1.25rem;
+}
+
+.admin-confirm-modal p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.admin-confirm-modal div {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.admin-restore-client {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+}
+
+.admin-restore-client small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .admin-client-list span[data-status="Pagado"],
 .admin-client-list span[data-status="Aceptada"],
 .admin-client-list span[data-status="Conectado"],
@@ -6112,6 +6231,7 @@ select:focus-visible {
 .admin-client-list span[data-status="Fallido"],
 .admin-client-list span[data-status="Expirado"],
 .admin-client-list span[data-status="Abierta"],
+.admin-client-list span[data-status="Bloqueado"],
 .admin-client-list span[data-status="danger"] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--red);
@@ -6216,6 +6336,7 @@ select:focus-visible {
   .admin-sidebar nav,
   .admin-kpi-grid,
   .admin-dian-grid,
+  .admin-actions-grid,
   .admin-module-grid,
   .admin-role-grid,
   .admin-overview-grid,
@@ -6275,6 +6396,7 @@ select:focus-visible {
   .admin-table-card > header,
   .admin-client-list article,
   .admin-dian-grid,
+  .admin-actions-grid,
   .admin-access-row,
   .admin-invoice-row,
   .admin-log-list article {

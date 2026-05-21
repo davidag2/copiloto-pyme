@@ -14,6 +14,13 @@ CREATE TABLE IF NOT EXISTS companies (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS access_blocked_at TIMESTAMPTZ;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS access_blocked_by UUID REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS access_block_reason TEXT;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS deleted_by UUID REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS deletion_reason TEXT;
+
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
@@ -192,6 +199,28 @@ CREATE TABLE IF NOT EXISTS siigo_invoice_logs (
   request_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
   response_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
   error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_cases (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  opened_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  priority TEXT NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS admin_client_actions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  admin_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  channel TEXT,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -624,6 +653,10 @@ CREATE INDEX IF NOT EXISTS idx_billing_profiles_company ON billing_profiles(comp
 CREATE INDEX IF NOT EXISTS idx_siigo_invoices_company_status ON siigo_invoices(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_siigo_invoice_logs_invoice_time ON siigo_invoice_logs(siigo_invoice_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_siigo_invoice_logs_company_status ON siigo_invoice_logs(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_companies_deleted_at ON companies(deleted_at, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_companies_access_blocked ON companies(access_blocked_at, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_support_cases_company_status ON support_cases(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_client_actions_company_time ON admin_client_actions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);

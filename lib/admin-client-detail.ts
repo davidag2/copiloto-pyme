@@ -36,7 +36,7 @@ function statusLabel(status: string | null | undefined) {
 }
 
 export async function getAdminClientDetail(companyId: string) {
-  const [company, users, subscription, payments, invoices, integrations, activity, alerts] = await Promise.all([
+  const [company, users, subscription, payments, invoices, integrations, activity, alerts, supportCases, adminActions] = await Promise.all([
     query<{
       id: string;
       name: string;
@@ -47,6 +47,10 @@ export async function getAdminClientDetail(companyId: string) {
       monthlyGoal: string;
       minimumStock: number;
       dataSource: string;
+      accessBlockedAt: string | null;
+      accessBlockReason: string | null;
+      deletedAt: string | null;
+      deletionReason: string | null;
       createdAt: string;
     }>(
       `SELECT id,
@@ -58,6 +62,10 @@ export async function getAdminClientDetail(companyId: string) {
               monthly_goal AS "monthlyGoal",
               minimum_stock AS "minimumStock",
               data_source AS "dataSource",
+              access_blocked_at AS "accessBlockedAt",
+              access_block_reason AS "accessBlockReason",
+              deleted_at AS "deletedAt",
+              deletion_reason AS "deletionReason",
               created_at AS "createdAt"
        FROM companies
        WHERE id = $1
@@ -210,6 +218,44 @@ export async function getAdminClientDetail(companyId: string) {
               created_at AS "createdAt"
        FROM alerts
        WHERE company_id = $1
+      ORDER BY created_at DESC
+      LIMIT 10`,
+      [companyId]
+    ),
+    query<{
+      id: string;
+      title: string;
+      description: string;
+      priority: string;
+      status: string;
+      createdAt: string;
+    }>(
+      `SELECT id,
+              title,
+              description,
+              priority,
+              status,
+              created_at AS "createdAt"
+       FROM support_cases
+       WHERE company_id = $1
+       ORDER BY created_at DESC
+       LIMIT 10`,
+      [companyId]
+    ),
+    query<{
+      id: string;
+      action: string;
+      channel: string | null;
+      metadata: Record<string, unknown>;
+      createdAt: string;
+    }>(
+      `SELECT id,
+              action,
+              channel,
+              metadata,
+              created_at AS "createdAt"
+       FROM admin_client_actions
+       WHERE company_id = $1
        ORDER BY created_at DESC
        LIMIT 10`,
       [companyId]
@@ -223,13 +269,17 @@ export async function getAdminClientDetail(companyId: string) {
     alerts: alerts.rows.map((alert) => ({ ...alert, createdLabel: toDateLabel(alert.createdAt), statusLabel: statusLabel(alert.status) })),
     company: {
       ...detail,
+      accessBlockedLabel: toDateLabel(detail.accessBlockedAt),
       createdLabel: toDateLabel(detail.createdAt),
+      deletedLabel: toDateLabel(detail.deletedAt),
       monthlyGoal: toNumber(detail.monthlyGoal)
     },
     activity: activity.rows.map((event) => ({ ...event, occurredLabel: toDateLabel(event.occurredAt) })),
     integrations: integrations.rows.map((integration) => ({ ...integration, lastSyncLabel: toDateLabel(integration.lastSyncAt), statusLabel: statusLabel(integration.status) })),
     invoices: invoices.rows.map((invoice) => ({ ...invoice, createdLabel: toDateLabel(invoice.createdAt), statusLabel: statusLabel(invoice.status) })),
     payments: payments.rows.map((payment) => ({ ...payment, amountCop: toNumber(payment.amountCop), createdLabel: toDateLabel(payment.createdAt), paidLabel: toDateLabel(payment.paidAt), statusLabel: statusLabel(payment.status) })),
+    supportCases: supportCases.rows.map((supportCase) => ({ ...supportCase, createdLabel: toDateLabel(supportCase.createdAt), statusLabel: statusLabel(supportCase.status) })),
+    adminActions: adminActions.rows.map((action) => ({ ...action, createdLabel: toDateLabel(action.createdAt) })),
     subscription: subscription.rows[0] ? {
       ...subscription.rows[0],
       priceCop: toNumber(subscription.rows[0].priceCop),
