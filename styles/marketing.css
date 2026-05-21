@@ -5722,7 +5722,8 @@ select:focus-visible {
 }
 
 .admin-client-list span[data-status="Cancelado"],
-.admin-client-list span[data-status="Sin suscripción"] {
+.admin-client-list span[data-status="Sin suscripción"],
+.admin-client-list span[data-status="disabled"] {
   background: rgba(100, 116, 139, 0.12);
   color: #64748b;
 }
@@ -5731,6 +5732,58 @@ select:focus-visible {
   align-items: center;
   display: flex;
   gap: 6px;
+}
+
+.admin-detail-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-detail-grid article {
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.admin-detail-grid small,
+.admin-detail-grid span {
+  color: var(--muted);
+  display: block;
+  font-weight: 800;
+}
+
+.admin-detail-grid strong {
+  color: #071a2d;
+  display: block;
+  font-size: 1.25rem;
+  margin: 8px 0;
+}
+
+.admin-client-list span[data-status="Pagado"],
+.admin-client-list span[data-status="Aceptada"],
+.admin-client-list span[data-status="Conectado"],
+.admin-client-list span[data-status="Resuelta"],
+.admin-client-list span[data-status="success"] {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.admin-client-list span[data-status="Fallido"],
+.admin-client-list span[data-status="Expirado"],
+.admin-client-list span[data-status="Abierta"],
+.admin-client-list span[data-status="danger"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.admin-client-list span[data-status="Pendiente"],
+.admin-client-list span[data-status="Configurar"],
+.admin-client-list span[data-status="Link creado"],
+.admin-client-list span[data-status="warning"] {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
 }
 
 .admin-empty-note {
@@ -5825,7 +5878,8 @@ select:focus-visible {
   .admin-kpi-grid,
   .admin-module-grid,
   .admin-role-grid,
-  .admin-overview-grid {
+  .admin-overview-grid,
+  .admin-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -5856,7 +5910,8 @@ select:focus-visible {
   .admin-kpi-grid,
   .admin-module-grid,
   .admin-role-grid,
-  .admin-overview-grid {
+  .admin-overview-grid,
+  .admin-detail-grid {
     grid-template-columns: 1fr;
   }
 }

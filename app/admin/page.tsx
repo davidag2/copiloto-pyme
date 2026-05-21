@@ -115,7 +115,7 @@ export default async function AdminPage() {
                   <span data-status={company.subscriptionStatus === "past_due" ? "Pago pendiente" : "Activo"}>
                     {company.subscriptionStatus || "Sin suscripcion"}
                   </span>
-                  <a href={`/admin/clientes?empresa=${company.id}`}>Ver ficha</a>
+                  <a href={`/admin/clientes/${company.id}`}>Ver ficha</a>
                 </article>
               )) : (
                 <p className="admin-empty-note">Aun no hay empresas registradas.</p>

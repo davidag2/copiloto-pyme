@@ -62,6 +62,7 @@ export async function getAdminPayments() {
     ),
     query<{
       id: string;
+      companyId: string;
       companyName: string;
       planName: string;
       priceCop: string;
@@ -71,6 +72,7 @@ export async function getAdminPayments() {
       createdAt: string;
     }>(
       `SELECT subscriptions.id,
+              companies.id AS "companyId",
               companies.name AS "companyName",
               plans.name AS "planName",
               plans.price_cop::text AS "priceCop",

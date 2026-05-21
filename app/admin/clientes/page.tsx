@@ -39,7 +39,7 @@ export default async function AdminClientsPage() {
                 <small><Mail size={14} /> {client.ownerEmail || "Sin email principal"}</small>
               </div>
               <span data-status={client.statusLabel}>{client.statusLabel}</span>
-              <a href={`/admin/clientes?empresa=${client.id}`}>Ver ficha</a>
+              <a href={`/admin/clientes/${client.id}`}>Ver ficha</a>
             </article>
           )) : (
             <p className="admin-empty-note">Aún no hay empresas registradas.</p>

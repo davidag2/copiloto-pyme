@@ -87,7 +87,7 @@ export default async function AdminPaymentsPage() {
                 <small>Alta: {subscription.createdLabel} · Renovación/prueba: {subscription.renewalLabel}</small>
               </div>
               <span data-status={subscription.statusLabel}>{subscription.statusLabel}</span>
-              <a href={`/admin/clientes?empresa=${subscription.id}`}>Ver cliente</a>
+              <a href={`/admin/clientes/${subscription.companyId}`}>Ver cliente</a>
             </article>
           )) : (
             <p className="admin-empty-note">Aún no hay suscripciones registradas.</p>
