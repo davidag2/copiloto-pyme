@@ -5711,6 +5711,137 @@ select:focus-visible {
   padding: 8px 12px;
 }
 
+.admin-access-table {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-access-header,
+.admin-access-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns:
+    minmax(180px, 1.4fr)
+    minmax(110px, 0.75fr)
+    minmax(138px, 0.95fr)
+    minmax(118px, 0.8fr)
+    minmax(150px, 1fr)
+    minmax(128px, 0.82fr)
+    minmax(190px, 1.25fr);
+}
+
+.admin-access-header {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  padding: 0 14px;
+  text-transform: uppercase;
+}
+
+.admin-access-row {
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  padding: 14px;
+}
+
+.admin-access-row[data-blocked="true"] {
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.74), rgba(255, 255, 255, 0.9));
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.admin-access-row strong,
+.admin-access-row small {
+  display: block;
+}
+
+.admin-access-row strong {
+  color: #071a2d;
+  font-weight: 950;
+}
+
+.admin-access-row small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.admin-access-company {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-access-company i {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 14px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-style: normal;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.admin-access-row > span {
+  align-items: center;
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 999px;
+  color: var(--green);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 950;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.admin-access-row > span[data-status="Prueba activa"],
+.admin-access-row > span[data-status="Activo"],
+.admin-access-row > span[data-status="Habilitado"] {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.admin-access-row > span[data-status="Prueba vencida"],
+.admin-access-row > span[data-status="Suscripción vencida"],
+.admin-access-row > span[data-status="Pago vencido"],
+.admin-access-row > span[data-status="Bloqueado"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.admin-access-row > span[data-status="Cancelado"],
+.admin-access-row > span[data-status="Sin suscripción"] {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+.admin-access-row > div:last-child {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.admin-access-row > div:last-child a {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 12px;
+  color: var(--brand-blue);
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 950;
+  padding: 8px 10px;
+}
+
 .admin-client-list span[data-status="Pago pendiente"] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--red);
@@ -5882,6 +6013,32 @@ select:focus-visible {
   .admin-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-access-header {
+    display: none;
+  }
+
+  .admin-access-row {
+    align-items: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-access-row > *::before {
+    color: var(--muted);
+    content: attr(data-label);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 950;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .admin-access-row > span::before {
+    color: inherit;
+    content: "";
+    display: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -5896,9 +6053,15 @@ select:focus-visible {
   }
 
   .admin-table-card > header,
-  .admin-client-list article {
+  .admin-client-list article,
+  .admin-access-row {
     align-items: flex-start;
     grid-template-columns: 1fr;
+  }
+
+  .admin-access-row > div:last-child {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .admin-session-card {
