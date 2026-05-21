@@ -49,6 +49,7 @@ export async function POST(request: Request) {
 
     if (!profile || !hasCompleteBillingProfile(profile)) {
       const invoice = await upsertInvoice(payment.id, session.companyId, "billing_profile_required", {}, {}, "Faltan datos fiscales del cliente.");
+      await logSiigoInvoiceAttempt(invoice.id, session.companyId, payment.id, "skipped", "billing_profile_required", {}, {}, "Faltan datos fiscales del cliente.", true);
       return ok({ invoice, ready: false, message: "Faltan datos fiscales para enviar la factura a SIIGO." }, 202);
     }
 
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
     if (!config) {
       const payloadPreview = buildSiigoInvoicePayload(getPreviewConfig(), profile, payment);
       const invoice = await upsertInvoice(payment.id, session.companyId, "configuration_required", payloadPreview, {}, "Faltan credenciales o IDs de SIIGO.");
+      await logSiigoInvoiceAttempt(invoice.id, session.companyId, payment.id, "skipped", "configuration_required", payloadPreview, {}, "Faltan credenciales o IDs de SIIGO.", true);
       return ok({ invoice, ready: false, payloadPreview, message: "Factura preparada, pero faltan credenciales o IDs de SIIGO." }, 202);
     }
 
@@ -63,10 +65,20 @@ export async function POST(request: Request) {
 
     if (payment.status !== "paid" && body.force !== true) {
       const invoice = await upsertInvoice(payment.id, session.companyId, "waiting_payment", payload, {}, "La factura se enviará cuando la pasarela confirme el pago.");
+      await logSiigoInvoiceAttempt(invoice.id, session.companyId, payment.id, "skipped", "waiting_payment", payload, {}, "La factura se enviará cuando la pasarela confirme el pago.", false);
       return ok({ invoice, ready: false, payloadPreview: payload, message: "Factura preparada. Se enviará a SIIGO cuando el pago esté confirmado." }, 202);
     }
 
-    const siigoResponse = await createSiigoInvoice(config, payload);
+    let siigoResponse;
+    try {
+      siigoResponse = await createSiigoInvoice(config, payload);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "SIIGO rechazó la creación de la factura.";
+      const invoice = await upsertInvoice(payment.id, session.companyId, "failed", payload, {}, message);
+      await logSiigoInvoiceAttempt(invoice.id, session.companyId, payment.id, "error", "create_invoice", payload, {}, message, true);
+      return fail(error, 400);
+    }
+
     const invoice = await upsertInvoice(
       payment.id,
       session.companyId,
@@ -79,6 +91,7 @@ export async function POST(request: Request) {
       siigoResponse?.number ? String(siigoResponse.number) : null,
       siigoResponse?.cufe || siigoResponse?.stamp?.cufe || null
     );
+    await logSiigoInvoiceAttempt(invoice.id, session.companyId, payment.id, "success", "create_invoice", payload, siigoResponse, null, false);
 
     return ok({ invoice, siigo: siigoResponse, message: "Factura enviada a SIIGO." }, 201);
   } catch (error) {
@@ -154,6 +167,60 @@ async function upsertInvoice(
   );
 
   return invoice.rows[0];
+}
+
+async function logSiigoInvoiceAttempt(
+  invoiceId: string,
+  companyId: string,
+  paymentId: string,
+  status: "success" | "error" | "skipped",
+  action: string,
+  requestPayload: unknown,
+  responsePayload: unknown,
+  errorMessage: string | null,
+  canRetry: boolean
+) {
+  try {
+    await query(
+      `INSERT INTO siigo_invoice_logs (
+         siigo_invoice_id,
+         company_id,
+         payment_transaction_id,
+         status,
+         action,
+         attempt_number,
+         can_retry,
+         request_payload,
+         response_payload,
+         error_message
+       )
+       VALUES (
+         $1,
+         $2,
+         $3,
+         $4,
+         $5,
+         COALESCE((SELECT MAX(attempt_number) + 1 FROM siigo_invoice_logs WHERE siigo_invoice_id = $1), 1),
+         $6,
+         $7::jsonb,
+         $8::jsonb,
+         $9
+       )`,
+      [
+        invoiceId,
+        companyId,
+        paymentId,
+        status,
+        action,
+        canRetry,
+        JSON.stringify(requestPayload || {}),
+        JSON.stringify(responsePayload || {}),
+        errorMessage
+      ]
+    );
+  } catch {
+    // La facturacion no debe fallar solo porque la tabla de auditoria aun no exista.
+  }
 }
 
 function getPreviewConfig() {

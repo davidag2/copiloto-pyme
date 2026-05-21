@@ -180,6 +180,21 @@ CREATE TABLE IF NOT EXISTS siigo_invoices (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS siigo_invoice_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  siigo_invoice_id UUID REFERENCES siigo_invoices(id) ON DELETE SET NULL,
+  company_id UUID REFERENCES companies(id) ON DELETE SET NULL,
+  payment_transaction_id UUID REFERENCES payment_transactions(id) ON DELETE SET NULL,
+  status TEXT NOT NULL CHECK (status IN ('success', 'error', 'skipped')),
+  action TEXT NOT NULL DEFAULT 'create_invoice',
+  attempt_number INTEGER NOT NULL DEFAULT 1,
+  can_retry BOOLEAN NOT NULL DEFAULT FALSE,
+  request_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  response_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_company_active
   ON subscriptions(company_id)
   WHERE status IN ('trial', 'active', 'past_due');
@@ -607,6 +622,8 @@ CREATE INDEX IF NOT EXISTS idx_payment_transactions_company_status ON payment_tr
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_provider_status ON payment_transactions(provider_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_billing_profiles_company ON billing_profiles(company_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_siigo_invoices_company_status ON siigo_invoices(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_siigo_invoice_logs_invoice_time ON siigo_invoice_logs(siigo_invoice_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_siigo_invoice_logs_company_status ON siigo_invoice_logs(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);
