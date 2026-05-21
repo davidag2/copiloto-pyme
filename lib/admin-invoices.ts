@@ -26,6 +26,20 @@ function invoiceStatusLabel(status: string | null | undefined) {
   return "Sin estado";
 }
 
+function dianValidationStatus(invoice: {
+  status: string;
+  responsePayload: Record<string, unknown> | null;
+}) {
+  const stamp = invoice.responsePayload?.stamp as Record<string, unknown> | undefined;
+  const stampStatus = typeof stamp?.status === "string" ? stamp.status : null;
+
+  if (stampStatus === "Accepted" || invoice.status === "accepted") return "Validada DIAN";
+  if (stampStatus === "Rejected" || invoice.status === "rejected") return "Rechazada DIAN";
+  if (invoice.status === "sent") return "En validación";
+  if (invoice.status === "failed") return "Falló validación";
+  return "Pendiente DIAN";
+}
+
 function logStatusLabel(status: string | null | undefined) {
   if (status === "success") return "Éxito";
   if (status === "error") return "Error";
@@ -100,6 +114,7 @@ export async function getAdminInvoices() {
       invoiceNumber: string | null;
       siigoCufe: string | null;
       errorMessage: string | null;
+      responsePayload: Record<string, unknown> | null;
       sentAt: string | null;
       acceptedAt: string | null;
       createdAt: string;
@@ -115,6 +130,7 @@ export async function getAdminInvoices() {
               COALESCE(siigo_invoices.siigo_invoice_number, siigo_invoices.siigo_invoice_name, siigo_invoices.siigo_invoice_id) AS "invoiceNumber",
               siigo_invoices.siigo_cufe AS "siigoCufe",
               siigo_invoices.error_message AS "errorMessage",
+              siigo_invoices.response_payload AS "responsePayload",
               siigo_invoices.sent_at AS "sentAt",
               siigo_invoices.accepted_at AS "acceptedAt",
               siigo_invoices.created_at AS "createdAt"
@@ -130,13 +146,28 @@ export async function getAdminInvoices() {
   ]);
 
   const summaryRow = summary.rows[0];
+  const failedOrRejected = toNumber(summaryRow?.failed) + toNumber(summaryRow?.rejected);
+  const accepted = toNumber(summaryRow?.accepted);
+  const sent = toNumber(summaryRow?.sent);
+  const lastKnownStatus = failedOrRejected > 0 ? "Degradado" : "Operativo";
+  const validationStatus = accepted > 0 ? "Validando facturas" : sent > 0 ? "En validación" : "Sin validaciones recientes";
 
   return {
+    dian: {
+      checkedAtLabel: new Intl.DateTimeFormat("es-CO", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      }).format(new Date()),
+      lastKnownStatus,
+      statusPageUrl: process.env.DIAN_STATUS_PAGE_URL || "https://www.dian.gov.co/",
+      validationStatus
+    },
     invoices: invoices.rows.map((invoice) => ({
       ...invoice,
       amountCop: toNumber(invoice.amountCop),
       customerName: invoice.customerName || invoice.companyName,
       dateLabel: toDateLabel(invoice.acceptedAt || invoice.sentAt || invoice.createdAt),
+      dianValidationStatus: dianValidationStatus(invoice),
       invoiceNumber: invoice.invoiceNumber || "Sin número",
       nit: invoice.nit || "Sin NIT",
       statusLabel: invoiceStatusLabel(invoice.status)

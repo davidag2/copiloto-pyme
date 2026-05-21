@@ -5949,6 +5949,67 @@ select:focus-visible {
   padding: 8px 10px;
 }
 
+.admin-dian-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-dian-grid article {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 18px 56px rgba(15, 23, 42, 0.07);
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+}
+
+.admin-dian-grid i {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 18px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-style: normal;
+  height: 52px;
+  justify-content: center;
+  width: 52px;
+}
+
+.admin-dian-grid article[data-status="Operativo"] i,
+.admin-dian-grid article[data-status="Validando facturas"] i {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.admin-dian-grid article[data-status="Degradado"] i,
+.admin-dian-grid article[data-status="Rechazadas"] i {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.admin-dian-grid small,
+.admin-dian-grid span,
+.admin-dian-grid a {
+  color: var(--muted);
+  display: block;
+  font-weight: 800;
+}
+
+.admin-dian-grid strong {
+  color: #071a2d;
+  display: block;
+  font-size: 1.35rem;
+  margin: 5px 0;
+}
+
+.admin-dian-grid a {
+  color: var(--brand-blue);
+}
+
 .admin-log-list {
   display: grid;
   gap: 12px;
@@ -6154,6 +6215,7 @@ select:focus-visible {
 
   .admin-sidebar nav,
   .admin-kpi-grid,
+  .admin-dian-grid,
   .admin-module-grid,
   .admin-role-grid,
   .admin-overview-grid,
@@ -6212,6 +6274,7 @@ select:focus-visible {
 
   .admin-table-card > header,
   .admin-client-list article,
+  .admin-dian-grid,
   .admin-access-row,
   .admin-invoice-row,
   .admin-log-list article {
