@@ -18,8 +18,8 @@ export default async function AdminSubscriptionsPage() {
       <section className="admin-kpi-grid" aria-label="Resumen de suscripciones">
         <article><small>MRR activo</small><strong>{formatAdminMoney(summary.mrr)}</strong><span>{summary.active} activas</span></article>
         <article><small>Mes gratis</small><strong>{summary.trial}</strong><span>En prueba de 30 días</span></article>
-        <article><small>Bloqueos</small><strong>{summary.pastDue}</strong><span>Acceso vencido por pago</span></article>
-        <article><small>Pagos pendientes</small><strong>{summary.pendingCount}</strong><span>{formatAdminMoney(summary.pendingAmount)}</span></article>
+        <article><small>Bloqueos</small><strong>{summary.pastDue}</strong><span>Acceso vencido por falta de pago</span></article>
+        <article><small>Planes controlados</small><strong>Go / Basic / Pro</strong><span>Cambios de plan auditables</span></article>
       </section>
 
       <section className="admin-table-card">

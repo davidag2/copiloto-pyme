@@ -1,4 +1,4 @@
-import { AlertTriangle, Building2, CreditCard, FileText, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, Building2, CreditCard, FileText, ShieldCheck, TimerReset, Users } from "lucide-react";
 import { AdminNextStep, AdminShell } from "@/components/admin/AdminShell";
 import { adminRoles } from "@/lib/admin-roles";
 import { requireAdminPageSession } from "@/lib/admin-page";
@@ -11,9 +11,14 @@ const adminModules = [
     icon: Building2
   },
   {
-    title: "Pagos y suscripciones",
-    description: "Pruebas gratis, pagos pendientes, renovaciones y bloqueos por vencimiento.",
+    title: "Pagos",
+    description: "Transacciones, pasarelas, conciliacion, pagos pendientes y fallidos.",
     icon: CreditCard
+  },
+  {
+    title: "Suscripciones",
+    description: "Planes Go, Basic y Pro, mes gratis, vencimientos y bloqueos por falta de pago.",
+    icon: TimerReset
   },
   {
     title: "Facturacion SIIGO",
@@ -154,7 +159,7 @@ export default async function AdminPage() {
 
         <AdminNextStep>
           <strong>Siguiente paso</strong>
-          <p>Conectar el modulo de clientes para ver empresas registradas, plan actual, estado de pago y fecha de alta.</p>
+          <p>Seguir separando operaciones: pagos para transacciones, suscripciones para acceso/planes, facturas para SIIGO y monitoreo para salud tecnica.</p>
         </AdminNextStep>
     </AdminShell>
   );
