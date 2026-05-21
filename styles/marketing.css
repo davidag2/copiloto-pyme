@@ -5721,6 +5721,18 @@ select:focus-visible {
   color: var(--brand-blue);
 }
 
+.admin-client-list span[data-status="Cancelado"],
+.admin-client-list span[data-status="Sin suscripción"] {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+.admin-client-insights p {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
 .admin-empty-note {
   color: var(--muted);
   font-weight: 800;
