@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Ban, LifeBuoy, Link2, Mail, RefreshCw, Send, Trash2, Undo2, UnlockKeyhole } from "lucide-react";
+import { Ban, Clock3, FileText, LifeBuoy, Link2, Mail, ReceiptText, RefreshCw, Send, ShieldCheck, Trash2, Undo2, UnlockKeyhole, UserRoundCheck } from "lucide-react";
 
 type AdminClientActionsProps = {
   companyId: string;
@@ -16,11 +16,13 @@ type PendingAction = {
   title: string;
   body: string;
   danger?: boolean;
+  payload?: Record<string, unknown>;
 };
 
 export function AdminClientActions({ companyId, currentPlan, isBlocked, isDeleted }: AdminClientActionsProps) {
   const router = useRouter();
   const [planId, setPlanId] = useState(currentPlan || "go");
+  const [trialDays, setTrialDays] = useState("30");
   const [message, setMessage] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -35,6 +37,12 @@ export function AdminClientActions({ companyId, currentPlan, isBlocked, isDelete
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo completar la acción.");
     setMessage(data.message || "Acción completada.");
+
+    if (data.redirectTo) {
+      window.location.assign(data.redirectTo);
+      return;
+    }
+
     router.refresh();
   }
 
@@ -77,12 +85,33 @@ export function AdminClientActions({ companyId, currentPlan, isBlocked, isDelete
               <option value="pro">Pro</option>
             </select>
           </label>
-          <button type="submit" disabled={isPending || isDeleted}>Aplicar plan</button>
+          <button type="submit" disabled={isPending || isDeleted}><ShieldCheck size={18} /> Aplicar plan</button>
+        </form>
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit("extend_trial", { days: Number(trialDays) || 30 });
+          }}
+        >
+          <label>
+            Extender prueba
+            <select value={trialDays} onChange={(event) => setTrialDays(event.target.value)} disabled={isPending || isDeleted}>
+              <option value="7">7 días</option>
+              <option value="15">15 días</option>
+              <option value="30">30 días</option>
+              <option value="60">60 días</option>
+              <option value="90">90 días</option>
+            </select>
+          </label>
+          <button type="submit" disabled={isPending || isDeleted}><Clock3 size={18} /> Extender</button>
         </form>
 
         <button type="button" onClick={() => submit("resend_payment_link")} disabled={isPending || isDeleted}><Link2 size={18} /> Reenviar link de pago</button>
-        <button type="button" onClick={() => submit("send_payment_reminder_email")} disabled={isPending || isDeleted}><Mail size={18} /> Recordatorio por email</button>
-        <button type="button" onClick={() => submit("send_payment_reminder_whatsapp")} disabled={isPending || isDeleted}><Send size={18} /> Recordatorio por WhatsApp</button>
+        <button type="button" onClick={() => submit("send_payment_reminder_email")} disabled={isPending || isDeleted}><Mail size={18} /> Recordatorio email</button>
+        <button type="button" onClick={() => submit("send_payment_reminder_whatsapp")} disabled={isPending || isDeleted}><Send size={18} /> Recordatorio WhatsApp</button>
+        <button type="button" onClick={() => submit("resend_invoice")} disabled={isPending || isDeleted}><FileText size={18} /> Reenviar factura</button>
+        <button type="button" onClick={() => confirm({ action: "mark_manual_payment", title: "Marcar pago manual", body: "Se registrará un pago manual por el valor del plan actual, se activará la suscripción por un mes y se auditará la acción." })} disabled={isPending || isDeleted}><ReceiptText size={18} /> Marcar pago manual</button>
         <button type="button" onClick={() => submit("open_support_case", { title: "Caso operativo del cliente", priority: "normal" })} disabled={isPending || isDeleted}><LifeBuoy size={18} /> Abrir caso soporte</button>
 
         {isBlocked ? (
@@ -90,6 +119,14 @@ export function AdminClientActions({ companyId, currentPlan, isBlocked, isDelete
         ) : (
           <button type="button" onClick={() => confirm({ action: "block_access", title: "Bloquear acceso", body: "El cliente no podrá entrar al dashboard hasta que sea desbloqueado." })} disabled={isPending || isDeleted}><Ban size={18} /> Bloquear acceso</button>
         )}
+
+        <button
+          type="button"
+          onClick={() => confirm({ action: "impersonate_client", title: "Impersonar cliente", body: "Entrarás al dashboard como el usuario propietario del cliente. La acción quedará registrada en auditoría." })}
+          disabled={isPending || isDeleted}
+        >
+          <UserRoundCheck size={18} /> Impersonar cliente
+        </button>
 
         {isDeleted ? (
           <button type="button" onClick={() => submit("restore_client")} disabled={isPending}><Undo2 size={18} /> Restaurar cliente</button>
@@ -117,8 +154,9 @@ export function AdminClientActions({ companyId, currentPlan, isBlocked, isDelete
                 type="button"
                 onClick={() => {
                   const action = pendingAction.action;
+                  const payload = pendingAction.payload || {};
                   setPendingAction(null);
-                  submit(action);
+                  submit(action, payload);
                 }}
               >
                 Sí
