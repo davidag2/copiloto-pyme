@@ -6272,6 +6272,62 @@ select:focus-visible {
   background: linear-gradient(90deg, var(--green), #2563eb);
 }
 
+.admin-search-form {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-search-form label {
+  color: #071a2d;
+  font-weight: 950;
+}
+
+.admin-search-form > div {
+  align-items: center;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 20px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 10px 10px 10px 16px;
+}
+
+.admin-search-form svg {
+  color: var(--brand-blue);
+}
+
+.admin-search-form input {
+  background: transparent;
+  border: 0;
+  color: #071a2d;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  min-width: 0;
+  outline: 0;
+}
+
+.admin-search-form input::placeholder {
+  color: rgba(100, 116, 139, 0.82);
+}
+
+.admin-search-form button {
+  background: var(--brand-blue);
+  border: 0;
+  border-radius: 15px;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  padding: 13px 18px;
+}
+
+.admin-search-form small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .admin-client-list span[data-status="Pago pendiente"] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--red);
@@ -6631,6 +6687,10 @@ select:focus-visible {
 
   .admin-saas-bars b {
     text-align: left;
+  }
+
+  .admin-search-form > div {
+    grid-template-columns: 1fr;
   }
 
   .admin-access-row > div:last-child,
