@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Activity, AlertTriangle, BellRing, Building2, CreditCard, FileText, Gauge, Headphones, ShieldCheck, TimerReset } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, BellRing, Building2, CreditCard, FileText, Gauge, Headphones, ShieldCheck, TimerReset } from "lucide-react";
 import { adminRoleLabel } from "@/lib/admin-roles";
 import type { AdminRole } from "@/lib/admin-roles";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
@@ -11,7 +11,7 @@ type AdminSession = {
 };
 
 type AdminShellProps = {
-  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "facturas" | "soporte" | "actividad" | "alertas-sistema" | "monitoreo";
+  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "metricas" | "facturas" | "soporte" | "actividad" | "alertas-sistema" | "monitoreo";
   children: ReactNode;
   description: string;
   session: AdminSession;
@@ -23,6 +23,7 @@ const navItems = [
   { id: "clientes", href: "/admin/clientes", label: "Clientes", icon: Building2 },
   { id: "pagos", href: "/admin/pagos", label: "Pagos", icon: CreditCard },
   { id: "suscripciones", href: "/admin/suscripciones", label: "Suscripciones", icon: TimerReset },
+  { id: "metricas", href: "/admin/metricas", label: "Métricas SaaS", icon: BarChart3 },
   { id: "facturas", href: "/admin/facturas", label: "Facturas", icon: FileText },
   { id: "soporte", href: "/admin/soporte", label: "Soporte", icon: Headphones },
   { id: "actividad", href: "/admin/actividad", label: "Actividad", icon: Activity },

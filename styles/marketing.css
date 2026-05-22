@@ -6216,6 +6216,62 @@ select:focus-visible {
   text-align: center;
 }
 
+.admin-saas-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-saas-bars article {
+  align-items: center;
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(120px, 1fr) minmax(120px, 1fr) auto;
+  padding: 16px;
+}
+
+.admin-saas-bars strong,
+.admin-saas-bars small {
+  display: block;
+}
+
+.admin-saas-bars small {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.admin-saas-bars b {
+  color: #071a2d;
+  font-size: 0.92rem;
+  text-align: right;
+}
+
+.admin-saas-meter {
+  background: rgba(37, 99, 235, 0.08);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.admin-saas-meter span {
+  background: linear-gradient(90deg, var(--brand-blue), #7c3aed);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.admin-saas-meter-alt {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.admin-saas-meter-alt span {
+  background: linear-gradient(90deg, var(--green), #2563eb);
+}
+
 .admin-client-list span[data-status="Pago pendiente"] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--red);
@@ -6567,9 +6623,14 @@ select:focus-visible {
   .admin-invoice-row,
   .admin-log-list article,
   .admin-support-list article,
-  .admin-activity-timeline article {
+  .admin-activity-timeline article,
+  .admin-saas-bars article {
     align-items: flex-start;
     grid-template-columns: 1fr;
+  }
+
+  .admin-saas-bars b {
+    text-align: left;
   }
 
   .admin-access-row > div:last-child,
