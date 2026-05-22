@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Activity, AlertTriangle, Building2, CreditCard, FileText, Gauge, ShieldCheck, TimerReset } from "lucide-react";
+import { Activity, AlertTriangle, Building2, CreditCard, FileText, Gauge, Headphones, ShieldCheck, TimerReset } from "lucide-react";
 import { adminRoleLabel } from "@/lib/admin-roles";
 import type { AdminRole } from "@/lib/admin-roles";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
@@ -11,7 +11,7 @@ type AdminSession = {
 };
 
 type AdminShellProps = {
-  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "facturas" | "monitoreo";
+  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "facturas" | "soporte" | "monitoreo";
   children: ReactNode;
   description: string;
   session: AdminSession;
@@ -24,6 +24,7 @@ const navItems = [
   { id: "pagos", href: "/admin/pagos", label: "Pagos", icon: CreditCard },
   { id: "suscripciones", href: "/admin/suscripciones", label: "Suscripciones", icon: TimerReset },
   { id: "facturas", href: "/admin/facturas", label: "Facturas", icon: FileText },
+  { id: "soporte", href: "/admin/soporte", label: "Soporte", icon: Headphones },
   { id: "monitoreo", href: "/admin/monitoreo", label: "Monitoreo", icon: AlertTriangle }
 ] as const;
 

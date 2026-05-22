@@ -6050,6 +6050,87 @@ select:focus-visible {
   margin-top: 4px;
 }
 
+.admin-support-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-support-list article {
+  align-items: center;
+  background: rgba(248, 250, 252, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  padding: 16px;
+}
+
+.admin-support-list i {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 16px;
+  color: var(--brand-blue);
+  display: inline-flex;
+  font-style: normal;
+  height: 46px;
+  justify-content: center;
+  width: 46px;
+}
+
+.admin-support-list strong,
+.admin-support-list small {
+  display: block;
+}
+
+.admin-support-list small {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.admin-support-list span {
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 999px;
+  color: var(--brand-blue);
+  font-size: 0.82rem;
+  font-weight: 950;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.admin-support-list span[data-status="Urgente"],
+.admin-support-list span[data-status="Alta"],
+.admin-support-list span[data-status="Error"],
+.admin-support-list span[data-status="Abierto"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red);
+}
+
+.admin-support-list span[data-status="En progreso"],
+.admin-support-list span[data-status="Normal"],
+.admin-support-list span[data-status="Pendiente"] {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.admin-support-list span[data-status="Resuelto"],
+.admin-support-list span[data-status="Cerrado"],
+.admin-support-list span[data-status="Baja"] {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.admin-support-list a {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  color: var(--brand-blue);
+  font-weight: 950;
+  padding: 11px 14px;
+}
+
 .admin-client-list span[data-status="Pago pendiente"] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--red);
@@ -6399,7 +6480,8 @@ select:focus-visible {
   .admin-actions-grid,
   .admin-access-row,
   .admin-invoice-row,
-  .admin-log-list article {
+  .admin-log-list article,
+  .admin-support-list article {
     align-items: flex-start;
     grid-template-columns: 1fr;
   }
