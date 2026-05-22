@@ -10,6 +10,13 @@ type RouteContext = {
 
 const validPlans = new Set(["go", "basic", "pro"]);
 
+type AuditContext = {
+  ipAddress: string | null;
+  requestMethod: string;
+  requestPath: string;
+  userAgent: string | null;
+};
+
 export async function POST(request: Request, context: RouteContext) {
   try {
     const adminSession = await validateAdminSession(request);
@@ -149,7 +156,7 @@ export async function POST(request: Request, context: RouteContext) {
       throw new Error("Acción no soportada.");
     }
 
-    await logAction(companyId, adminSession.userId, action, channel, metadata);
+    await logAction(companyId, adminSession.userId, action, channel, metadata, auditContext(request));
 
     const response = ok({ message, redirectTo });
     if (impersonationCookie) {
@@ -368,10 +375,68 @@ async function unblockCompany(companyId: string) {
   );
 }
 
-async function logAction(companyId: string, adminUserId: string, action: string, channel: string | null, metadata: Record<string, unknown>) {
-  await query(
-    `INSERT INTO admin_client_actions (company_id, admin_user_id, action, channel, metadata)
-     VALUES ($1, $2, $3, $4, $5::jsonb)`,
-    [companyId, adminUserId, action, channel, JSON.stringify(metadata)]
-  );
+function auditContext(request: Request): AuditContext {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  const vercelForwardedFor = request.headers.get("x-vercel-forwarded-for");
+  const ipAddress = (vercelForwardedFor || forwardedFor || realIp || "")
+    .split(",")[0]
+    .trim() || null;
+  const url = new URL(request.url);
+
+  return {
+    ipAddress,
+    requestMethod: request.method,
+    requestPath: url.pathname,
+    userAgent: request.headers.get("user-agent")
+  };
+}
+
+async function logAction(
+  companyId: string,
+  adminUserId: string,
+  action: string,
+  channel: string | null,
+  metadata: Record<string, unknown>,
+  audit: AuditContext
+) {
+  try {
+    await query(
+      `INSERT INTO admin_client_actions (
+         company_id,
+         admin_user_id,
+         action,
+         channel,
+         ip_address,
+         user_agent,
+         request_path,
+         request_method,
+         target_type,
+         target_id,
+         metadata
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'company', $1, $9::jsonb)`,
+      [
+        companyId,
+        adminUserId,
+        action,
+        channel,
+        audit.ipAddress,
+        audit.userAgent,
+        audit.requestPath,
+        audit.requestMethod,
+        JSON.stringify(metadata)
+      ]
+    );
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.toLowerCase().includes("column")) {
+      throw error;
+    }
+
+    await query(
+      `INSERT INTO admin_client_actions (company_id, admin_user_id, action, channel, metadata)
+       VALUES ($1, $2, $3, $4, $5::jsonb)`,
+      [companyId, adminUserId, action, channel, JSON.stringify({ ...metadata, auditPendingSchema: audit })]
+    );
+  }
 }

@@ -220,9 +220,22 @@ CREATE TABLE IF NOT EXISTS admin_client_actions (
   admin_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   action TEXT NOT NULL,
   channel TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  request_path TEXT,
+  request_method TEXT,
+  target_type TEXT NOT NULL DEFAULT 'company',
+  target_id UUID,
   metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS ip_address TEXT;
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS user_agent TEXT;
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS request_path TEXT;
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS request_method TEXT;
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS target_type TEXT NOT NULL DEFAULT 'company';
+ALTER TABLE admin_client_actions ADD COLUMN IF NOT EXISTS target_id UUID;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_company_active
   ON subscriptions(company_id)
@@ -657,6 +670,9 @@ CREATE INDEX IF NOT EXISTS idx_companies_deleted_at ON companies(deleted_at, cre
 CREATE INDEX IF NOT EXISTS idx_companies_access_blocked ON companies(access_blocked_at, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_support_cases_company_status ON support_cases(company_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_client_actions_company_time ON admin_client_actions(company_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_client_actions_admin_time ON admin_client_actions(admin_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_client_actions_action_time ON admin_client_actions(action, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_client_actions_target ON admin_client_actions(target_type, target_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);

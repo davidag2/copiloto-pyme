@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Activity, AlertTriangle, BarChart3, BellRing, Building2, CreditCard, FileText, Gauge, Headphones, Search, ShieldCheck, TimerReset } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, BellRing, Building2, CreditCard, FileText, Gauge, Headphones, LockKeyhole, Search, ShieldCheck, TimerReset } from "lucide-react";
 import { adminRoleLabel } from "@/lib/admin-roles";
 import type { AdminRole } from "@/lib/admin-roles";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
@@ -11,7 +11,7 @@ type AdminSession = {
 };
 
 type AdminShellProps = {
-  active: "resumen" | "busqueda" | "clientes" | "pagos" | "suscripciones" | "metricas" | "facturas" | "soporte" | "actividad" | "alertas-sistema" | "monitoreo";
+  active: "resumen" | "busqueda" | "clientes" | "pagos" | "suscripciones" | "metricas" | "facturas" | "soporte" | "actividad" | "auditoria" | "alertas-sistema" | "monitoreo";
   children: ReactNode;
   description: string;
   session: AdminSession;
@@ -28,6 +28,7 @@ const navItems = [
   { id: "facturas", href: "/admin/facturas", label: "Facturas", icon: FileText },
   { id: "soporte", href: "/admin/soporte", label: "Soporte", icon: Headphones },
   { id: "actividad", href: "/admin/actividad", label: "Actividad", icon: Activity },
+  { id: "auditoria", href: "/admin/auditoria", label: "Auditoría", icon: LockKeyhole },
   { id: "alertas-sistema", href: "/admin/alertas-sistema", label: "Alertas sistema", icon: BellRing },
   { id: "monitoreo", href: "/admin/monitoreo", label: "Monitoreo", icon: AlertTriangle }
 ] as const;
