@@ -11,7 +11,7 @@ type AdminSession = {
 };
 
 type AdminShellProps = {
-  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "facturas" | "soporte" | "monitoreo";
+  active: "resumen" | "clientes" | "pagos" | "suscripciones" | "facturas" | "soporte" | "actividad" | "monitoreo";
   children: ReactNode;
   description: string;
   session: AdminSession;
@@ -25,6 +25,7 @@ const navItems = [
   { id: "suscripciones", href: "/admin/suscripciones", label: "Suscripciones", icon: TimerReset },
   { id: "facturas", href: "/admin/facturas", label: "Facturas", icon: FileText },
   { id: "soporte", href: "/admin/soporte", label: "Soporte", icon: Headphones },
+  { id: "actividad", href: "/admin/actividad", label: "Actividad", icon: Activity },
   { id: "monitoreo", href: "/admin/monitoreo", label: "Monitoreo", icon: AlertTriangle }
 ] as const;
 
