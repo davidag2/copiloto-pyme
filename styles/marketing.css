@@ -3146,6 +3146,59 @@ select:focus-visible {
   font-weight: 800;
 }
 
+.auth-admin-master-note,
+.onboarding-admin-master-note {
+  align-items: flex-start;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.09), rgba(34, 197, 94, 0.08)),
+    rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 20px;
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+}
+
+.auth-admin-master-note svg,
+.onboarding-admin-master-note svg {
+  background: white;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.12);
+  color: var(--brand-blue);
+  flex: 0 0 auto;
+  height: 42px;
+  padding: 9px;
+  width: 42px;
+}
+
+.auth-admin-master-note div,
+.onboarding-admin-master-note div {
+  display: grid;
+  gap: 5px;
+}
+
+.auth-admin-master-note strong,
+.onboarding-admin-master-note strong {
+  color: var(--brand-primary);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.auth-admin-master-note p,
+.onboarding-admin-master-note p,
+.auth-admin-master-note small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.auth-admin-master-note small {
+  color: var(--brand-blue);
+}
+
 .auth-plan-picker {
   display: grid;
   gap: 10px;
@@ -3252,6 +3305,12 @@ select:focus-visible {
   font-size: 18px;
   line-height: 1.6;
   margin: 0;
+}
+
+.onboarding-admin-master-note {
+  background:
+    linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(37, 99, 235, 0.09)),
+    rgba(255, 255, 255, 0.82);
 }
 
 .onboarding-route-steps {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Building2, CheckCircle2, Database, Target } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, Database, ShieldCheck, Target } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 type OnboardingData = {
@@ -69,6 +69,14 @@ export function OnboardingForm({ data }: OnboardingFormProps) {
         <span>Onboarding</span>
         <h1>Configura tu primer resumen</h1>
         <p>{message}</p>
+      </div>
+
+      <div className="onboarding-admin-master-note" role="note">
+        <ShieldCheck aria-hidden="true" />
+        <div>
+          <strong>{data.user.name}, tu usuario será el administrador maestro</strong>
+          <p>Esta cuenta tendrá permisos para crear usuarios, asignar roles y controlar la configuración principal de {onboarding.companyName}. Si no eres la persona autorizada, pide al administrador de la empresa que complete este paso.</p>
+        </div>
       </div>
 
       <div className="onboarding-route-steps" aria-label="Progreso de onboarding">

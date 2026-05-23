@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { commercialPlans, type CommercialPlan, type PlanId } from "@/lib/plans";
 
@@ -111,6 +111,14 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
         ))}
       </div>
       <input name="plan" type="hidden" value={activePlan.id} />
+      <div className="auth-admin-master-note" role="note">
+        <ShieldCheck aria-hidden="true" />
+        <div>
+          <strong>Cuenta administradora maestra</strong>
+          <p>Esta será la cuenta principal de la empresa en Copiloto Pyme. Desde aquí podrás invitar integrantes, asignar roles y administrar permisos, datos, facturación y configuración.</p>
+          <small>Recomendamos que la cree el administrador de la empresa o una persona autorizada para gestionar el equipo.</small>
+        </div>
+      </div>
       <label>Nombre<input name="ownerName" placeholder="Tu nombre" required /></label>
       <label>Empresa<input name="companyName" placeholder="Nombre de tu empresa" required /></label>
       <label>Email<input name="ownerEmail" type="email" placeholder="correo@empresa.com" required /></label>
