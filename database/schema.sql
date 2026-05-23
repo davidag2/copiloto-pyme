@@ -677,3 +677,97 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expire
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_team_invitations_company_status ON team_invitations(company_id, status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_email_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_key TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  preheader TEXT NOT NULL DEFAULT '',
+  body_text TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived')),
+  created_by_admin_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS admin_email_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID REFERENCES companies(id) ON DELETE SET NULL,
+  recipient_email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  preheader TEXT NOT NULL DEFAULT '',
+  body_text TEXT NOT NULL DEFAULT '',
+  template_key TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sent', 'failed', 'configuration_required')),
+  provider TEXT NOT NULL DEFAULT 'resend',
+  provider_message_id TEXT,
+  error_message TEXT,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  sent_by_admin_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO admin_email_templates (template_key, name, subject, preheader, body_text)
+VALUES
+  (
+    'product_update',
+    'Actualización de producto',
+    'Novedades de Copiloto Pyme para tu empresa',
+    'Novedades importantes para administrar mejor tu PYME.',
+    'Hola {{nombre}},
+
+Queríamos contarte una novedad importante de Copiloto Pyme para {{empresa}}.
+
+Tu equipo puede entrar al dashboard y revisar ventas, caja, inventario y decisiones recomendadas para hoy.
+
+Estamos atentos para acompañarte.'
+  ),
+  (
+    'onboarding_followup',
+    'Seguimiento onboarding',
+    'Completa tu onboarding en Copiloto Pyme',
+    'Completa tu configuración y recibe mejores decisiones diarias.',
+    'Hola {{nombre}},
+
+Vimos que {{empresa}} todavía puede completar algunos pasos para aprovechar mejor Copiloto Pyme.
+
+Te recomendamos cargar tus datos de ventas, caja e inventario para recibir un resumen diario más útil.
+
+Si necesitas ayuda, responde este correo y te acompañamos.'
+  ),
+  (
+    'payment_reminder',
+    'Recordatorio de pago',
+    'Recordatorio de pago de Copiloto Pyme',
+    'Mantén activo el acceso al dashboard de Copiloto Pyme.',
+    'Hola {{nombre}},
+
+Tu cuenta de {{empresa}} tiene un pago pendiente. Para mantener activo el dashboard después del mes gratis, realiza el pago del plan contratado.
+
+Si ya pagaste, responde este correo para ayudarte a validar el estado.'
+  ),
+  (
+    'welcome',
+    'Bienvenida',
+    'Bienvenido a Copiloto Pyme',
+    'Tu mes gratis ya está activo.',
+    'Hola {{nombre}},
+
+Bienvenido a Copiloto Pyme. Tu empresa {{empresa}} ya tiene activa su cuenta y su mes gratis.
+
+Tu usuario quedó como administrador maestro de la empresa. Desde el dashboard podrás configurar datos, invitar integrantes, asignar roles y empezar a cargar ventas, caja e inventario.'
+  )
+ON CONFLICT (template_key) DO UPDATE SET
+  name = EXCLUDED.name,
+  subject = EXCLUDED.subject,
+  preheader = EXCLUDED.preheader,
+  body_text = EXCLUDED.body_text,
+  status = 'active',
+  updated_at = NOW();
+
+CREATE INDEX IF NOT EXISTS idx_admin_email_templates_status ON admin_email_templates(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_email_logs_company_time ON admin_email_logs(company_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_email_logs_status_time ON admin_email_logs(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_email_logs_recipient ON admin_email_logs(recipient_email, created_at DESC);

@@ -1,6 +1,7 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassword } from "@/lib/auth";
 import { transaction } from "@/lib/db";
+import { sendEmail, welcomeEmailBody } from "@/lib/email";
 import { getPlanById, getTrialEndsAt } from "@/lib/plans";
 import { normalizeRole } from "@/lib/roles";
 import { setSessionCookie } from "@/lib/session";
@@ -163,6 +164,24 @@ export async function POST(request: Request) {
           nextStep: "/onboarding"
         }
       };
+    });
+
+    await sendEmail({
+      body: welcomeEmailBody({
+        companyName: result.company.name,
+        ownerName: result.user.name,
+        planName: result.subscription.planId,
+        trialEndsAt: result.subscription.trialEndsAt
+      }),
+      companyId: result.company.id,
+      metadata: {
+        source: "auth_register",
+        userId: result.user.id
+      },
+      preheader: "Bienvenido a Copiloto Pyme. Tu mes gratis ya está activo.",
+      subject: "Bienvenido a Copiloto Pyme",
+      templateKey: "welcome",
+      to: result.user.email
     });
 
     const response = ok(result, 201);
