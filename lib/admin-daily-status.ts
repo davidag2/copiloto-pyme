@@ -126,7 +126,7 @@ async function getAdminDailyStatus() {
     query<ActivityRow>(
       `SELECT (SELECT COUNT(*) FROM companies WHERE created_at >= CURRENT_DATE)::text AS "newCompaniesToday",
               (SELECT COUNT(*) FROM sessions WHERE created_at >= CURRENT_DATE)::text AS "loginsToday",
-              (SELECT COUNT(*) FROM import_batches WHERE created_at >= CURRENT_DATE)::text AS "importsToday",
+              (SELECT COUNT(*) FROM imported_data_batches WHERE created_at >= CURRENT_DATE)::text AS "importsToday",
               (SELECT COUNT(*) FROM ai_suggestions WHERE generated_at >= CURRENT_DATE)::text AS "suggestionsToday"`
     ),
     query<CompanyStatusRow>(
