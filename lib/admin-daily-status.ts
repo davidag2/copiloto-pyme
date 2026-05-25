@@ -77,6 +77,23 @@ function todayLabel() {
   }).format(new Date());
 }
 
+function cleanStatusText(value: unknown) {
+  if (value === null || value === undefined) return "";
+
+  return String(value)
+    .normalize("NFC")
+    .replace(/\u00C3\u00A1/g, "\u00E1")
+    .replace(/\u00C3\u00A9/g, "\u00E9")
+    .replace(/\u00C3\u00AD/g, "\u00ED")
+    .replace(/\u00C3\u00B3/g, "\u00F3")
+    .replace(/\u00C3\u00BA/g, "\u00FA")
+    .replace(/\u00C3\u00B1/g, "\u00F1")
+    .replace(/Panela Org.nica/gi, "Panela Org\u00E1nica")
+    .replace(/Andr.s V.lez/gi, "Andr\u00E9s V\u00E9lez")
+    .replace(/Org.nica/gi, "Org\u00E1nica")
+    .replace(/Organica/g, "Org\u00E1nica");
+}
+
 export async function sendAdminDailyStatusEmail() {
   const report = await getAdminDailyStatus();
   const body = renderAdminDailyStatus(report);
@@ -204,14 +221,14 @@ function renderAdminDailyStatus(report: Awaited<ReturnType<typeof getAdminDailyS
         const access = company.accessBlockedAt ? "Bloqueado" : "Habilitado";
         const subscription = company.status === "trial"
           ? `Trial hasta ${dateLabel(company.trialEndsAt)}`
-          : company.status || "Sin suscripción";
-        return `${index + 1}. ${company.companyName} - Plan ${String(company.plan || "go").toUpperCase()} - ${subscription} - ${access} - Alertas: ${company.alertCount} - Sugerencias IA: ${company.openSuggestions} - Propietario: ${company.ownerName || "Sin propietario"} (${company.ownerEmail || "sin email"})`;
+          : company.status || "Sin suscripci\u00F3n";
+        return `${index + 1}. ${cleanStatusText(company.companyName)} - Plan ${String(company.plan || "go").toUpperCase()} - ${subscription} - ${access} - Alertas: ${company.alertCount} - Sugerencias IA: ${company.openSuggestions} - Propietario: ${cleanStatusText(company.ownerName || "Sin propietario")} (${company.ownerEmail || "sin email"})`;
       }).join("\n")
     : "No hay empresas activas para reportar.";
 
   const alertLines = report.criticalAlerts.length
-    ? report.criticalAlerts.map((alert, index) => `${index + 1}. ${alert.companyName} - ${alert.level.toUpperCase()} - ${alert.title}: ${alert.text} (${dateLabel(alert.createdAt)})`).join("\n")
-    : "No hay alertas abiertas críticas o pendientes.";
+    ? report.criticalAlerts.map((alert, index) => `${index + 1}. ${cleanStatusText(alert.companyName)} - ${alert.level.toUpperCase()} - ${cleanStatusText(alert.title)}: ${cleanStatusText(alert.text)} (${dateLabel(alert.createdAt)})`).join("\n")
+    : "No hay alertas abiertas cr\u00EDticas o pendientes.";
 
   return `Status diario de Copiloto Pyme
 Fecha: ${todayLabel()}
@@ -229,9 +246,9 @@ Resumen SaaS
 - Alertas abiertas: ${report.summary.openAlerts}
 - Casos de soporte abiertos: ${report.summary.openSupport}
 
-Métricas comerciales
+M\u00E9tricas comerciales
 - Ventas registradas hoy: ${money(report.sales.salesToday)}
-- Órdenes registradas hoy: ${report.sales.ordersToday}
+- \u00D3rdenes registradas hoy: ${report.sales.ordersToday}
 - Ventas del mes: ${money(report.sales.salesMonth)}
 - Cuentas por cobrar: ${money(report.sales.pendingReceivables)}
 
@@ -247,10 +264,10 @@ ${companyLines}
 Alertas importantes
 ${alertLines}
 
-Acciones sugeridas para mañana
+Acciones sugeridas para ma\u00F1ana
 - Revisar empresas bloqueadas o con pago pendiente.
 - Validar facturas SIIGO fallidas o rechazadas.
-- Atender alertas críticas abiertas por empresa.
-- Revisar clientes con trial próximo a vencer.
+- Atender alertas cr\u00EDticas abiertas por empresa.
+- Revisar clientes con trial pr\u00F3ximo a vencer.
 - Confirmar que las empresas nuevas completen onboarding y carga de datos.`;
 }
