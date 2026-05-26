@@ -8693,3 +8693,165 @@ select:focus-visible {
   transform: translateY(-2px);
 }
 
+.mkt-testimonial-section {
+  background:
+    radial-gradient(circle at 80% 15%, rgba(37, 99, 235, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(248, 251, 255, 0.96), rgba(255, 255, 255, 0.96));
+  border-color: rgba(191, 219, 254, 0.88);
+  gap: clamp(26px, 4vw, 52px);
+}
+
+.mkt-quote-card > span {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 999px;
+  color: #2563eb;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  text-transform: uppercase;
+}
+
+.mkt-impact-panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 28px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 3vw, 30px);
+}
+
+.mkt-impact-header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.mkt-impact-header span {
+  align-items: center;
+  color: #2563eb;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 950;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.mkt-impact-header svg {
+  height: 18px;
+  width: 18px;
+}
+
+.mkt-impact-header strong {
+  color: var(--mkt-ink);
+  font-size: clamp(18px, 2vw, 24px);
+  text-align: right;
+}
+
+.mkt-impact-decision {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.98), rgba(255, 255, 255, 0.98));
+  border: 1px solid rgba(134, 239, 172, 0.75);
+  border-radius: 24px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.2fr) 190px;
+  padding: clamp(20px, 3vw, 26px);
+}
+
+.mkt-impact-decision small,
+.mkt-impact-metrics span,
+.mkt-impact-score span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.mkt-impact-decision strong {
+  color: #047857;
+  display: block;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.08;
+  margin-top: 8px;
+}
+
+.mkt-impact-decision p {
+  color: #475569;
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+
+.mkt-impact-score {
+  align-content: center;
+  background: #ffffff;
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  border-radius: 22px;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.mkt-impact-score svg {
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 14px;
+  color: #16a34a;
+  height: 42px;
+  padding: 10px;
+  width: 42px;
+}
+
+.mkt-impact-score strong {
+  color: var(--mkt-ink);
+  font-size: 28px;
+  margin: 0;
+}
+
+.mkt-impact-score small,
+.mkt-impact-metrics small {
+  color: #16a34a;
+  font-weight: 900;
+}
+
+.mkt-impact-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mkt-impact-metrics article {
+  background: rgba(248, 251, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 20px;
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+}
+
+.mkt-impact-metrics strong {
+  color: var(--mkt-ink);
+  font-size: clamp(20px, 2vw, 24px);
+  line-height: 1.1;
+}
+
+@media (max-width: 980px) {
+  .mkt-impact-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mkt-impact-header strong {
+    text-align: left;
+  }
+
+  .mkt-impact-decision,
+  .mkt-impact-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+

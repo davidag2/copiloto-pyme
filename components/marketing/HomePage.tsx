@@ -1,4 +1,4 @@
-import { BarChart3, Brain, CheckCircle2, ClipboardCheck, Database, PackageCheck, Sparkles, Users, WalletCards, Zap } from "lucide-react";
+import { ArrowUpRight, BarChart3, Brain, CheckCircle2, ClipboardCheck, Database, PackageCheck, Sparkles, Users, WalletCards, Zap } from "lucide-react";
 import { Hero } from "./Hero";
 import { PricingCard } from "./PricingCard";
 import { commercialPlans } from "@/lib/plans";
@@ -127,15 +127,46 @@ export function HomePage() {
 
       <section className="mkt-testimonial-section">
         <div className="mkt-quote-card">
-          <span>“</span>
-          <p>Antes revisábamos datos por horas. Ahora Copiloto Pyme nos dice qué acción tomar, qué riesgo atender primero y cómo mantener la operación bajo control.</p>
+          <span>Impacto en la operación</span>
+          <p>Antes revisábamos hojas y reportes por horas. Ahora abrimos Inicio y sabemos qué riesgo atender, qué oportunidad aprovechar y qué acción asignar al equipo.</p>
           <strong>Andrés Vélez</strong>
           <small>Gerente, Café Oriente</small>
         </div>
-        <div className="mkt-testimonial-dashboard">
-          <div><span>Ventas</span><strong>$2.850.000</strong><i className="bars blue" /></div>
-          <div><span>Caja</span><strong>18 días</strong><i className="line green" /></div>
-          <p>Decisión recomendada: <strong>Reponer Panela Orgánica hoy</strong></p>
+        <div className="mkt-impact-panel" aria-label="Ejemplo de decisión generada por Copiloto Pyme">
+          <div className="mkt-impact-header">
+            <span><Sparkles aria-hidden="true" />Resumen de hoy</span>
+            <strong>La IA encontró una acción prioritaria</strong>
+          </div>
+          <div className="mkt-impact-decision">
+            <div>
+              <small>Decisión recomendada</small>
+              <strong>Reponer Panela Orgánica hoy</strong>
+              <p>Quedan pocas unidades, las ventas subieron y todavía hay caja disponible para comprar.</p>
+            </div>
+            <div className="mkt-impact-score">
+              <ArrowUpRight aria-hidden="true" />
+              <span>Impacto</span>
+              <strong>+12 días</strong>
+              <small>de caja estable</small>
+            </div>
+          </div>
+          <div className="mkt-impact-metrics">
+            <article>
+              <span>Ventas hoy</span>
+              <strong>$2.850.000</strong>
+              <small>+18% vs ayer</small>
+            </article>
+            <article>
+              <span>Riesgo</span>
+              <strong>2 productos</strong>
+              <small>requieren atención</small>
+            </article>
+            <article>
+              <span>Acción</span>
+              <strong>Compras</strong>
+              <small>asignar orden hoy</small>
+            </article>
+          </div>
         </div>
       </section>
 
