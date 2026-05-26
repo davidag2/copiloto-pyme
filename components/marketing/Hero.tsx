@@ -14,7 +14,7 @@ export function Hero() {
       <div className="mkt-hero-copy">
         <span className="mkt-eyebrow"><Bot aria-hidden="true" />Sistema operativo con IA</span>
         <h1>El sistema operativo para administrar tu <span>PYME con IA</span></h1>
-        <p>Copiloto Pyme conecta tus ventas, caja, inventario y clientes en un solo panel. La IA analiza lo que pasa en tu negocio y te dice qué riesgo viene, qué oportunidad tienes y qué decisión debes tomar hoy.</p>
+        <p>Copiloto Pyme reúne tus ventas, caja, inventario y clientes en un solo lugar. La IA revisa esos datos por ti y te dice qué problema atender, qué oportunidad aprovechar y qué hacer hoy para vender más y perder menos dinero.</p>
         <div className="mkt-bullets">
           {bullets.map((item) => (
             <span key={item}><CheckCircle2 aria-hidden="true" />{item}</span>
