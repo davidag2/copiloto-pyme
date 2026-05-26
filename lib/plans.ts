@@ -22,7 +22,14 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $20.000 / mes",
     trialDays,
     href: "/register?plan=go",
-    features: ["1 empresa", "1 mes gratis", "Dashboard simple", "Lectura diaria con IA"]
+    features: [
+      "1 mes gratis",
+      "Acceso a Inicio",
+      "Módulo Ventas",
+      "Módulo Caja",
+      "Dashboard simple con IA",
+      "1 asiento para ver y editar información"
+    ]
   },
   {
     id: "basic",
@@ -31,7 +38,17 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $50.000 / mes",
     trialDays,
     href: "/register?plan=basic",
-    features: ["Hasta 2 empresas", "Alertas básicas", "Ventas, caja e inventario", "Soporte estándar"]
+    features: [
+      "1 mes gratis",
+      "Acceso a Inicio",
+      "Módulo Ventas",
+      "Módulo Caja",
+      "Módulo Inventario",
+      "Módulo Clientes",
+      "Alertas básicas",
+      "Reportes principales",
+      "3 asientos para ver y editar información"
+    ]
   },
   {
     id: "pro",
@@ -42,7 +59,18 @@ export const commercialPlans: CommercialPlan[] = [
     href: "/register?plan=pro",
     badge: "Recomendado",
     highlighted: true,
-    features: ["Hasta 5 empresas", "Alertas inteligentes", "Proyección de caja", "Roles de equipo"]
+    features: [
+      "1 mes gratis",
+      "Acceso a todos los módulos",
+      "Ventas, Caja, Inventario y Clientes",
+      "Equipo, Datos, Reportes, Alertas y Configuración",
+      "Alertas inteligentes",
+      "Proyección de caja",
+      "Decisiones y recomendaciones con IA",
+      "Roles de equipo",
+      "6 asientos para ver y editar información",
+      "Prioridad en soporte"
+    ]
   }
 ];
 

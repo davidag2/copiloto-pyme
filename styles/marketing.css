@@ -7449,6 +7449,45 @@ select:focus-visible {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.mkt-module-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mkt-module-grid article {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--mkt-line);
+  border-radius: 24px;
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 14px;
+  min-height: 236px;
+  padding: 28px;
+}
+
+.mkt-module-grid svg {
+  background: linear-gradient(135deg, #155dfc, #00bc7d);
+  border-radius: 16px;
+  box-shadow: 0 16px 28px rgba(43, 127, 255, 0.18);
+  color: white;
+  height: 56px;
+  padding: 14px;
+  width: 56px;
+}
+
+.mkt-module-grid strong {
+  color: var(--mkt-ink);
+  font-size: 22px;
+}
+
+.mkt-module-grid p {
+  color: var(--mkt-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
 .mkt-benefit-grid article {
   align-items: center;
   display: flex;
@@ -7633,6 +7672,14 @@ select:focus-visible {
   color: white;
   margin-inline: auto;
   max-width: 760px;
+}
+
+.mkt-final-cta p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 18px auto 0;
+  max-width: 680px;
 }
 
 .mkt-final-cta div {
@@ -8006,6 +8053,10 @@ select:focus-visible {
   .mkt-benefit-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .mkt-module-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 780px) {
@@ -8089,6 +8140,7 @@ select:focus-visible {
   .mkt-metrics,
   .mkt-kpi-grid,
   .mkt-benefit-grid,
+  .mkt-module-grid,
   .mkt-figma-feature-grid,
   .mkt-intelligence-grid,
   .mkt-impact-grid,

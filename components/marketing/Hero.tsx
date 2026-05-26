@@ -4,17 +4,17 @@ import { MetricCard } from "./MetricCard";
 
 export function Hero() {
   const bullets = [
-    "Entiende tu negocio en segundos",
-    "Detecta problemas antes de que crezcan",
-    "Recibe una decisión clara cada día"
+    "Registra la operación diaria de tu empresa",
+    "Une ventas, caja, inventario y clientes en una sola vista",
+    "Recibe decisiones claras con impacto estimado"
   ];
 
   return (
     <section className="mkt-hero">
       <div className="mkt-hero-copy">
-        <span className="mkt-eyebrow"><Bot aria-hidden="true" />IA para PYMES</span>
-        <h1>La IA que convierte tus datos en <span>decisiones claras</span></h1>
-        <p>Copiloto Pyme analiza tus ventas, caja e inventario para mostrarte qué está pasando, qué riesgo viene y cuál acción tomar hoy.</p>
+        <span className="mkt-eyebrow"><Bot aria-hidden="true" />Sistema operativo con IA</span>
+        <h1>El sistema operativo para administrar tu <span>PYME con IA</span></h1>
+        <p>Copiloto Pyme conecta tus ventas, caja, inventario y clientes en un solo panel. La IA analiza lo que pasa en tu negocio y te dice qué riesgo viene, qué oportunidad tienes y qué decisión debes tomar hoy.</p>
         <div className="mkt-bullets">
           {bullets.map((item) => (
             <span key={item}><CheckCircle2 aria-hidden="true" />{item}</span>
@@ -34,9 +34,9 @@ export function Hero() {
       <div className="mkt-hero-visual">
         <DashboardMockup />
         <div className="mkt-metrics">
-          <MetricCard value="10 seg" label="Lectura diaria" />
+          <MetricCard value="10 seg" label="Lectura ejecutiva" />
           <MetricCard value="+12 días" label="Proyección de caja" />
-          <MetricCard value="COP" label="Planes para Colombia" />
+          <MetricCard value="4 módulos" label="Operación conectada" />
         </div>
       </div>
     </section>
