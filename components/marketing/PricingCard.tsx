@@ -17,7 +17,7 @@ export function PricingCard({ name, price, features, cta, href, highlighted, bad
       <ul>
         {features.map((feature) => <li key={feature}>{feature}</li>)}
       </ul>
-      <a className={highlighted ? "mkt-button primary" : "mkt-button secondary"} href={href}>{cta}</a>
+      <a className={`mkt-price-cta ${highlighted ? "mkt-button primary" : "mkt-button secondary"}`} href={href}>{cta}</a>
     </article>
   );
 }

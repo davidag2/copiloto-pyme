@@ -38,6 +38,8 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $50.000 / mes",
     trialDays,
     href: "/register?plan=basic",
+    badge: "Recomendado",
+    highlighted: true,
     features: [
       "1 mes gratis",
       "Acceso a Inicio",
@@ -57,8 +59,6 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $100.000 / mes",
     trialDays,
     href: "/register?plan=pro",
-    badge: "Recomendado",
-    highlighted: true,
     features: [
       "1 mes gratis",
       "Acceso a todos los módulos",
@@ -68,7 +68,7 @@ export const commercialPlans: CommercialPlan[] = [
       "Proyección de caja",
       "Decisiones y recomendaciones con IA",
       "Roles de equipo",
-      "6 asientos para ver y editar información",
+      "5 asientos para ver y editar información",
       "Prioridad en soporte"
     ]
   }
