@@ -8676,10 +8676,13 @@ select:focus-visible {
 .mkt-pricing-card .mkt-price-cta {
   align-items: center;
   display: inline-flex;
+  height: 58px;
   justify-content: center;
+  line-height: 1;
   margin-top: auto;
+  max-height: 58px;
   min-height: 58px;
-  padding: 0 22px;
+  padding: 0 22px !important;
   text-align: center;
   width: 100%;
 }
