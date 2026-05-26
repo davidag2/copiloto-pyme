@@ -8634,7 +8634,6 @@ select:focus-visible {
 
 .mkt-pricing-card {
   align-content: start;
-  grid-template-rows: auto auto auto 1fr auto;
   isolation: isolate;
   min-height: 100%;
   overflow: hidden;
@@ -8678,6 +8677,7 @@ select:focus-visible {
   align-items: center;
   display: inline-flex;
   justify-content: center;
+  margin-top: auto;
   min-height: 58px;
   padding: 0 22px;
   text-align: center;
