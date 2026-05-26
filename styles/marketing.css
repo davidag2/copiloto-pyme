@@ -7981,6 +7981,69 @@ select:focus-visible {
   width: 100%;
 }
 
+.mkt-contact-form .mkt-contact-submit {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  border: 1px solid rgba(37, 99, 235, 0.38);
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.22);
+  color: #ffffff;
+  min-height: 58px;
+  overflow: hidden;
+  position: relative;
+  transition:
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    transform 180ms ease;
+}
+
+.mkt-contact-form .mkt-contact-submit::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24), transparent);
+  content: "";
+  height: 100%;
+  left: -120%;
+  position: absolute;
+  top: 0;
+  transform: skewX(-18deg);
+  transition: left 420ms ease;
+  width: 70%;
+}
+
+.mkt-contact-form .mkt-contact-submit:hover,
+.mkt-contact-form .mkt-contact-submit:focus-visible {
+  background: linear-gradient(135deg, #4338ca, #1d4ed8);
+  box-shadow: 0 24px 54px rgba(37, 99, 235, 0.32);
+  color: #ffffff;
+  filter: saturate(1.08);
+  transform: translateY(-2px);
+}
+
+.mkt-contact-form .mkt-contact-submit:hover::before,
+.mkt-contact-form .mkt-contact-submit:focus-visible::before {
+  left: 130%;
+}
+
+.mkt-contact-form .mkt-contact-submit:disabled {
+  cursor: wait;
+  opacity: 0.78;
+  transform: none;
+}
+
+.mkt-contact-status {
+  border-radius: 14px;
+  font-weight: 850;
+  margin: 0;
+  padding: 14px 16px;
+}
+
+.mkt-contact-status.is-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #047857;
+}
+
+.mkt-contact-status.is-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+}
+
 .theme-dark.mkt-page {
   --mkt-bg: #07111f;
   --mkt-ink: #f8fafc;
