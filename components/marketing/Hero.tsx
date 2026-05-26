@@ -13,8 +13,8 @@ export function Hero() {
     <section className="mkt-hero">
       <div className="mkt-hero-copy">
         <span className="mkt-eyebrow"><Bot aria-hidden="true" />IA para PYMES</span>
-        <h1>La IA que te ayuda a administrar y tomar decisiones en tu PYME</h1>
-        <p>Copiloto Pyme analiza tus ventas, caja e inventario y te muestra qué está pasando, qué riesgo viene y qué acción debes tomar hoy para no perder dinero.</p>
+        <h1>La IA que convierte tus datos en <span>decisiones claras</span></h1>
+        <p>Copiloto Pyme analiza tus ventas, caja e inventario para mostrarte qué está pasando, qué riesgo viene y cuál acción tomar hoy.</p>
         <div className="mkt-bullets">
           {bullets.map((item) => (
             <span key={item}><CheckCircle2 aria-hidden="true" />{item}</span>
@@ -24,7 +24,7 @@ export function Hero() {
           <a className="mkt-button primary large" href="/register?plan=go"><ArrowRight aria-hidden="true" />Probar 1 mes gratis</a>
           <a className="mkt-button secondary large" href="/demo"><BarChart3 aria-hidden="true" />Ver demo</a>
         </div>
-        <small>1 mes gratis · Sin tarjeta · Configuración en minutos</small>
+        <small>Sin tarjeta · Configuración en minutos · Planes en COP</small>
         <div className="mkt-trust-pills">
           <span><Database aria-hidden="true" />Datos por empresa</span>
           <span><Users aria-hidden="true" />Roles por equipo</span>
