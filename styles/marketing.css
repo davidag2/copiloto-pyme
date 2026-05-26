@@ -7657,6 +7657,283 @@ select:focus-visible {
   grid-template-columns: 0.8fr 1.2fr;
 }
 
+.mkt-single-section > .mkt-section-heading {
+  margin-left: 0;
+  text-align: left;
+}
+
+.mkt-single-section > .mkt-section-heading h2 {
+  max-width: 780px;
+}
+
+.mkt-figma-feature-grid {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 54px;
+}
+
+.mkt-figma-feature-grid .mkt-feature-card {
+  min-height: 252px;
+  padding: 32px;
+}
+
+.mkt-figma-feature-grid .mkt-feature-card svg {
+  background: linear-gradient(135deg, #155dfc, #00bc7d);
+  border-radius: 16px;
+  box-shadow: 0 16px 28px rgba(43, 127, 255, 0.22);
+  color: white;
+  height: 56px;
+  padding: 14px;
+  width: 56px;
+}
+
+.mkt-figma-advantages {
+  display: grid;
+  gap: 72px;
+  margin-top: 92px;
+}
+
+.mkt-business-intelligence,
+.mkt-impact-panel {
+  border: 1px solid var(--mkt-line);
+  border-radius: 24px;
+  box-shadow: 0 24px 52px rgba(219, 234, 254, 0.62);
+  padding: clamp(32px, 5vw, 56px);
+}
+
+.mkt-business-intelligence {
+  background: linear-gradient(145deg, #faf5ff, #eff6ff);
+}
+
+.mkt-business-intelligence > div:first-child {
+  max-width: 720px;
+}
+
+.mkt-business-intelligence span:first-child {
+  color: var(--mkt-blue-2);
+  font-weight: 950;
+}
+
+.mkt-business-intelligence h2,
+.mkt-impact-panel h2 {
+  color: var(--mkt-ink);
+  font-size: clamp(34px, 4.5vw, 54px);
+  line-height: 1.08;
+  margin: 10px 0 14px;
+}
+
+.mkt-business-intelligence p,
+.mkt-impact-panel p {
+  color: var(--mkt-muted);
+  font-size: 20px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.mkt-intelligence-grid,
+.mkt-impact-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 48px;
+}
+
+.mkt-intelligence-grid article,
+.mkt-impact-grid article {
+  background: white;
+  border: 1px solid var(--mkt-line);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+  display: grid;
+  gap: 10px;
+  min-height: 112px;
+  padding: 24px;
+}
+
+.mkt-intelligence-grid svg,
+.mkt-impact-grid svg {
+  height: 26px;
+  width: 26px;
+}
+
+.mkt-intelligence-grid strong,
+.mkt-impact-grid strong {
+  color: var(--mkt-ink);
+  font-size: 20px;
+}
+
+.mkt-intelligence-grid span,
+.mkt-impact-grid span {
+  color: var(--mkt-muted);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.mkt-intelligence-grid .green,
+.mkt-impact-grid .green {
+  border-color: #a4f4cf;
+  background: linear-gradient(150deg, #ecfdf5, #f0fdf4);
+}
+
+.mkt-intelligence-grid .green svg,
+.mkt-intelligence-grid .green strong,
+.mkt-impact-grid .green svg,
+.mkt-impact-grid .green strong {
+  color: #009966;
+}
+
+.mkt-intelligence-grid .blue,
+.mkt-impact-grid .blue {
+  border-color: #bedbff;
+  background: linear-gradient(150deg, #eff6ff, rgba(219, 234, 254, 0.5));
+}
+
+.mkt-intelligence-grid .blue svg,
+.mkt-intelligence-grid .blue strong,
+.mkt-impact-grid .blue svg,
+.mkt-impact-grid .blue strong {
+  color: #155dfc;
+}
+
+.mkt-intelligence-grid .orange,
+.mkt-impact-grid .orange {
+  border-color: #ffd6a8;
+  background: linear-gradient(150deg, #fff7ed, rgba(255, 237, 212, 0.5));
+}
+
+.mkt-intelligence-grid .orange svg,
+.mkt-intelligence-grid .orange strong,
+.mkt-impact-grid .orange svg,
+.mkt-impact-grid .orange strong {
+  color: #f54900;
+}
+
+.mkt-intelligence-grid .purple,
+.mkt-impact-grid .purple {
+  border-color: #e9d4ff;
+  background: linear-gradient(150deg, #faf5ff, rgba(243, 232, 255, 0.5));
+}
+
+.mkt-intelligence-grid .purple svg,
+.mkt-intelligence-grid .purple strong,
+.mkt-impact-grid .purple svg,
+.mkt-impact-grid .purple strong {
+  color: #9810fa;
+}
+
+.mkt-impact-panel {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.mkt-price-assurance {
+  background: linear-gradient(172deg, #eff6ff, #f8fafc);
+  border: 1px solid var(--mkt-line);
+  border-radius: 24px;
+  box-shadow: 0 18px 38px rgba(219, 234, 254, 0.54);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 64px;
+  padding: 34px;
+}
+
+.mkt-price-assurance span {
+  align-items: center;
+  color: var(--mkt-ink);
+  display: grid;
+  font-weight: 950;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.mkt-price-assurance svg {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  color: var(--mkt-blue-2);
+  height: 48px;
+  padding: 12px;
+  width: 48px;
+}
+
+.mkt-demo-info {
+  background: #f5f0ff;
+  border: 1px solid var(--mkt-line);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(13, 20, 46, 0.09);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: auto 1fr;
+  margin-top: 72px;
+  max-width: 500px;
+  padding: 40px;
+}
+
+.mkt-demo-info > div {
+  align-items: center;
+  background: linear-gradient(135deg, #155dfc, #00bc7d);
+  border-radius: 999px;
+  color: white;
+  display: flex;
+  font-weight: 950;
+  height: 72px;
+  justify-content: center;
+  width: 72px;
+}
+
+.mkt-demo-info h3 {
+  color: var(--mkt-ink);
+  font-size: 26px;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+
+.mkt-demo-info p {
+  color: var(--mkt-muted);
+  font-size: 17px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.mkt-demo-info ul {
+  display: grid;
+  gap: 10px;
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.mkt-demo-info li {
+  color: var(--mkt-ink);
+  font-weight: 850;
+}
+
+.mkt-demo-info li::before {
+  content: "✓";
+  margin-right: 8px;
+}
+
+.mkt-contact-form {
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(13, 20, 46, 0.09);
+  padding: 44px;
+}
+
+.mkt-contact-form input,
+.mkt-contact-form textarea {
+  border-color: #dbe3f2;
+  border-radius: 12px;
+}
+
+.mkt-contact-form .mkt-button {
+  border-radius: 14px;
+  min-height: 52px;
+  width: 100%;
+}
+
 .theme-dark.mkt-page {
   --mkt-bg: #07111f;
   --mkt-ink: #f8fafc;
@@ -7713,6 +7990,13 @@ select:focus-visible {
   .mkt-home-pricing .mkt-pricing-grid,
   .mkt-single-section .mkt-pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mkt-figma-feature-grid,
+  .mkt-intelligence-grid,
+  .mkt-impact-grid,
+  .mkt-price-assurance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .mkt-pricing-card.is-highlighted {
@@ -7804,8 +8088,17 @@ select:focus-visible {
 
   .mkt-metrics,
   .mkt-kpi-grid,
-  .mkt-benefit-grid {
+  .mkt-benefit-grid,
+  .mkt-figma-feature-grid,
+  .mkt-intelligence-grid,
+  .mkt-impact-grid,
+  .mkt-price-assurance {
     grid-template-columns: 1fr;
+  }
+
+  .mkt-demo-info {
+    grid-template-columns: 1fr;
+    padding: 26px;
   }
 
   .mkt-app-mockup {

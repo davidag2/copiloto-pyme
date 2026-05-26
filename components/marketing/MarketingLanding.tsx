@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { AlertTriangle, ClipboardCheck, Eye, MessageSquareText } from "lucide-react";
+import { AlertTriangle, Bell, Check, Clock3, ClipboardCheck, CreditCard, Eye, Headphones, MessageSquareText, ShieldCheck, Sparkles, Target, TrendingUp, WalletCards } from "lucide-react";
 import { useState } from "react";
 import { ContactForm } from "./ContactForm";
 import { FeatureCard } from "./FeatureCard";
@@ -34,43 +33,37 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <span>Ventajas</span>
               <h2>Así te ayuda Copiloto Pyme</h2>
             </div>
-            <div className="mkt-feature-grid">
+            <div className="mkt-feature-grid mkt-figma-feature-grid">
               <FeatureCard icon={Eye} title="Ve todo claro" text="Sabes cuánto vendes, cuánto tienes y qué está pasando." />
-              <FeatureCard icon={AlertTriangle} title="Te avisa problemas" text="Te dice antes si algo se va a acabar o si algo va mal." />
+              <FeatureCard icon={Bell} title="Te avisa problemas" text="Te dice antes si algo se va a acabar o si algo va mal." />
               <FeatureCard icon={ClipboardCheck} title="Te dice qué hacer" text="No tienes que pensar mucho. Te dice la siguiente acción." />
             </div>
 
-            <div className="mkt-advantages-story">
-              <div className="mkt-section-heading">
-                <span>Claridad operativa</span>
-                <h2>La IA conecta las señales importantes de tu empresa</h2>
-                <p>Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas.</p>
-              </div>
-              <section className="mkt-infographic-section" aria-label="Infografía sobre cómo la IA entiende cada parte del negocio">
-                <Image
-                  alt="Infografía: la IA entiende ventas, caja, inventario y alertas para entregar una sola inteligencia de negocio"
-                  height={1024}
-                  quality={76}
-                  sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
-                  src="/images/infografia-ia-entiende-negocio-copiloto-pyme.png"
-                  width={1536}
-                />
+            <div className="mkt-advantages-story mkt-figma-advantages">
+              <section className="mkt-business-intelligence">
+                <div>
+                  <span>Claridad operativa</span>
+                  <h2>La IA entiende cada parte de tu negocio</h2>
+                  <p>Analiza ventas, caja, inventario y alertas para darte claridad y control en un solo lugar.</p>
+                </div>
+                <div className="mkt-intelligence-grid">
+                  <article className="green"><TrendingUp aria-hidden="true" /><strong>Ventas</strong><span>Producto líder y tendencia</span></article>
+                  <article className="blue"><WalletCards aria-hidden="true" /><strong>Caja</strong><span>Flujo y proyección</span></article>
+                  <article className="orange"><ClipboardCheck aria-hidden="true" /><strong>Inventario</strong><span>Stock y rotación</span></article>
+                  <article className="purple"><AlertTriangle aria-hidden="true" /><strong>Alertas</strong><span>Riesgos antes de que pasen</span></article>
+                </div>
               </section>
 
-              <div className="mkt-section-heading">
-                <span>Impacto real</span>
+              <section className="mkt-impact-panel">
+                <h2>La IA conecta las señales importantes de tu empresa</h2>
+                <p>Copiloto Pyme une ventas, caja, inventario y alertas para que el propietario no tenga que perseguir datos en varias herramientas.</p>
                 <h2>Decisiones más rápidas, menos riesgo y mayor control</h2>
-                <p>El valor no está solo en ver gráficas bonitas. Está en ahorrar tiempo, evitar pérdidas y convertir cada resumen diario en una acción.</p>
-              </div>
-              <section className="mkt-infographic-section" aria-label="Infografía sobre el impacto real de Copiloto Pyme">
-                <Image
-                  alt="Infografía: impacto real de Copiloto Pyme en ahorro de tiempo, reducción de pérdidas, control y crecimiento"
-                  height={1024}
-                  quality={76}
-                  sizes="(max-width: 768px) 94vw, (max-width: 1200px) 88vw, 1120px"
-                  src="/images/infografia-impacto-real-copiloto-pyme.png"
-                  width={1536}
-                />
+                <div className="mkt-impact-grid">
+                  <article className="blue"><Clock3 aria-hidden="true" /><strong>Ahorra tiempo</strong><span>Lectura diaria en 10 segundos</span></article>
+                  <article className="green"><ShieldCheck aria-hidden="true" /><strong>Evita pérdidas</strong><span>Alertas tempranas</span></article>
+                  <article className="purple"><Target aria-hidden="true" /><strong>Más control</strong><span>Datos confiables</span></article>
+                  <article className="orange"><Sparkles aria-hidden="true" /><strong>Mejores decisiones</strong><span>Acciones que generan resultados</span></article>
+                </div>
               </section>
             </div>
           </section>
@@ -97,6 +90,13 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
                 />
               ))}
             </div>
+            <div className="mkt-price-assurance" aria-label="Beneficios incluidos">
+              <span><Sparkles aria-hidden="true" />1 mes gratis</span>
+              <span><CreditCard aria-hidden="true" />Sin tarjeta de crédito</span>
+              <span><Clock3 aria-hidden="true" />Configuración en minutos</span>
+              <span><Headphones aria-hidden="true" />Soporte humano</span>
+              <span><Check aria-hidden="true" />100% seguro</span>
+            </div>
             <p className="mkt-price-note">Todos los planes incluyen 1 mes gratis · Precios en COP · No incluyen IVA</p>
           </section>
         )}
@@ -107,6 +107,18 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
               <span><MessageSquareText aria-hidden="true" />Contáctenos</span>
               <h2>Habla con nosotros</h2>
               <p>Déjanos tus datos y te mostramos cómo Copiloto Pyme puede ayudarte.</p>
+              <article className="mkt-demo-info">
+                <div>CP</div>
+                <section>
+                  <h3>Demo para PYMES</h3>
+                  <p>Implementación guiada, soporte inicial y acompañamiento para cargar tus primeros datos.</p>
+                </section>
+                <ul>
+                  <li>Ventas, caja e inventario</li>
+                  <li>Roles por equipo</li>
+                  <li>IA accionable</li>
+                </ul>
+              </article>
             </div>
             <ContactForm />
           </section>

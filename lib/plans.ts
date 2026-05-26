@@ -22,7 +22,7 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $20.000 / mes",
     trialDays,
     href: "/register?plan=go",
-    features: ["1 mes gratis", "Lectura diaria con IA", "Ventas, caja e inventario", "Alertas básicas"]
+    features: ["1 empresa", "1 mes gratis", "Dashboard simple", "Lectura diaria con IA"]
   },
   {
     id: "basic",
@@ -31,9 +31,7 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $50.000 / mes",
     trialDays,
     href: "/register?plan=basic",
-    badge: "Más popular",
-    highlighted: true,
-    features: ["1 mes gratis", "Todo lo del plan Go", "Proyección de caja", "Alertas inteligentes", "Soporte estándar"]
+    features: ["Hasta 2 empresas", "Alertas básicas", "Ventas, caja e inventario", "Soporte estándar"]
   },
   {
     id: "pro",
@@ -42,7 +40,9 @@ export const commercialPlans: CommercialPlan[] = [
     priceLabel: "COP $100.000 / mes",
     trialDays,
     href: "/register?plan=pro",
-    features: ["1 mes gratis", "Todo lo del plan Basic", "Roles de equipo", "Reporte semanal", "Prioridad en soporte"]
+    badge: "Recomendado",
+    highlighted: true,
+    features: ["Hasta 5 empresas", "Alertas inteligentes", "Proyección de caja", "Roles de equipo"]
   }
 ];
 
