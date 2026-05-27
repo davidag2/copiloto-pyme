@@ -112,7 +112,42 @@ export async function saveAiDecisionSuggestions(
         })
       ]
     );
+
+    await query(
+      `INSERT INTO notifications (
+         company_id,
+         target_user_id,
+         type,
+         title,
+         body,
+         severity,
+         action_url,
+         entity_type,
+         entity_id,
+         metadata
+       )
+       VALUES ($1, NULL, 'ai_suggestion', $2, $3, $4, $5, 'ai_suggestions', $6, $7::jsonb)`,
+      [
+        companyId,
+        notificationTitle(suggestion.priority, suggestion.title),
+        suggestion.recommendation,
+        toSeverity(suggestion.priority),
+        `/dashboard/suggestions/${savedSuggestion.id}`,
+        savedSuggestion.id,
+        JSON.stringify({
+          impactLabel: suggestion.impactLabel,
+          impactType: suggestion.impactType,
+          source: "openai_decision_engine"
+        })
+      ]
+    );
   }
 
   return saved;
+}
+
+function notificationTitle(priority: AiDecisionSuggestion["priority"], title: string) {
+  if (priority === "critical") return `Decision critica: ${title}`;
+  if (priority === "high") return `Prioridad alta: ${title}`;
+  return `Nueva sugerencia IA: ${title}`;
 }

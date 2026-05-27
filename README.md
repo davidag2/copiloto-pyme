@@ -473,6 +473,7 @@ La integracion tecnica inicial esta separada en dos capas:
 - `lib/ai-decision-engine.ts`: prompts, tipos y normalizacion de respuestas para convertir metricas de la PYME en sugerencias accionables.
 - `lib/business-snapshot.ts`: resumen operativo de ventas, caja, inventario, clientes, alertas y actividad.
 - `app/api/ai/decisions`: endpoint protegido que genera decisiones IA y las guarda en `ai_suggestions`.
+- `lib/ai-suggestion-persistence.ts`: persiste sugerencias, registra actividad y crea notificaciones accionables para la campana del dashboard.
 
 Esta base permite conectar despues el dashboard, reportes y alertas sin duplicar prompts ni modelos en cada endpoint.
 
