@@ -4,16 +4,21 @@ import { useMemo, useState } from "react";
 import type { CSSProperties, FormEvent, UIEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
+  AlertTriangle,
   BarChart3,
   Bot,
+  Brain,
   CalendarDays,
   ClipboardCheck,
   CreditCard,
   DollarSign,
   FileText,
   PackageCheck,
+  Percent,
+  Search,
   ShoppingCart,
   TrendingUp,
+  UserCheck,
   Users
 } from "lucide-react";
 
@@ -172,7 +177,8 @@ const SALES_TABLE_ROW_HEIGHT = 58;
 const SALES_TABLE_VIEWPORT_HEIGHT = 520;
 const SALES_TABLE_OVERSCAN = 8;
 
-const money = (value: string | number) => Number(value || 0).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+const money = (value: string | number) =>
+  Number(value || 0).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
 function sumSales(sales: RecentSale[], predicate: (sale: RecentSale) => boolean) {
   return sales.filter(predicate).reduce((total, sale) => total + Number(sale.total || 0), 0);
@@ -188,6 +194,10 @@ function topBy<T extends string>(sales: RecentSale[], selector: (sale: RecentSal
     totals.set(label, current);
   });
   return Array.from(totals.values()).sort((a, b) => b.amount - a.amount);
+}
+
+function parseMoneyLabel(value: string) {
+  return Number(value.replace(/[^\d-]/g, "") || 0);
 }
 
 export function SalesModule({
@@ -222,16 +232,26 @@ export function SalesModule({
   formatMoney,
   formatShortDate
 }: SalesModuleProps) {
-  const todayTotal = Number(salesSummaryCards.find((card) => card.label.toLowerCase().includes("día"))?.value.replace(/[^\d-]/g, "") || 0);
-  const monthTotal = Number(salesSummaryCards.find((card) => card.label.toLowerCase().includes("mes"))?.value.replace(/[^\d-]/g, "") || 0) || weeklyTotal;
+  const todayTotal = parseMoneyLabel(salesSummaryCards.find((card) => {
+    const label = card.label.toLowerCase();
+    return label.includes("día") || label.includes("dia");
+  })?.value || "") || weeklyTotal;
+  const monthTotal = parseMoneyLabel(salesSummaryCards.find((card) => card.label.toLowerCase().includes("mes"))?.value || "") || weeklyTotal;
   const pendingTotal = sumSales(filteredSales, (sale) => sale.status === "pendiente");
+  const discountTotal = filteredSales.reduce((total, sale) => total + Number(sale.discount || 0), 0);
   const averageTicket = filteredSales.length ? filteredSalesTotal / filteredSales.length : 0;
   const recentSales = filteredSales.slice(0, 3);
   const receivables = filteredSales.filter((sale) => sale.status === "pendiente").slice(0, 3);
   const topProducts = topBy(filteredSales, (sale) => sale.productName).slice(0, 3);
-  const channels = topBy(filteredSales, (sale) => sale.channelName).slice(0, 5);
+  const channels = topBy(filteredSales, (sale) => sale.channelName || "Sin canal").slice(0, 5);
+  const reps = topBy(filteredSales, (sale) => sale.salesRepName || "Sin vendedor").slice(0, 4);
+  const paymentMethods = topBy(filteredSales, (sale) => sale.paymentMethodName || "Sin método").slice(0, 4);
   const channelTotal = Math.max(channels.reduce((total, channel) => total + channel.amount, 0), 1);
+  const paidCount = filteredSales.filter((sale) => sale.status === "pagada").length;
+  const pendingCount = filteredSales.filter((sale) => sale.status === "pendiente").length;
+  const cancelledCount = filteredSales.filter((sale) => sale.status === "anulada").length;
   const [salesTableScrollTop, setSalesTableScrollTop] = useState(0);
+
   const virtualSales = useMemo(() => {
     const totalRows = filteredSales.length;
     const visibleRows = Math.ceil(SALES_TABLE_VIEWPORT_HEIGHT / SALES_TABLE_ROW_HEIGHT) + SALES_TABLE_OVERSCAN * 2;
@@ -246,20 +266,28 @@ export function SalesModule({
       totalRows
     };
   }, [filteredSales, salesTableScrollTop]);
+
   const handleSalesTableScroll = (event: UIEvent<HTMLDivElement>) => {
     setSalesTableScrollTop(event.currentTarget.scrollTop);
   };
+
   const aiSuggestion = salesPercent < salesRule
     ? `Contactar clientes que compraron ${products[0]?.name ?? "tu producto líder"} hace más de 15 días.`
     : recommendedAction();
   const estimatedTotal = Math.max((Number(manualSaleForm.quantity) * Number(manualSaleForm.unitPrice)) - Number(manualSaleForm.discount || 0), 0);
+  const dataSignals = [
+    { label: "Ventas registradas", value: filteredSales.length, helper: "base para tendencias" },
+    { label: "Clientes", value: salesCatalogs.customers.length, helper: "recompra y frecuencia" },
+    { label: "Productos", value: salesCatalogs.products.length, helper: "rotación y margen" },
+    { label: "Canales", value: salesCatalogs.channels.length, helper: "dónde vendes mejor" }
+  ];
 
   return (
     <section className="sales-command-center dashboard-module-section" data-active={isActive}>
       <header className="sales-page-heading">
         <div>
           <h2>Ventas</h2>
-          <p>Registra, consulta y analiza las ventas de tu negocio en un solo lugar.</p>
+          <p>Registra ventas, productos, canales, vendedores, descuentos, pagos pendientes y comportamiento comercial para que la IA recomiende mejores decisiones.</p>
         </div>
         <div className="sales-page-actions">
           <button className="sales-date-button" type="button"><CalendarDays aria-hidden="true" />14 may - 20 may, 2026</button>
@@ -270,10 +298,10 @@ export function SalesModule({
 
       <div className="sales-kpi-row">
         {[
-          { label: "Ventas de hoy", value: todayTotal || weeklyTotal, helper: `${weeklyVariation >= 0 ? "+" : ""}${weeklyVariation}% vs ayer`, icon: BarChart3, tone: "purple" },
+          { label: "Ventas de hoy", value: todayTotal, helper: `${weeklyVariation >= 0 ? "+" : ""}${weeklyVariation}% vs ayer`, icon: BarChart3, tone: "purple" },
           { label: "Ventas del mes", value: monthTotal, helper: "+12% vs mes anterior", icon: CalendarDays, tone: "blue" },
-          { label: "Facturas pendientes", value: pendingTotal, helper: `${receivables.length} clientes por cobrar`, icon: FileText, tone: "amber" },
-          { label: "Ticket promedio", value: averageTicket, helper: "+7% vs semana anterior", icon: DollarSign, tone: "green" }
+          { label: "Pagos pendientes", value: pendingTotal, helper: `${pendingCount} cliente(s) por cobrar`, icon: FileText, tone: "amber" },
+          { label: "Ticket promedio", value: averageTicket, helper: "promedio por venta", icon: DollarSign, tone: "green" }
         ].map((card) => {
           const Icon = card.icon;
           return (
@@ -292,17 +320,40 @@ export function SalesModule({
       <article className="sales-ai-banner">
         <div className="sales-ai-orb" aria-hidden="true"><Bot /></div>
         <div>
-          <span>Copiloto de ventas</span>
-          <h3>Tu IA encontró una oportunidad para vender más hoy.</h3>
-          <p><b>Sugerencia:</b> {aiSuggestion}</p>
+          <span>Motor de sugerencias OpenAI</span>
+          <h3>Convierte cada venta en una decisión comercial y administrativa.</h3>
+          <p><b>Lectura actual:</b> {aiSuggestion}</p>
+          <ul className="sales-ai-signal-list">
+            <li><Brain aria-hidden="true" /> Cruza cliente, producto, canal, vendedor, descuento y estado de pago.</li>
+            <li><AlertTriangle aria-hidden="true" /> Detecta caída de ventas, cartera vencida, canales débiles y descuentos excesivos.</li>
+            <li><ClipboardCheck aria-hidden="true" /> Propone acción, responsable e impacto esperado para Inicio.</li>
+          </ul>
         </div>
         <aside>
           <span>Impacto estimado</span>
           <strong>{formatMoney(Math.max(pendingTotal * 0.2, 1_250_000))}</strong>
-          <small>Posible ingreso</small>
-          <button className="primary-button micro-button" type="button" onClick={onGenerateSalesReading}>Ver sugerencia</button>
+          <small>Posible ingreso o cartera recuperada</small>
+          <button className="primary-button micro-button" type="button" onClick={onGenerateSalesReading}>Generar sugerencia</button>
         </aside>
       </article>
+
+      <section className="sales-ai-data-grid" aria-label="Datos que alimentan OpenAI">
+        <article className="sales-ai-data-card sales-ai-data-card-main">
+          <span><Brain aria-hidden="true" /></span>
+          <div>
+            <small>Datos comerciales para mejores decisiones</small>
+            <h3>{filteredSales.length ? "La IA ya tiene señales para recomendar acciones." : "Registra ventas para activar recomendaciones reales."}</h3>
+            <p>Mientras más completos estén los campos de ventas, mejores serán las sugerencias sobre precios, cartera, productos, canales y vendedores.</p>
+          </div>
+        </article>
+        {dataSignals.map((signal) => (
+          <article className="sales-ai-data-card" key={signal.label}>
+            <strong>{signal.value}</strong>
+            <span>{signal.label}</span>
+            <small>{signal.helper}</small>
+          </article>
+        ))}
+      </section>
 
       <nav className="sales-work-tabs" aria-label="Herramientas de ventas">
         {[
@@ -321,8 +372,8 @@ export function SalesModule({
       <div className="sales-workspace">
         <form className="sales-register-card" onSubmit={onSubmitManualSale}>
           <div className="sales-form-heading">
-            <h3>Registrar una venta</h3>
-            <p>Agrega una venta cuando no venga de integración, CSV o facturación electrónica.</p>
+            <h3>Registrar venta con contexto</h3>
+            <p>Captura la información que necesita Copiloto Pyme para entender qué se vendió, quién compró, por dónde llegó, quién atendió y si quedó cartera pendiente.</p>
             <small>{manualSaleStatus}</small>
           </div>
 
@@ -333,30 +384,41 @@ export function SalesModule({
             <label><span>Cantidad</span><input type="number" min="0.01" step="0.01" value={manualSaleForm.quantity} onChange={(event) => onManualFieldChange("quantity", event.target.value)} disabled={!canRegisterSales} required /></label>
             <label><span>Precio unitario</span><input type="number" min="0" step="100" value={manualSaleForm.unitPrice} onChange={(event) => onManualFieldChange("unitPrice", event.target.value)} placeholder="50000" disabled={!canRegisterSales} required /></label>
             <label><span>Descuento</span><input type="number" min="0" step="100" value={manualSaleForm.discount} onChange={(event) => onManualFieldChange("discount", event.target.value)} disabled={!canRegisterSales} /></label>
-            <label><span>Canal</span><input list="sales-channels-list" value={manualSaleForm.channelName} onChange={(event) => onManualFieldChange("channelName", event.target.value)} placeholder="Instagram" disabled={!canRegisterSales} required /><datalist id="sales-channels-list">{salesCatalogs.channels.map((item) => <option value={item.name} key={item.id} />)}</datalist></label>
+            <label><span>Canal</span><input list="sales-channels-list" value={manualSaleForm.channelName} onChange={(event) => onManualFieldChange("channelName", event.target.value)} placeholder="WhatsApp, tienda, web..." disabled={!canRegisterSales} required /><datalist id="sales-channels-list">{salesCatalogs.channels.map((item) => <option value={item.name} key={item.id} />)}</datalist></label>
             <label><span>Vendedor</span><input list="sales-reps-list" value={manualSaleForm.salesRepName} onChange={(event) => onManualFieldChange("salesRepName", event.target.value)} placeholder="Responsable" disabled={!canRegisterSales} required /><datalist id="sales-reps-list">{salesCatalogs.reps.map((item) => <option value={item.name} key={item.id} />)}</datalist></label>
-            <label><span>Método de pago</span><input list="sales-payment-methods-list" value={manualSaleForm.paymentMethodName} onChange={(event) => onManualFieldChange("paymentMethodName", event.target.value)} placeholder="Crédito cliente" disabled={!canRegisterSales} required /><datalist id="sales-payment-methods-list">{salesCatalogs.paymentMethods.map((item) => <option value={item.name} key={item.id} />)}</datalist></label>
+            <label><span>Método de pago</span><input list="sales-payment-methods-list" value={manualSaleForm.paymentMethodName} onChange={(event) => onManualFieldChange("paymentMethodName", event.target.value)} placeholder="Efectivo, transferencia, crédito cliente" disabled={!canRegisterSales} required /><datalist id="sales-payment-methods-list">{salesCatalogs.paymentMethods.map((item) => <option value={item.name} key={item.id} />)}</datalist></label>
             <label><span>Estado de pago</span><select value={manualSaleForm.status} onChange={(event) => onManualFieldChange("status", event.target.value as ManualSaleForm["status"])} disabled={!canRegisterSales}><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select></label>
-            <label className="sales-notes-field"><span>Notas</span><textarea value={manualSaleForm.notes} onChange={(event) => onManualFieldChange("notes", event.target.value)} placeholder="Observaciones, entrega, condiciones..." disabled={!canRegisterSales} /></label>
+            <label className="sales-notes-field"><span>Notas</span><textarea value={manualSaleForm.notes} onChange={(event) => onManualFieldChange("notes", event.target.value)} placeholder="Observaciones, entrega, condiciones, promoción aplicada..." disabled={!canRegisterSales} /></label>
           </div>
 
           <footer className="sales-register-footer">
             <div><span>Total estimado</span><strong>{money(estimatedTotal)}</strong></div>
+            <div><span>Señal para IA</span><strong>{manualSaleForm.status === "pendiente" ? "Cartera" : manualSaleForm.discount ? "Descuento" : "Demanda"}</strong></div>
             <button className="primary-button" type="submit" disabled={!canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
           </footer>
         </form>
 
         <aside className="sales-side-panels">
+          <article className="sales-side-card sales-decision-card">
+            <header><strong>Señales para decidir hoy</strong><button type="button" onClick={onGenerateSalesReading}>Analizar</button></header>
+            <div className="sales-decision-list">
+              <p><TrendingUp aria-hidden="true" /><span>Canal más fuerte</span><b>{channels[0]?.label || "Sin canal"}</b></p>
+              <p><UserCheck aria-hidden="true" /><span>Vendedor destacado</span><b>{reps[0]?.label || "Sin vendedor"}</b></p>
+              <p><CreditCard aria-hidden="true" /><span>Pagos pendientes</span><b>{pendingCount}</b></p>
+              <p><Percent aria-hidden="true" /><span>Descuentos aplicados</span><b>{money(discountTotal)}</b></p>
+            </div>
+          </article>
+
           <article className="sales-side-card sales-recent-card">
             <header><strong>Ventas recientes</strong><button type="button" onClick={onRefreshSalesData}>Ver todas</button></header>
-            <table><tbody>{recentSales.map((sale) => <tr key={sale.id}><td>{formatShortDate(sale.saleDate)}</td><td>{sale.customerName}</td><td>{money(sale.total)}</td><td><span data-status={sale.status}>{sale.status}</span></td><td><button type="button" onClick={() => onStartEditingSale(sale)}>Ver</button></td></tr>)}</tbody></table>
+            <table><tbody>{recentSales.map((sale) => <tr key={sale.id}><td>{formatShortDate(sale.saleDate)}</td><td>{sale.customerName}</td><td>{money(sale.total)}</td><td><span data-status={sale.status}>{sale.status}</span></td><td><button type="button" onClick={() => onStartEditingSale(sale)}>Editar</button></td></tr>)}</tbody></table>
           </article>
 
           <div className="sales-mini-grid">
             <article className="sales-side-card">
               <header><strong>Por cobrar</strong><button type="button" onClick={() => onFilterChange("status", "pendiente")}>Ver todas</button></header>
               <div className="sales-receivable-list">
-                {receivables.map((sale) => <p key={sale.id}><span>{sale.customerName}</span><b>{money(sale.total)}</b><small>15 días</small></p>)}
+                {receivables.map((sale) => <p key={sale.id}><span>{sale.customerName}</span><b>{money(sale.total)}</b><small>pendiente</small></p>)}
               </div>
               <footer><span>Total por cobrar</span><strong>{money(pendingTotal)}</strong></footer>
             </article>
@@ -379,46 +441,61 @@ export function SalesModule({
               ))}
             </div>
           </article>
+
+          <article className="sales-side-card">
+            <header><strong>Comportamiento comercial</strong><button type="button">Ver detalle</button></header>
+            <div className="sales-behavior-grid">
+              <p><span>Pagadas</span><b>{paidCount}</b></p>
+              <p><span>Pendientes</span><b>{pendingCount}</b></p>
+              <p><span>Anuladas</span><b>{cancelledCount}</b></p>
+              <p><span>Métodos</span><b>{paymentMethods.length}</b></p>
+            </div>
+          </article>
         </aside>
       </div>
 
       <details className="sales-advanced-panel" data-active={isActive}>
-        <summary>Filtros, edición rápida y herramientas avanzadas</summary>
+        <summary><Search aria-hidden="true" /> Filtros, edición rápida y auditoría comercial</summary>
         <div className="sales-filter-grid">
           <label><span>Desde</span><input type="date" value={salesFilters.startDate} onChange={(event) => onFilterChange("startDate", event.target.value)} /></label>
           <label><span>Hasta</span><input type="date" value={salesFilters.endDate} onChange={(event) => onFilterChange("endDate", event.target.value)} /></label>
           <label><span>Cliente</span><select value={salesFilters.customer} onChange={(event) => onFilterChange("customer", event.target.value)}><option value="">Todos</option>{salesCatalogs.customers.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
           <label><span>Producto</span><select value={salesFilters.product} onChange={(event) => onFilterChange("product", event.target.value)}><option value="">Todos</option>{salesCatalogs.products.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
-          <label><span>Búsqueda</span><input value={salesFilters.search} onChange={(event) => onFilterChange("search", event.target.value)} placeholder="Buscar venta" /></label>
+          <label><span>Canal</span><select value={salesFilters.channel} onChange={(event) => onFilterChange("channel", event.target.value)}><option value="">Todos</option>{salesCatalogs.channels.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+          <label><span>Vendedor</span><select value={salesFilters.salesRep} onChange={(event) => onFilterChange("salesRep", event.target.value)}><option value="">Todos</option>{salesCatalogs.reps.map((item) => <option value={item.name} key={item.id}>{item.name}</option>)}</select></label>
+          <label><span>Estado</span><select value={salesFilters.status} onChange={(event) => onFilterChange("status", event.target.value)}><option value="">Todos</option><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select></label>
+          <label><span>Búsqueda</span><input value={salesFilters.search} onChange={(event) => onFilterChange("search", event.target.value)} placeholder="Buscar venta, cliente o producto" /></label>
           <button className="secondary-button" type="button" onClick={onClearFilters}>Limpiar</button>
         </div>
 
         <div className="sales-table-meta">
-          <span>Mostrando {virtualSales.totalRows ? virtualSales.startIndex + 1 : 0}-{virtualSales.endIndex} de {virtualSales.totalRows} ventas filtradas</span>
+          <span>Mostrando {virtualSales.totalRows ? virtualSales.startIndex + 1 : 0}-{virtualSales.endIndex} de {virtualSales.totalRows} ventas filtradas · Total {money(filteredSalesTotal)}</span>
         </div>
         <div className="sales-table-wrap sales-virtual-table-wrap" onScroll={handleSalesTableScroll}>
-          <table className="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Estado</th><th>Total</th><th>Edición</th></tr></thead>
+          <table className="sales-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Canal</th><th>Vendedor</th><th>Pago</th><th>Estado</th><th>Total</th><th>Edición</th></tr></thead>
             <tbody>
-              {virtualSales.topPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={6} style={{ height: virtualSales.topPadding }} /></tr> : null}
+              {virtualSales.topPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={9} style={{ height: virtualSales.topPadding }} /></tr> : null}
               {virtualSales.rows.map((sale) => {
-              const isEditing = editingSaleId === sale.id;
-              return (
-                <tr data-status={sale.status} key={sale.id}>
-                  <td>{isEditing ? <input type="date" value={editingSale.saleDate} onChange={(event) => onEditingSaleChange({ saleDate: event.target.value })} /> : formatShortDate(sale.saleDate)}</td>
-                  <td>{sale.customerName}</td>
-                  <td>{sale.productName}</td>
-                  <td>{isEditing ? <select value={editingSale.status} onChange={(event) => onEditingSaleChange({ status: event.target.value as RecentSale["status"] })}><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select> : <span className="sale-status-pill">{sale.status}</span>}</td>
-                  <td>{money(sale.total)}</td>
-                  <td>{isEditing ? <div className="quick-edit-controls"><input value={editingSale.notes} onChange={(event) => onEditingSaleChange({ notes: event.target.value })} placeholder="Notas" /><button className="primary-button" type="button" onClick={() => onSaveQuickSaleEdit(sale.id)}>Guardar</button><button className="secondary-button" type="button" onClick={onCancelEdit}>Cancelar</button></div> : <button className="secondary-button" type="button" onClick={() => onStartEditingSale(sale)}>Editar</button>}</td>
-                </tr>
-              );
-            })}
-              {virtualSales.bottomPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={6} style={{ height: virtualSales.bottomPadding }} /></tr> : null}
+                const isEditing = editingSaleId === sale.id;
+                return (
+                  <tr data-status={sale.status} key={sale.id}>
+                    <td>{isEditing ? <input type="date" value={editingSale.saleDate} onChange={(event) => onEditingSaleChange({ saleDate: event.target.value })} /> : formatShortDate(sale.saleDate)}</td>
+                    <td>{sale.customerName}</td>
+                    <td>{sale.productName}</td>
+                    <td>{sale.channelName}</td>
+                    <td>{sale.salesRepName}</td>
+                    <td>{sale.paymentMethodName}</td>
+                    <td>{isEditing ? <select value={editingSale.status} onChange={(event) => onEditingSaleChange({ status: event.target.value as RecentSale["status"] })}><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select> : <span className="sale-status-pill">{sale.status}</span>}</td>
+                    <td>{money(sale.total)}</td>
+                    <td>{isEditing ? <div className="quick-edit-controls"><input value={editingSale.notes} onChange={(event) => onEditingSaleChange({ notes: event.target.value })} placeholder="Notas" /><button className="primary-button" type="button" onClick={() => onSaveQuickSaleEdit(sale.id)}>Guardar</button><button className="secondary-button" type="button" onClick={onCancelEdit}>Cancelar</button></div> : <button className="secondary-button" type="button" onClick={() => onStartEditingSale(sale)}>Editar</button>}</td>
+                  </tr>
+                );
+              })}
+              {virtualSales.bottomPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={9} style={{ height: virtualSales.bottomPadding }} /></tr> : null}
             </tbody>
           </table>
         </div>
       </details>
-
     </section>
   );
 }
