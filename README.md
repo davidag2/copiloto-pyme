@@ -471,6 +471,8 @@ La integracion tecnica inicial esta separada en dos capas:
 
 - `lib/openai-client.ts`: cliente centralizado para llamar la API de OpenAI desde funciones del servidor.
 - `lib/ai-decision-engine.ts`: prompts, tipos y normalizacion de respuestas para convertir metricas de la PYME en sugerencias accionables.
+- `lib/business-snapshot.ts`: resumen operativo de ventas, caja, inventario, clientes, alertas y actividad.
+- `app/api/ai/decisions`: endpoint protegido que genera decisiones IA y las guarda en `ai_suggestions`.
 
 Esta base permite conectar despues el dashboard, reportes y alertas sin duplicar prompts ni modelos en cada endpoint.
 

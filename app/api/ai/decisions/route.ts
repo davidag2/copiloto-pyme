@@ -1,6 +1,8 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { buildBusinessSnapshot } from "@/lib/business-snapshot";
 import { canUseAiDecisionEngine, generateAiDecisionEngineResult } from "@/lib/ai-decision-engine";
+import { saveAiDecisionSuggestions } from "@/lib/ai-suggestion-persistence";
+import { clearCompanyServerCache } from "@/lib/server-cache";
 import { requireCompanySession } from "@/lib/session";
 
 export async function POST(request: Request) {
@@ -19,9 +21,19 @@ export async function POST(request: Request) {
 
     const snapshot = await buildBusinessSnapshot(companyId);
     const result = await generateAiDecisionEngineResult(snapshot);
+    const shouldPersist = body.persist !== false;
+    const savedSuggestions = shouldPersist
+      ? await saveAiDecisionSuggestions(companyId, session.session.userId, result.suggestions)
+      : [];
+
+    if (shouldPersist) {
+      clearCompanyServerCache(companyId);
+    }
 
     return ok({
       generatedAt: new Date().toISOString(),
+      persisted: shouldPersist,
+      savedSuggestions,
       snapshot,
       ...result
     });
