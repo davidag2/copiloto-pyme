@@ -456,6 +456,15 @@ IA:
 - OpenAI API
 - pgvector para busqueda semantica
 
+### Modelos IA Oficiales
+
+Copiloto Pyme centraliza sus modelos en `lib/ai-models.ts` para evitar valores duplicados en endpoints o componentes.
+
+- `OPENAI_DAILY_ANALYSIS_MODEL=gpt-4o-mini`: resumen diario, alertas y recomendaciones economicas.
+- `OPENAI_DECISION_MODEL=gpt-4o-mini`: motor de decisiones, prioridades, impacto y acciones sugeridas.
+- `OPENAI_VOICE_MODEL=gpt-4o-mini-realtime-preview`: asistente de voz con Twilio.
+- `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`: busqueda semantica y memoria del negocio.
+
 Infraestructura:
 
 - Vercel
