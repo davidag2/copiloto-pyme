@@ -2085,7 +2085,7 @@ h2 {
   color: white;
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(260px, 0.96fr) minmax(220px, 0.58fr) minmax(270px, 0.62fr);
+  grid-template-columns: minmax(260px, 0.9fr) minmax(260px, 0.62fr) minmax(270px, 0.64fr);
   min-height: 350px;
   overflow: hidden;
   padding: clamp(22px, 2.8vw, 38px);
@@ -2171,8 +2171,81 @@ h2 {
   background: linear-gradient(135deg, #704cff, #4f46e5);
   border: 0;
   box-shadow: 0 20px 44px rgba(79, 70, 229, 0.34);
-  justify-self: start;
   margin-top: 8px;
+}
+
+.ai-command-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.ai-command-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: white;
+}
+
+.ai-command-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+}
+
+.ai-decision-stack {
+  align-self: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-decision-stack > svg {
+  color: rgba(196, 181, 253, 0.82);
+  justify-self: center;
+  transform: rotate(90deg);
+}
+
+.ai-orb-mini {
+  align-items: center;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.8), transparent 14%),
+    linear-gradient(135deg, #8b5cf6, #2563eb 62%, #22c55e);
+  border-radius: 22px;
+  box-shadow: 0 18px 44px rgba(109, 93, 252, 0.35);
+  color: white;
+  display: inline-flex;
+  height: 66px;
+  justify-content: center;
+  width: 66px;
+}
+
+.ai-decision-stack div {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.ai-decision-stack small {
+  color: rgba(237, 242, 255, 0.62);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ai-decision-stack strong {
+  color: white;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .ai-orb-stage {
@@ -2344,6 +2417,10 @@ h2 {
 .ai-process-panel,
 .ai-potential-card,
 .ai-week-card,
+.ai-category-panel,
+.ai-decision-card,
+.ai-impact-summary-panel,
+.ai-activity-decision-panel,
 .ai-suggestion-board {
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -2356,6 +2433,10 @@ h2 {
 .theme-dark .ai-process-panel,
 .theme-dark .ai-potential-card,
 .theme-dark .ai-week-card,
+.theme-dark .ai-category-panel,
+.theme-dark .ai-decision-card,
+.theme-dark .ai-impact-summary-panel,
+.theme-dark .ai-activity-decision-panel,
 .theme-dark .ai-suggestion-board {
   background: rgba(15, 23, 42, 0.72);
   border-color: rgba(148, 163, 184, 0.16);
@@ -2442,7 +2523,7 @@ h2 {
 }
 
 .ai-command-side {
-  grid-template-rows: minmax(310px, auto) minmax(250px, 1fr);
+  grid-template-rows: minmax(260px, auto) auto minmax(250px, 1fr);
 }
 
 .ai-potential-card,
@@ -2495,6 +2576,209 @@ h2 {
 .ai-side-link span {
   color: var(--ink);
   font-weight: 900;
+}
+
+.ai-decision-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+}
+
+.ai-decision-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-decision-checklist > div {
+  align-items: start;
+  background: color-mix(in srgb, var(--brand-blue) 5%, var(--surface));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 14px;
+}
+
+.ai-decision-checklist span {
+  align-items: center;
+  background: linear-gradient(135deg, #6d5dfc, #2563eb);
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.ai-decision-checklist strong,
+.ai-impact-summary-item strong,
+.ai-category-row strong,
+.ai-activity-decision-item strong,
+.ai-category-empty strong,
+.ai-activity-empty strong {
+  color: var(--ink);
+}
+
+.ai-decision-checklist p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 4px 0 0;
+}
+
+.ai-impact-summary-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ai-impact-summary-item {
+  align-items: center;
+  background: color-mix(in srgb, var(--surface-strong) 74%, transparent);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 14px;
+}
+
+.ai-impact-summary-item > span,
+.ai-category-row > span,
+.ai-activity-decision-item > span {
+  align-items: center;
+  background: rgba(109, 93, 252, 0.1);
+  border-radius: 14px;
+  color: #6d5dfc;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.ai-impact-summary-item[data-tone="green"] > span,
+.ai-category-row[data-tone="green"] > span,
+.ai-activity-decision-item[data-tone="green"] > span {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--green);
+}
+
+.ai-impact-summary-item[data-tone="red"] > span,
+.ai-category-row[data-tone="red"] > span,
+.ai-activity-decision-item[data-tone="red"] > span {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--red);
+}
+
+.ai-impact-summary-item small,
+.ai-category-row small,
+.ai-activity-decision-item small,
+.ai-category-empty small,
+.ai-activity-empty small {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+.ai-category-list,
+.ai-activity-decision-list {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-category-row {
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 12px;
+  text-align: left;
+}
+
+.ai-category-row:hover {
+  background: color-mix(in srgb, var(--brand-blue) 5%, transparent);
+  border-color: rgba(37, 99, 235, 0.28);
+}
+
+.ai-category-row div {
+  min-width: 0;
+}
+
+.ai-category-row em {
+  background: linear-gradient(90deg, #6d5dfc, #22c55e);
+  border-radius: 999px;
+  display: block;
+  height: 5px;
+  margin-top: 9px;
+  max-width: 100%;
+}
+
+.ai-category-row b {
+  color: var(--brand-blue);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ai-category-empty,
+.ai-activity-empty {
+  align-items: center;
+  background: color-mix(in srgb, var(--brand-blue) 5%, var(--surface));
+  border: 1px dashed rgba(37, 99, 235, 0.24);
+  border-radius: 18px;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 22px;
+  text-align: center;
+}
+
+.ai-category-empty svg,
+.ai-activity-empty svg {
+  color: var(--brand-blue);
+}
+
+.ai-activity-decision-panel {
+  margin-bottom: 18px;
+}
+
+.ai-activity-decision-list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ai-activity-decision-item {
+  align-items: center;
+  background: color-mix(in srgb, var(--surface-strong) 78%, transparent);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ai-activity-decision-item:hover {
+  border-color: rgba(37, 99, 235, 0.32);
+  transform: translateY(-1px);
+}
+
+.ai-activity-decision-item em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  grid-column: 2;
 }
 
 .ai-week-list {
@@ -2590,7 +2874,7 @@ h2 {
   }
 
   .ai-command-side {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: auto;
   }
 }
@@ -2600,8 +2884,19 @@ h2 {
     grid-template-columns: minmax(0, 1fr) minmax(250px, 0.75fr);
   }
 
-  .ai-orb-stage {
-    display: none;
+  .ai-decision-stack {
+    grid-column: 1 / -1;
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .ai-decision-stack > svg {
+    align-self: center;
+    transform: none;
+  }
+
+  .ai-command-side,
+  .ai-activity-decision-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2609,6 +2904,9 @@ h2 {
   .ai-command-home,
   .ai-command-side,
   .ai-process-steps,
+  .ai-decision-grid,
+  .ai-impact-summary-grid,
+  .ai-activity-decision-list,
   .ai-suggestion-board-grid {
     grid-template-columns: 1fr;
   }
@@ -2616,6 +2914,14 @@ h2 {
   .ai-command-hero {
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .ai-decision-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-decision-stack > svg {
+    transform: rotate(90deg);
   }
 
   .ai-process-card:not(:last-child)::after {

@@ -1,7 +1,15 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, CheckCircle2, Clock3, Database, Sparkles, Target } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  ClipboardCheck,
+  Database,
+  Sparkles,
+  Target
+} from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts";
 
 type HomeSuggestion = {
@@ -117,11 +125,15 @@ export function DashboardHome({
   aiSuggestionsStatus,
   aiSuggestions,
   aiHomeKpis,
+  aiImpactSummaryCards,
   aiImpactLift,
   hasRealAiSuggestions,
   hasBusinessData,
   aiImpactData,
   aiImpactCategories,
+  aiCategoryMaxImpact,
+  aiActivity,
+  activityStatus,
   companyId,
   tenantShortId,
   activeRoleLabel,
@@ -134,6 +146,7 @@ export function DashboardHome({
   onGenerateAiDecisions,
   onRefreshSuggestions,
   onShowAllCategories,
+  onRefreshActivity,
   formatCopCompact,
   formatMoney
 }: DashboardHomeProps) {
@@ -143,21 +156,36 @@ export function DashboardHome({
   const PrimaryIcon = primarySuggestion?.icon ?? Sparkles;
   const weekKpis = aiHomeKpis.slice(0, 4);
   const hasSuggestions = aiSuggestions.length > 0;
+  const impactCards = aiImpactSummaryCards.slice(0, 4);
   const processSteps = [
     {
-      title: "Detectamos oportunidades",
-      text: "La IA analiza tus ventas, caja, inventario, precios y comportamiento de clientes.",
+      title: "Conecta datos reales",
+      text: "Ventas, caja, inventario y clientes alimentan la lectura diaria.",
+      icon: Database
+    },
+    {
+      title: "Genera sugerencias IA",
+      text: "OpenAI cruza señales y detecta riesgos, oportunidades y prioridades.",
       icon: Sparkles
     },
     {
-      title: "Generamos sugerencias",
-      text: "Priorizamos las acciones con mayor impacto y factibilidad para tu equipo.",
-      icon: Target
+      title: "Ejecuta la decisión",
+      text: "Abre la sugerencia, asígnala al equipo y mide el impacto real.",
+      icon: CheckCircle2
+    }
+  ];
+  const decisionChecklist = [
+    {
+      label: "Problema detectado",
+      value: primarySuggestion?.text ?? "Aún no hay datos suficientes para detectar una prioridad."
     },
     {
-      title: "Obtienes mejores resultados",
-      text: "Ejecutas la recomendación, mides el avance y mantienes el negocio bajo control.",
-      icon: CheckCircle2
+      label: "Impacto esperado",
+      value: primarySuggestion?.impact ?? formatCopCompact(aiImpactLift)
+    },
+    {
+      label: "Siguiente acción",
+      value: primarySuggestion?.id ? "Abrir la sugerencia, revisar evidencia y asignar responsable." : "Carga datos y genera tu primera lectura IA."
     }
   ];
 
@@ -167,32 +195,49 @@ export function DashboardHome({
         <div className="ai-command-main">
           <article className="ai-command-hero" data-status={overallStatusTone}>
             <div className="ai-command-copy">
-              <span className="ai-command-eyebrow"><Sparkles aria-hidden="true" />Copiloto AI</span>
-              <h2>{hasSuggestions ? "Tu IA encontró la mejor acción para impulsar tu negocio" : "Tu dashboard está listo para recibir tus datos"}</h2>
-              <p>{hasSuggestions ? "Basado en ventas, caja e inventario, esta es la acción con mayor impacto para esta semana." : "Cuando importes información o registres ventas manuales, Copiloto Pyme mostrará KPIs, alertas y sugerencias reales."}</p>
+              <span className="ai-command-eyebrow"><Sparkles aria-hidden="true" />Motor de sugerencias OpenAI</span>
+              <h2>{hasSuggestions ? "Decide qué hacer hoy con evidencia de tu PYME" : "Activa tu primer centro de decisiones con IA"}</h2>
+              <p>{hasSuggestions ? "Inicio reúne ventas, caja, inventario y clientes para convertirlos en una decisión priorizada, con impacto estimado y una acción concreta para ejecutar." : "Registra o importa datos reales y Copiloto Pyme usará OpenAI para detectar riesgos, oportunidades y decisiones importantes antes de que se vuelvan problemas."}</p>
               <div className="ai-command-meta">
                 <span><Clock3 aria-hidden="true" />{dateRangeLabel}</span>
                 <span data-status={overallStatusTone}>{overallStatus}</span>
                 <span><Database aria-hidden="true" />{hasBusinessData ? hasRealAiSuggestions ? "Datos reales conectados" : "Datos cargados" : "Sin datos cargados"}</span>
               </div>
-              <button className="primary-button ai-command-action" type="button" onClick={onGenerateAiDecisions} disabled={isGeneratingAi}>
-                {isGeneratingAi ? "Analizando datos..." : hasSuggestions ? "Generar nueva lectura IA" : "Generar sugerencias IA"} <ArrowRight aria-hidden="true" />
-              </button>
+              <div className="ai-command-actions">
+                <button className="primary-button ai-command-action" type="button" onClick={onGenerateAiDecisions} disabled={isGeneratingAi}>
+                  {isGeneratingAi ? "Analizando datos..." : hasSuggestions ? "Generar nueva lectura IA" : "Generar sugerencias IA"} <ArrowRight aria-hidden="true" />
+                </button>
+                <button className="secondary-button ai-command-secondary" type="button" onClick={onRefreshSuggestions}>
+                  Actualizar sugerencias
+                </button>
+              </div>
             </div>
 
-            <div className="ai-orb-stage" aria-hidden="true">
-              <span className="ai-orb-ring" />
-              <span className="ai-orb-core"><Sparkles /></span>
-              <span className="ai-orb-shadow" />
+            <div className="ai-decision-stack" aria-label="Flujo de decisión">
+              <span className="ai-orb-mini"><Sparkles aria-hidden="true" /></span>
+              <div>
+                <small>Entrada</small>
+                <strong>Ventas · Caja · Inventario · Clientes</strong>
+              </div>
+              <ArrowRight aria-hidden="true" />
+              <div>
+                <small>OpenAI analiza</small>
+                <strong>Riesgo · Impacto · Prioridad</strong>
+              </div>
+              <ArrowRight aria-hidden="true" />
+              <div>
+                <small>Salida</small>
+                <strong>Decisión clara para hoy</strong>
+              </div>
             </div>
 
             <article className="ai-priority-card" data-tone={primarySuggestion?.tone ?? "priority"}>
-              <span className="ai-priority-badge">{primarySuggestion?.label ?? "Sin prioridad activa"}</span>
+              <span className="ai-priority-badge">{primarySuggestion?.label ?? "Esperando lectura IA"}</span>
               <div className="ai-priority-title">
                 <span><PrimaryIcon aria-hidden="true" /></span>
                 <div>
-                  <strong>{primarySuggestion?.title ?? "Aún no hay sugerencias IA"}</strong>
-                  <small>{primarySuggestion?.text ?? "Carga ventas, caja o inventario para que la IA analice tu negocio."}</small>
+                  <strong>{primarySuggestion?.title ?? "Genera tu primera decisión inteligente"}</strong>
+                  <small>{primarySuggestion?.text ?? "Copiloto Pyme necesita datos operativos para entregar recomendaciones accionables."}</small>
                 </div>
               </div>
               <div className="ai-confidence-bars" aria-label="Confianza alta">
@@ -203,13 +248,13 @@ export function DashboardHome({
                 <span data-muted="true" />
               </div>
               <p><span>Impacto estimado</span><strong>{primarySuggestion?.impact ?? formatCopCompact(aiImpactLift)}</strong></p>
-              {primarySuggestion?.id ? <a href={`/dashboard/suggestions/${primarySuggestion.id}`}>Abrir sugerencia</a> : null}
+              {primarySuggestion?.id ? <a href={`/dashboard/suggestions/${primarySuggestion.id}`}>Abrir detalle y asignar</a> : null}
             </article>
           </article>
 
           <article className="ai-process-panel">
             <div className="ai-section-heading">
-              <strong>Así impactarán las sugerencias en tu negocio</strong>
+              <strong>Cómo sacar provecho al motor de sugerencias</strong>
               <span>{kpiSourceStatus}</span>
             </div>
             <div className="ai-process-steps">
@@ -225,6 +270,47 @@ export function DashboardHome({
               })}
             </div>
           </article>
+
+          <section className="ai-decision-grid" aria-label="Lectura de la decisión recomendada">
+            <article className="ai-decision-card">
+              <div className="ai-section-heading">
+                <strong>Lectura ejecutiva de la decisión</strong>
+                <span>{aiSuggestionsStatus}</span>
+              </div>
+              <div className="ai-decision-checklist">
+                {decisionChecklist.map((item, index) => (
+                  <div key={item.label}>
+                    <span>{index + 1}</span>
+                    <div>
+                      <strong>{item.label}</strong>
+                      <p>{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="ai-impact-summary-panel">
+              <div className="ai-section-heading">
+                <strong>Impacto por tipo de decisión</strong>
+                <span>{hasRealAiSuggestions ? "Calculado desde sugerencias reales" : "Listo para medir cuando haya sugerencias"}</span>
+              </div>
+              <div className="ai-impact-summary-grid">
+                {impactCards.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div className="ai-impact-summary-item" data-tone={item.tone} key={item.type}>
+                      <span><Icon aria-hidden="true" /></span>
+                      <div>
+                        <strong>{formatCopCompact(item.value)}</strong>
+                        <small>{item.label}</small>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+          </section>
         </div>
 
         <aside className="ai-command-side">
@@ -247,6 +333,36 @@ export function DashboardHome({
               <span>Sugerencias activas</span>
               <ArrowRight aria-hidden="true" />
             </button>
+          </article>
+
+          <article className="ai-category-panel">
+            <div className="ai-section-heading">
+              <strong>Prioridades por módulo</strong>
+              <span>Ventas, caja, inventario y clientes reportan aquí</span>
+            </div>
+            <div className="ai-category-list">
+              {aiImpactCategories.length ? aiImpactCategories.map((category) => {
+                const Icon = category.icon;
+                const width = Math.max(8, Math.round((category.impactTotal / aiCategoryMaxImpact) * 100));
+                return (
+                  <button type="button" className="ai-category-row" data-tone={category.tone} key={category.label} onClick={onShowAllCategories}>
+                    <span><Icon aria-hidden="true" /></span>
+                    <div>
+                      <strong>{category.label}</strong>
+                      <small>{category.count} sugerencia(s) · {category.tag}</small>
+                      <em style={{ width: `${width}%` }} />
+                    </div>
+                    <b>{formatCopCompact(category.impactTotal)}</b>
+                  </button>
+                );
+              }) : (
+                <div className="ai-category-empty">
+                  <Target aria-hidden="true" />
+                  <strong>Sin prioridades todavía</strong>
+                  <small>Genera una lectura IA para ver qué módulo requiere acción primero.</small>
+                </div>
+              )}
+            </div>
           </article>
 
           <article className="ai-week-card">
@@ -272,9 +388,9 @@ export function DashboardHome({
         </aside>
       </section>
 
-      <section className="ai-suggestion-board dashboard-module-section" data-active={isActive} aria-label="Otras sugerencias para ti">
+      <section className="ai-suggestion-board dashboard-module-section" data-active={isActive} aria-label="Decisiones listas para revisar">
         <div className="ai-section-heading ai-board-heading">
-          <strong>Otras sugerencias para ti</strong>
+          <strong>Decisiones listas para revisar</strong>
           <button className="ghost-button" type="button" onClick={onShowAllCategories}>Ver todas las sugerencias <ArrowRight aria-hidden="true" /></button>
         </div>
         <div className="ai-suggestion-board-grid">
@@ -306,6 +422,34 @@ export function DashboardHome({
               <b>{formatCopCompact(0)}</b>
             </article>
           ) : null}
+        </div>
+      </section>
+
+      <section className="ai-activity-decision-panel dashboard-module-section" data-active={isActive} aria-label="Actividad reciente de sugerencias IA">
+        <div className="ai-section-heading ai-board-heading">
+          <strong>Actividad reciente del motor IA</strong>
+          <button className="ghost-button" type="button" onClick={onRefreshActivity}>Actualizar actividad <ArrowRight aria-hidden="true" /></button>
+        </div>
+        <div className="ai-activity-decision-list">
+          {aiActivity.length ? aiActivity.slice(0, 4).map((item) => {
+            const Icon = item.icon;
+            return (
+              <a className="ai-activity-decision-item" data-tone={item.tone} href={item.href || "#"} key={item.id}>
+                <span><Icon aria-hidden="true" /></span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>{item.text}</small>
+                </div>
+                <em>{item.time}</em>
+              </a>
+            );
+          }) : (
+            <div className="ai-activity-empty">
+              <ClipboardCheck aria-hidden="true" />
+              <strong>Sin actividad IA reciente</strong>
+              <small>{activityStatus}</small>
+            </div>
+          )}
         </div>
       </section>
 
