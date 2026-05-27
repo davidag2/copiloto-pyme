@@ -9629,6 +9629,204 @@ select,
   justify-self: center;
 }
 
+.clients-ai-decision-banner {
+  align-items: center;
+  background:
+    radial-gradient(circle at 12% 34%, rgba(109, 93, 252, 0.2), transparent 24%),
+    radial-gradient(circle at 84% 10%, rgba(34, 197, 94, 0.12), transparent 25%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 255, 0.9));
+  border: 1px solid rgba(109, 93, 252, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 22px 58px rgba(79, 70, 229, 0.1);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 112px minmax(0, 1fr) minmax(280px, 0.44fr);
+  min-width: 0;
+  overflow: hidden;
+  padding: 26px;
+}
+
+.clients-ai-decision-banner > * {
+  min-width: 0;
+}
+
+.clients-ai-decision-banner span {
+  color: var(--brand-blue);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.clients-ai-decision-banner h3 {
+  color: var(--ink);
+  font-size: clamp(25px, 2.2vw, 38px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 8px 0 10px;
+  max-width: 850px;
+}
+
+.clients-ai-decision-banner p {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.clients-ai-decision-banner aside {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(109, 93, 252, 0.16);
+  border-radius: 20px;
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.clients-ai-decision-banner aside small {
+  color: var(--muted);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.clients-ai-decision-banner aside strong {
+  color: var(--ink);
+  font-size: clamp(20px, 1.35vw, 25px);
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.clients-ai-decision-banner aside .secondary-button {
+  width: 100%;
+}
+
+.clients-ai-signal-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(280px, 1.35fr) repeat(4, minmax(150px, 0.62fr));
+  max-width: 100%;
+  min-width: 0;
+}
+
+.clients-ai-signal-intro,
+.clients-ai-signal-card,
+.clients-segments-panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.055);
+  min-width: 0;
+  padding: 18px;
+}
+
+.clients-ai-signal-intro {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.clients-ai-signal-intro > svg,
+.clients-ai-signal-card > svg {
+  background: linear-gradient(135deg, rgba(109, 93, 252, 0.14), rgba(34, 197, 94, 0.1));
+  border-radius: 16px;
+  color: var(--brand-blue);
+  height: 52px;
+  padding: 14px;
+  width: 52px;
+}
+
+.clients-ai-signal-intro small,
+.clients-ai-signal-card span,
+.clients-ai-signal-card small {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.clients-ai-signal-intro h3 {
+  color: var(--ink);
+  font-size: clamp(18px, 1.2vw, 23px);
+  font-weight: 950;
+  letter-spacing: 0;
+  margin: 4px 0 6px;
+}
+
+.clients-ai-signal-intro p {
+  color: var(--muted);
+  font-weight: 760;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.clients-ai-signal-card {
+  display: grid;
+  gap: 8px;
+}
+
+.clients-ai-signal-card strong {
+  color: var(--ink);
+  font-size: clamp(20px, 1.4vw, 28px);
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.clients-segments-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.clients-segments-panel header,
+.clients-segments-panel article {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.clients-segments-panel header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.clients-segments-panel header strong,
+.clients-segments-panel article strong,
+.clients-segments-panel article b {
+  color: var(--ink);
+  font-weight: 950;
+}
+
+.clients-segments-panel header button {
+  background: transparent;
+  border: 0;
+  color: var(--brand-blue);
+  cursor: pointer;
+  font-weight: 950;
+}
+
+.clients-segments-panel article {
+  background: rgba(248, 250, 252, 0.76);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.clients-segments-panel article > svg {
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+  color: var(--brand-blue);
+  height: 38px;
+  padding: 9px;
+  width: 38px;
+}
+
+.clients-segments-panel article span {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 850;
+  margin-top: 3px;
+}
+
 .theme-dark .clients-ai-card,
 .theme-dark .clients-kpi-card,
 .theme-dark .clients-important-panel,
@@ -9639,12 +9837,26 @@ select,
 .theme-dark .clients-icon-button,
 .theme-dark .clients-date-button,
 .theme-dark .clients-featured-kpis article,
-.theme-dark .clients-insights-panel article {
+.theme-dark .clients-insights-panel article,
+.theme-dark .clients-ai-decision-banner,
+.theme-dark .clients-ai-decision-banner aside,
+.theme-dark .clients-ai-signal-intro,
+.theme-dark .clients-ai-signal-card,
+.theme-dark .clients-segments-panel,
+.theme-dark .clients-segments-panel article {
   background: rgba(15, 23, 42, 0.72);
   border-color: rgba(148, 163, 184, 0.16);
 }
 
 @media (max-width: 1500px) {
+  .clients-ai-signal-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .clients-ai-signal-intro {
+    grid-column: 1 / -1;
+  }
+
   .clients-hero-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -9660,6 +9872,14 @@ select,
 }
 
 @media (max-width: 980px) {
+  .clients-ai-decision-banner {
+    grid-template-columns: 94px minmax(0, 1fr);
+  }
+
+  .clients-ai-decision-banner aside {
+    grid-column: 1 / -1;
+  }
+
   .clients-page-heading {
     display: grid;
   }
@@ -9669,6 +9889,7 @@ select,
   }
 
   .clients-hero-grid,
+  .clients-ai-signal-grid,
   .clients-pipeline-panel > div,
   .clients-contact-actions,
   .clients-featured-kpis {
@@ -9688,6 +9909,12 @@ select,
 }
 
 @media (max-width: 640px) {
+  .clients-ai-decision-banner,
+  .clients-ai-signal-grid,
+  .clients-ai-signal-intro {
+    grid-template-columns: 1fr;
+  }
+
   .clients-page-actions,
   .clients-date-button,
   .clients-page-actions .primary-button {
@@ -9707,6 +9934,11 @@ select,
 
   .clients-ai-card {
     grid-template-columns: 1fr;
+  }
+
+  .clients-ai-decision-banner {
+    border-radius: 18px;
+    padding: 16px;
   }
 
   .clients-ai-orb {
