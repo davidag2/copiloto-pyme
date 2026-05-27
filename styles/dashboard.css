@@ -7480,6 +7480,172 @@ select,
   gap: 8px;
 }
 
+.cash-ai-decision-banner {
+  align-items: center;
+  background:
+    radial-gradient(circle at 12% 38%, rgba(79, 70, 229, 0.28), transparent 24%),
+    radial-gradient(circle at 82% 16%, rgba(34, 197, 94, 0.13), transparent 26%),
+    linear-gradient(135deg, #11104f, #1a1470 48%, #0f1f4b);
+  border: 1px solid rgba(167, 139, 250, 0.34);
+  border-radius: 24px;
+  box-shadow: 0 22px 58px rgba(49, 46, 129, 0.2);
+  color: #fff;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 112px minmax(0, 1fr) minmax(280px, 0.45fr);
+  min-width: 0;
+  overflow: hidden;
+  padding: 26px;
+  position: relative;
+}
+
+.cash-ai-decision-banner > * {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.cash-ai-decision-banner::after {
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  content: "";
+  inset: 0;
+  opacity: 0.72;
+  position: absolute;
+  transform: translateX(-42%);
+}
+
+.cash-ai-decision-banner span {
+  color: #a7f3d0;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cash-ai-decision-banner h3 {
+  color: #fff;
+  font-size: clamp(25px, 2.2vw, 38px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 8px 0 10px;
+  max-width: 850px;
+}
+
+.cash-ai-decision-banner p {
+  color: rgba(255, 255, 255, 0.76);
+  font-weight: 750;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.cash-ai-decision-banner aside {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.cash-ai-decision-banner aside small {
+  color: #c4b5fd;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cash-ai-decision-banner aside strong {
+  color: #fff;
+  font-size: clamp(20px, 1.4vw, 26px);
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.cash-ai-decision-banner .primary-button {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.cash-ai-signal-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(280px, 1.35fr) repeat(4, minmax(150px, 0.62fr));
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cash-ai-signal-intro,
+.cash-ai-signal-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.055);
+  min-width: 0;
+  padding: 18px;
+}
+
+.cash-ai-signal-intro {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.cash-ai-signal-intro > svg,
+.cash-ai-signal-card > svg {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(37, 99, 235, 0.1));
+  border-radius: 16px;
+  color: var(--brand-blue);
+  height: 52px;
+  padding: 14px;
+  width: 52px;
+}
+
+.cash-ai-signal-intro small,
+.cash-ai-signal-card span,
+.cash-ai-signal-card small {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.cash-ai-signal-intro h3 {
+  color: var(--ink);
+  font-size: clamp(18px, 1.2vw, 23px);
+  font-weight: 950;
+  letter-spacing: 0;
+  margin: 4px 0 6px;
+}
+
+.cash-ai-signal-intro p {
+  color: var(--muted);
+  font-weight: 760;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.cash-ai-signal-card {
+  display: grid;
+  gap: 8px;
+}
+
+.cash-ai-signal-card strong {
+  color: var(--ink);
+  font-size: clamp(20px, 1.4vw, 28px);
+  font-weight: 950;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.theme-dark .cash-ai-decision-banner {
+  border-color: rgba(167, 139, 250, 0.24);
+}
+
+.theme-dark .cash-ai-signal-intro,
+.theme-dark .cash-ai-signal-card {
+  background: rgba(15, 23, 42, 0.76);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
 .theme-dark .cash-kpi-card,
 .theme-dark .cash-projection-card,
 .theme-dark .cash-panel,
@@ -7501,6 +7667,14 @@ select,
     grid-template-columns: minmax(0, 1.3fr) minmax(min(100%, 380px), 0.8fr);
   }
 
+  .cash-ai-signal-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cash-ai-signal-intro {
+    grid-column: 1 / -1;
+  }
+
   .cash-ai-banner {
     grid-template-columns: 108px minmax(0, 1fr);
   }
@@ -7519,6 +7693,14 @@ select,
 @media (max-width: 1240px) {
   .cash-layout {
     grid-template-columns: 1fr;
+  }
+
+  .cash-ai-decision-banner {
+    grid-template-columns: 94px minmax(0, 1fr);
+  }
+
+  .cash-ai-decision-banner aside {
+    grid-column: 1 / -1;
   }
 
   .cash-side-column {
@@ -7548,6 +7730,10 @@ select,
   .cash-chart-dates {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+
+  .cash-ai-signal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -7559,6 +7745,12 @@ select,
   .cash-date-button,
   .cash-add-button {
     width: 100%;
+  }
+
+  .cash-ai-decision-banner,
+  .cash-ai-signal-grid,
+  .cash-ai-signal-intro {
+    grid-template-columns: 1fr;
   }
 
   .cash-icon-button {
@@ -7576,6 +7768,11 @@ select,
   .cash-ai-banner {
     grid-template-columns: 1fr;
     padding: 18px;
+  }
+
+  .cash-ai-decision-banner {
+    border-radius: 18px;
+    padding: 16px;
   }
 
   .cash-ai-banner .primary-button {

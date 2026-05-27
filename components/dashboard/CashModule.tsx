@@ -5,16 +5,18 @@ import {
   ArrowUpCircle,
   Banknote,
   Bell,
+  Brain,
   CalendarDays,
   CalendarRange,
   CheckCircle2,
   Clock3,
   CreditCard,
+  Database,
   Info,
   MoreHorizontal,
   Plus,
+  ShieldCheck,
   Sparkles,
-  TrendingDown,
   TrendingUp,
   WalletCards
 } from "lucide-react";
@@ -55,13 +57,16 @@ export function CashModule({
   stockRule,
   showMargin,
   showStock,
-  formatMoney,
   formatGoal,
   cashDays
 }: CashModuleProps) {
   const availableCash = Math.max(metrics.cash * 1_000_000, 0);
   const projectedIncome = Math.max(metrics.sales * 150_000, 12_600_000);
   const pendingPayments = Math.max(availableCash * 0.44, 8_200_000);
+  const receivablesTotal = Math.max(projectedIncome * 0.38, 4_730_000);
+  const expensesNextWeek = Math.max(pendingPayments * 0.72, 5_900_000);
+  const bankedCash = Math.max(availableCash * 0.73, 1_000_000);
+  const physicalCash = Math.max(availableCash - bankedCash, 0);
   const days = cashDays(metrics.cash);
   const projectedBalance = Math.max(availableCash - pendingPayments + projectedIncome * 0.52, 0);
   const lowestPoint = Math.max(availableCash * 0.15, 2_800_000);
@@ -72,34 +77,30 @@ export function CashModule({
     {
       label: "Caja disponible",
       value: shortMoney(availableCash),
-      helper: "Disponible en todas las cuentas",
+      helper: "Bancos y efectivo",
       icon: WalletCards,
-      tone: "purple",
-      info: true
+      tone: "purple"
     },
     {
       label: "Días de caja",
       value: `${days} días`,
-      helper: days >= 18 ? "Estable" : "Revisar esta semana",
+      helper: days >= 18 ? "Flujo estable" : "Requiere acción",
       icon: CalendarDays,
-      tone: "green",
-      info: true
+      tone: days >= 18 ? "green" : "red"
     },
     {
       label: "Ingresos esperados",
       value: shortMoney(projectedIncome),
       helper: "Próximos 7 días",
       icon: ArrowUpCircle,
-      tone: "blue",
-      info: true
+      tone: "blue"
     },
     {
-      label: "Pagos pendientes",
-      value: shortMoney(pendingPayments),
-      helper: "3 vencen esta semana",
+      label: "Egresos próximos",
+      value: shortMoney(expensesNextWeek),
+      helper: "Pagos por priorizar",
       icon: ArrowDownCircle,
-      tone: "red",
-      info: true
+      tone: "red"
     }
   ];
 
@@ -116,34 +117,41 @@ export function CashModule({
   ] as const;
 
   const accounts = [
-    ["Bancolombia Ahorros", "•••• 2345", 8_450_000, "yellow"],
-    ["Nequi", "•••• 5678", 3_200_000, "purple"],
-    ["Daviplata", "•••• 9876", 1_800_000, "red"],
+    ["Bancolombia Ahorros", "**** 2345", 8_450_000, "yellow"],
+    ["Nequi", "**** 5678", 3_200_000, "purple"],
+    ["Daviplata", "**** 9876", 1_800_000, "red"],
     ["Efectivo en caja", "", 5_000_000, "orange"]
   ] as const;
 
   const suggestions = [
     {
       label: "Optimización",
-      title: "Reducir compras de inventario lento",
-      text: "Puedes liberar hasta $1.200.000 esta semana.",
+      title: "Reducir compras de baja rotación",
+      text: "Puedes liberar hasta $1.200.000 esta semana sin afectar ventas.",
       tone: "blue",
       icon: TrendingUp
     },
     {
       label: "Riesgo",
-      title: "Caja podría bajar bajo el mínimo recomendado",
-      text: "Revisa los pagos del 28 al 30 de mayo.",
+      title: "Caja podría bajar del mínimo recomendado",
+      text: "Revisa egresos del 28 al 30 de mayo antes de aprobar nuevos pagos.",
       tone: "red",
       icon: Bell
     },
     {
       label: "Oportunidad",
       title: "Cobrar 2 clientes mejora 5 días de caja",
-      text: "Café Oriente y Dulce Hogar suman $3.750.000.",
+      text: "Café Oriente y Dulce Hogar suman $3.750.000 por recuperar.",
       tone: "green",
       icon: CheckCircle2
     }
+  ];
+
+  const aiSignals = [
+    { label: "Ingresos", value: shortMoney(projectedIncome), helper: "ventas esperadas y cartera recuperable", icon: ArrowUpCircle },
+    { label: "Egresos", value: shortMoney(pendingPayments), helper: "pagos próximos y gastos no prioritarios", icon: ArrowDownCircle },
+    { label: "Cartera", value: shortMoney(receivablesTotal), helper: "clientes pendientes por cobrar", icon: CreditCard },
+    { label: "Bancos", value: shortMoney(bankedCash), helper: "dinero disponible por cuenta", icon: Banknote }
   ];
 
   return (
@@ -151,7 +159,7 @@ export function CashModule({
       <header className="cash-page-heading">
         <div>
           <h2>Caja</h2>
-          <p>Controla tu dinero, proyecta tu flujo y toma mejores decisiones.</p>
+          <p>Controla ingresos, egresos, cuentas por cobrar, pagos próximos, bancos y flujo disponible para que la IA priorice qué decisión financiera tomar hoy.</p>
         </div>
         <div className="cash-page-actions">
           <button className="cash-date-button" type="button"><CalendarRange aria-hidden="true" />14 may - 20 may, 2026</button>
@@ -167,7 +175,7 @@ export function CashModule({
             <article className="cash-kpi-card" data-tone={card.tone} key={card.label}>
               <span><Icon aria-hidden="true" /></span>
               <div>
-                <small>{card.label} {card.info && <Info aria-hidden="true" />}</small>
+                <small>{card.label} <Info aria-hidden="true" /></small>
                 <strong>{card.value}</strong>
                 <em>{card.helper}</em>
               </div>
@@ -176,25 +184,48 @@ export function CashModule({
         })}
       </div>
 
+      <article className="cash-ai-decision-banner">
+        <div className="cash-ai-orb" aria-hidden="true">
+          <Sparkles />
+          <i />
+        </div>
+        <div>
+          <span>Motor de sugerencias OpenAI para caja</span>
+          <h3>La IA revisa tu dinero y te dice qué pagar, qué cobrar y qué aplazar.</h3>
+          <p>Copiloto Pyme cruza ingresos esperados, egresos próximos, cartera por cobrar, bancos y días de caja para evitar quedarte sin flujo.</p>
+        </div>
+        <aside>
+          <small>Decisión recomendada</small>
+          <strong>Cobrar cartera antes de aprobar compras nuevas</strong>
+          <p>Impacto: +5 a +8 días de caja disponible.</p>
+          <button className="primary-button" type="button">Ver acciones recomendadas</button>
+        </aside>
+      </article>
+
+      <section className="cash-ai-signal-grid" aria-label="Datos de caja que usa OpenAI">
+        <article className="cash-ai-signal-intro">
+          <Brain aria-hidden="true" />
+          <div>
+            <small>Datos que mejoran las decisiones de caja</small>
+            <h3>Mientras más completo esté Caja, mejores serán las recomendaciones en Inicio.</h3>
+            <p>La IA necesita saber cuánto entra, cuánto sale, qué clientes deben, qué pagos vencen y dónde está el dinero.</p>
+          </div>
+        </article>
+        {aiSignals.map((signal) => {
+          const Icon = signal.icon;
+          return (
+            <article className="cash-ai-signal-card" key={signal.label}>
+              <Icon aria-hidden="true" />
+              <span>{signal.label}</span>
+              <strong>{signal.value}</strong>
+              <small>{signal.helper}</small>
+            </article>
+          );
+        })}
+      </section>
+
       <div className="cash-layout">
         <main className="cash-main-column">
-          <article className="cash-ai-banner">
-            <div className="cash-ai-orb" aria-hidden="true">
-              <Sparkles />
-              <i />
-            </div>
-            <div>
-              <span>Copiloto de caja</span>
-              <h3>Tu flujo de caja estará ajustado en 6 días.</h3>
-              <p>Cobrar facturas pendientes y reducir compras no prioritarias esta semana.</p>
-              <footer>
-                <small>Impacto estimado:</small>
-                <b>+8 días de caja</b>
-              </footer>
-            </div>
-            <button className="primary-button" type="button">Ver acciones recomendadas</button>
-          </article>
-
           <article className="cash-projection-card">
             <header>
               <strong>Proyección de caja <Info aria-hidden="true" /></strong>
@@ -226,8 +257,8 @@ export function CashModule({
             </div>
 
             <div className="cash-projection-summary">
-              <div><span>Saldo inicial (hoy)</span><strong>{shortMoney(availableCash)}</strong></div>
-              <div><span>Saldo proyectado (30 días)</span><strong className="danger">{shortMoney(projectedBalance)}</strong></div>
+              <div><span>Saldo inicial</span><strong>{shortMoney(availableCash)}</strong></div>
+              <div><span>Saldo proyectado</span><strong className="danger">{shortMoney(projectedBalance)}</strong></div>
               <div><span>Punto más bajo</span><strong className="danger">{shortMoney(lowestPoint)}</strong><small>{riskDate}</small></div>
             </div>
           </article>
@@ -286,7 +317,7 @@ export function CashModule({
           </article>
 
           <article className="cash-panel">
-            <header><strong>Cuentas y medios de pago</strong><button type="button">Ver todas</button></header>
+            <header><strong>Bancos y medios de pago</strong><button type="button">Ver todos</button></header>
             <div className="cash-accounts-list">
               {accounts.map(([name, digits, value, tone]) => (
                 <div key={name}>
@@ -301,9 +332,10 @@ export function CashModule({
           </article>
 
           <article className="cash-panel cash-context-panel">
-            <header><strong>Lectura del negocio</strong></header>
+            <header><strong>Contexto para decisiones</strong></header>
             <p>Meta mensual: {monthlyGoalText}. Avance comercial: {Math.round(salesPercent)}%. {showMargin ? `Margen observado: ${metrics.margin.toFixed(1)}% vs meta ${marginRule}%.` : ""} {showStock ? `Inventario crítico: ${metrics.criticalStock}/${stockRule} SKU.` : ""}</p>
-            <span><Banknote aria-hidden="true" />La caja disponible equivale a {days} días de operación.</span>
+            <span><ShieldCheck aria-hidden="true" />La caja disponible equivale a {days} días de operación.</span>
+            <span><Database aria-hidden="true" />Bancos: {shortMoney(bankedCash)} · Efectivo: {shortMoney(physicalCash)}</span>
           </article>
         </aside>
       </div>
