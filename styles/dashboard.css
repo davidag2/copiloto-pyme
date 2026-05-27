@@ -8393,6 +8393,148 @@ select,
   width: 14px;
 }
 
+.inventory-ai-decision-banner {
+  align-items: center;
+  background:
+    radial-gradient(circle at 12% 34%, rgba(109, 93, 252, 0.2), transparent 24%),
+    radial-gradient(circle at 84% 10%, rgba(34, 197, 94, 0.12), transparent 25%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 255, 0.9));
+  border: 1px solid rgba(109, 93, 252, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 22px 58px rgba(79, 70, 229, 0.1);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 112px minmax(0, 1fr) minmax(280px, 0.44fr);
+  min-width: 0;
+  overflow: hidden;
+  padding: 26px;
+}
+
+.inventory-ai-decision-banner > * {
+  min-width: 0;
+}
+
+.inventory-ai-decision-banner span {
+  color: var(--brand-blue);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.inventory-ai-decision-banner h3 {
+  color: var(--ink);
+  font-size: clamp(25px, 2.2vw, 38px);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 8px 0 10px;
+  max-width: 850px;
+}
+
+.inventory-ai-decision-banner p {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.inventory-ai-decision-banner aside {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(109, 93, 252, 0.16);
+  border-radius: 20px;
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.inventory-ai-decision-banner aside small {
+  color: var(--muted);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.inventory-ai-decision-banner aside strong {
+  color: var(--ink);
+  font-size: clamp(20px, 1.35vw, 25px);
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.inventory-ai-decision-banner aside .secondary-button {
+  width: 100%;
+}
+
+.inventory-ai-signal-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(280px, 1.35fr) repeat(4, minmax(150px, 0.62fr));
+  max-width: 100%;
+  min-width: 0;
+}
+
+.inventory-ai-signal-intro,
+.inventory-ai-signal-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.055);
+  min-width: 0;
+  padding: 18px;
+}
+
+.inventory-ai-signal-intro {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.inventory-ai-signal-intro > svg,
+.inventory-ai-signal-card > svg {
+  background: linear-gradient(135deg, rgba(109, 93, 252, 0.14), rgba(34, 197, 94, 0.1));
+  border-radius: 16px;
+  color: var(--brand-blue);
+  height: 52px;
+  padding: 14px;
+  width: 52px;
+}
+
+.inventory-ai-signal-intro small,
+.inventory-ai-signal-card span,
+.inventory-ai-signal-card small {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.inventory-ai-signal-intro h3 {
+  color: var(--ink);
+  font-size: clamp(18px, 1.2vw, 23px);
+  font-weight: 950;
+  letter-spacing: 0;
+  margin: 4px 0 6px;
+}
+
+.inventory-ai-signal-intro p {
+  color: var(--muted);
+  font-weight: 760;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.inventory-ai-signal-card {
+  display: grid;
+  gap: 8px;
+}
+
+.inventory-ai-signal-card strong {
+  color: var(--ink);
+  font-size: clamp(20px, 1.4vw, 28px);
+  font-weight: 950;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
 .theme-dark .inventory-kpi-card,
 .theme-dark .inventory-status-card,
 .theme-dark .inventory-critical-card,
@@ -8408,6 +8550,51 @@ select,
 .theme-dark .inventory-ai-banner,
 .theme-dark .inventory-ai-list article {
   background: rgba(15, 23, 42, 0.72);
+}
+
+.theme-dark .inventory-ai-decision-banner,
+.theme-dark .inventory-ai-decision-banner aside,
+.theme-dark .inventory-ai-signal-intro,
+.theme-dark .inventory-ai-signal-card {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+@media (max-width: 1500px) {
+  .inventory-ai-signal-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .inventory-ai-signal-intro {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1080px) {
+  .inventory-ai-decision-banner {
+    grid-template-columns: 94px minmax(0, 1fr);
+  }
+
+  .inventory-ai-decision-banner aside {
+    grid-column: 1 / -1;
+  }
+
+  .inventory-ai-signal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .inventory-ai-decision-banner,
+  .inventory-ai-signal-grid,
+  .inventory-ai-signal-intro {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-ai-decision-banner {
+    border-radius: 18px;
+    padding: 16px;
+  }
 }
 
 @media (max-width: 1500px) {
