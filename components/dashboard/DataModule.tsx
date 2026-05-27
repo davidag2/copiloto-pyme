@@ -31,17 +31,17 @@ type ImportBlock = {
 };
 
 const sources = [
-  ["Ventas manuales", "PostgreSQL", "Actualizado hace 4 min", "Conectado"],
-  ["Importador modular", "Excel y Word", "Carga por módulo", "Activo"],
-  ["Google Sheets", "Integración", "Sincronización diaria", "Pendiente"],
-  ["SIIGO", "Facturación", "Próxima integración", "Planeado"]
+  ["Ventas", "Sin archivo cargado", "Importa o registra datos", "En cero"],
+  ["Caja", "Sin archivo cargado", "Importa o registra movimientos", "En cero"],
+  ["Inventario", "Sin archivo cargado", "Importa o crea productos", "En cero"],
+  ["Clientes", "Sin archivo cargado", "Importa o crea contactos", "En cero"]
 ];
 
 const dataSets = [
-  ["ventas", "1.248 filas", "98% válido"],
-  ["caja", "186 movimientos", "94% completo"],
-  ["clientes", "326 registros", "96% completo"],
-  ["inventario", "248 productos", "12 alertas"]
+  ["ventas", "0 filas", "Sin datos"],
+  ["caja", "0 movimientos", "Sin datos"],
+  ["clientes", "0 registros", "Sin datos"],
+  ["inventario", "0 productos", "Sin datos"]
 ];
 
 const importBlocks: ImportBlock[] = [
@@ -104,7 +104,7 @@ export function DataModule({ isActive }: DataModuleProps) {
           <h3>Carga tus archivos por módulo y Copiloto Pyme arma la base para la IA.</h3>
           <p>Cada archivo funciona como una pieza: Ventas, Caja, Inventario y Clientes se conectan para que Inicio entregue mejores decisiones.</p>
         </div>
-        <strong>LEGO</strong>
+        <strong>0%</strong>
       </div>
 
       <section className="data-import-builder" aria-label="Importador de archivos por módulo">

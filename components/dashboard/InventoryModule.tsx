@@ -50,59 +50,78 @@ export function InventoryModule({
   products,
   formatMoney
 }: InventoryModuleProps) {
-  const criticalProducts = Math.max(metrics.criticalStock || 0, 6);
-  const inventoryValue = Math.max(metrics.sales * 1_025_000, 86_400_000);
-  const activeProducts = Math.max(products.length * 62, 248);
-  const lowStockProducts = Math.max(criticalProducts * 4, 24);
-  const noMovementProducts = Math.max(activeProducts - 192, 56);
-  const purchaseOrdersTotal = 6_350_000;
-  const riskAvoided = Math.max(metrics.sales * 280_000, 2_400_000);
+  const hasInventoryData = products.length > 0 || metrics.criticalStock > 0;
+  const criticalProducts = metrics.criticalStock || 0;
+  const inventoryValue = hasInventoryData ? Math.max(metrics.sales * 1_025_000, 0) : 0;
+  const activeProducts = products.length;
+  const lowStockProducts = hasInventoryData ? criticalProducts : 0;
+  const healthyProducts = hasInventoryData ? Math.max(activeProducts - criticalProducts, 0) : 0;
+  const noMovementProducts = 0;
+  const purchaseOrdersTotal = 0;
+  const riskAvoided = hasInventoryData ? Math.max(metrics.sales * 280_000, 0) : 0;
 
-  const productRows = [
+  const productRows = hasInventoryData ? [
     ["Panela Orgánica 500g", "PAN500", "4 unidades", "20 unidades", "Crítico", "Reponer", "red"],
     ["Café Premium 500g", "CAF500", "12 unidades", "30 unidades", "Bajo", "Revisar", "amber"],
     ["Azúcar Integral 1kg", "AZU1K", "0 unidades", "15 unidades", "Sin stock", "Comprar", "red"]
-  ] as const;
+  ] as const : [];
 
-  const warehouses = [
+  const warehouses = hasInventoryData ? [
     ["Bodega Principal", "Centro", 48_200_000, "128 productos", "purple"],
     ["Tienda Física", "Punto de venta", 21_600_000, "96 productos", "green"],
     ["Bodega Norte", "Barranquilla", 12_100_000, "82 productos", "amber"],
     ["En Tránsito", "En proveedores", 4_500_000, "24 productos", "blue"]
-  ] as const;
+  ] as const : [];
 
-  const movements = [
+  const movements = hasInventoryData ? [
     ["Entrada de inventario", "Café Premium 500g - 24 unidades", "Hoy, 9:30 a.m.", "green"],
     ["Venta realizada", "Panela Orgánica 500g - 3 unidades", "Hoy, 8:20 a.m.", "gray"],
     ["Ajuste manual", "Azúcar Integral 1kg - 2 unidades", "Ayer, 4:15 p.m.", "red"],
     ["Transferencia", "Café Premium 500g - 10 unidades", "Ayer, 11:40 a.m.", "blue"],
     ["Compra recibida", "Proveedor Café SAS - Orden #1254", "16 may, 3:20 p.m.", "green"]
-  ] as const;
+  ] as const : [];
 
-  const orders = [
+  const orders = hasInventoryData ? [
     ["Café SAS", "Pendiente", "22 may", 2_400_000],
     ["Distribuciones La 80", "Pendiente", "24 may", 1_750_000],
     ["Insumos del Valle", "En tránsito", "21 may", 980_000],
     ["Azúcares Colombia", "Recibida", "15 may", 1_220_000]
-  ] as const;
+  ] as const : [];
 
-  const suggestions = [
+  const suggestions = hasInventoryData ? [
     ["Riesgo", "Panela Orgánica se agotará en 4 días si mantiene la venta actual.", "red", TriangleAlert],
     ["Oportunidad", "Café Premium subió 28%; conviene reforzar stock en tienda.", "green", TrendingUp],
     ["Optimización", "Reducir compras de productos sin movimiento protege la caja.", "blue", RotateCw]
-  ] as const;
+  ] as const : [];
+
+  const inventoryRows = hasInventoryData ? products.slice(0, 3).map((product, index) => [
+    product.name,
+    `SKU-${String(index + 1).padStart(3, "0")}`,
+    product.stock === "Critico" ? "0 unidades" : product.stock === "Bajo" ? "Bajo mínimo" : "Disponible",
+    "Configurar",
+    product.stock === "Critico" ? "Crítico" : product.stock === "Bajo" ? "Bajo" : "Saludable",
+    product.stock === "Normal" ? "Revisar" : "Reponer",
+    product.stock === "Normal" ? "green" : product.stock === "Bajo" ? "amber" : "red"
+  ] as const) : [];
+  const inventoryWarehouses = hasInventoryData ? [["Bodega principal", "Configurar ubicación", inventoryValue, `${activeProducts} productos`, "purple"]] as const : [];
+  const inventoryMovements = hasInventoryData ? [["Inventario conectado", `${activeProducts} producto(s) cargados`, "Ahora", "green"]] as const : [];
+  const inventoryOrders = [] as Array<readonly [string, string, string, number]>;
+  const inventorySuggestions = hasInventoryData ? [
+    ["Riesgo", `${criticalProducts} producto(s) requieren revisar stock mínimo.`, "red", TriangleAlert],
+    ["Optimización", "Completa bodegas, costos y mínimos para mejorar las sugerencias.", "blue", RotateCw]
+  ] as const : [];
 
   const kpiCards: Array<{ label: string; value: string; helper: string; icon: LucideIcon; tone: string }> = [
-    { label: "Productos activos", value: activeProducts.toString(), helper: "+12 este mes", icon: Box, tone: "purple" },
+    { label: "Productos activos", value: activeProducts.toString(), helper: hasInventoryData ? "Cargados en inventario" : "Sin productos cargados", icon: Box, tone: "purple" },
     { label: "Stock crítico", value: `${criticalProducts} productos`, helper: "Riesgo de quiebre", icon: TriangleAlert, tone: "amber" },
     { label: "Inventario valorizado", value: cop(inventoryValue), helper: "Costo estimado en COP", icon: CircleDollarSign, tone: "blue" },
-    { label: "Rotación promedio", value: "18 días", helper: "Saludable", icon: RotateCw, tone: "green" }
+    { label: "Rotación promedio", value: hasInventoryData ? "Por calcular" : "0 días", helper: hasInventoryData ? "Completa ventas y stock" : "Sin movimientos", icon: RotateCw, tone: "green" }
   ];
 
   const aiSignals = [
     { label: "Stock mínimo", value: `${criticalProducts} SKU`, helper: "productos bajo punto de reposición", icon: TriangleAlert },
-    { label: "Bodegas", value: warehouses.length.toString(), helper: "ubicación y disponibilidad", icon: Warehouse },
-    { label: "Movimientos", value: movements.length.toString(), helper: "entradas, ventas y ajustes", icon: ArrowDownUp },
+    { label: "Bodegas", value: inventoryWarehouses.length.toString(), helper: "ubicación y disponibilidad", icon: Warehouse },
+    { label: "Movimientos", value: inventoryMovements.length.toString(), helper: "entradas, ventas y ajustes", icon: ArrowDownUp },
     { label: "Compras", value: cop(purchaseOrdersTotal), helper: "órdenes pendientes y recibidas", icon: ShoppingBag }
   ];
 
@@ -124,12 +143,12 @@ export function InventoryModule({
         <div className="inventory-ai-orb"><Sparkles aria-hidden="true" /></div>
         <div>
           <span>Motor de sugerencias OpenAI para inventario</span>
-          <h3>La IA detecta riesgo de quiebre y decide qué producto mover, comprar o pausar.</h3>
+          <h3>{hasInventoryData ? "La IA detecta riesgo de quiebre y decide qué producto mover, comprar o pausar." : "Inventario empieza en cero: importa productos o crea tu primer producto."}</h3>
           <p>Copiloto Pyme cruza stock actual, stock mínimo, ventas recientes, bodegas, compras y movimientos para proteger ventas y caja.</p>
         </div>
         <aside>
           <small>Decisión recomendada</small>
-          <strong>Reponer Panela Orgánica y mover Café Premium a tienda física.</strong>
+          <strong>{hasInventoryData ? "Revisar productos con stock bajo y configurar mínimos." : "Carga inventario para recibir la primera recomendación"}</strong>
           <p>Impacto estimado: evitar pérdidas por {formatMoney(riskAvoided)}.</p>
           <button className="secondary-button" type="button">Ver acciones recomendadas</button>
         </aside>
@@ -172,10 +191,10 @@ export function InventoryModule({
             <header><strong>Productos por estado</strong><button type="button">Ver todos</button></header>
             <div>
               {[
-                ["Saludable", 162, "65%", "green"],
-                ["Bajo inventario", lowStockProducts, "10%", "amber"],
-                ["Crítico", criticalProducts, "2%", "red"],
-                ["Sin movimiento", noMovementProducts, "23%", "gray"]
+                ["Saludable", healthyProducts, hasInventoryData && activeProducts ? `${Math.round((healthyProducts / activeProducts) * 100)}%` : "0%", "green"],
+                ["Bajo inventario", lowStockProducts, hasInventoryData ? "10%" : "0%", "amber"],
+                ["Crítico", criticalProducts, hasInventoryData ? "2%" : "0%", "red"],
+                ["Sin movimiento", noMovementProducts, "0%", "gray"]
               ].map(([label, value, percent, tone]) => (
                 <article data-tone={tone} key={String(label)}><span>{label}</span><strong>{value}</strong><small>{percent}</small></article>
               ))}
@@ -187,7 +206,7 @@ export function InventoryModule({
             <table>
               <thead><tr><th>Producto</th><th>SKU</th><th>Stock actual</th><th>Stock mínimo</th><th>Estado</th><th>Acción</th><th /></tr></thead>
               <tbody>
-                {productRows.map(([name, sku, current, minimum, status, action, tone]) => (
+                {inventoryRows.map(([name, sku, current, minimum, status, action, tone]) => (
                   <tr key={sku}>
                     <td><span className="inventory-product-thumb"><PackagePlus aria-hidden="true" /></span>{name}</td>
                     <td>{sku}</td>
@@ -198,6 +217,7 @@ export function InventoryModule({
                     <td><MoreVertical aria-hidden="true" /></td>
                   </tr>
                 ))}
+                {!inventoryRows.length ? <tr><td colSpan={7}><p className="module-empty-note">Sin productos cargados. Importa o crea tu primer producto.</p></td></tr> : null}
               </tbody>
             </table>
           </section>
@@ -206,13 +226,14 @@ export function InventoryModule({
             <section className="inventory-panel">
               <header><strong>Bodegas y ubicaciones</strong><button type="button">Ver todas</button></header>
               <div className="inventory-warehouse-list">
-                {warehouses.map(([name, place, value, count, tone]) => (
+                {inventoryWarehouses.map(([name, place, value, count, tone]) => (
                   <article key={name}>
                     <span data-tone={tone}><Warehouse aria-hidden="true" /></span>
                     <div><strong>{name}</strong><small>{place}</small></div>
                     <b>{cop(value)}<small>{count}</small></b>
                   </article>
                 ))}
+                {!inventoryWarehouses.length ? <p className="module-empty-note">Sin bodegas registradas.</p> : null}
               </div>
               <button className="inventory-full-button" type="button"><Plus aria-hidden="true" />Nueva bodega</button>
             </section>
@@ -220,13 +241,14 @@ export function InventoryModule({
             <section className="inventory-panel">
               <header><strong>Movimientos recientes</strong><button type="button">Ver todos</button></header>
               <div className="inventory-movement-list">
-                {movements.map(([title, detail, time, tone]) => (
+                {inventoryMovements.map(([title, detail, time, tone]) => (
                   <article key={`${title}-${time}`}>
                     <span data-tone={tone}><ClipboardList aria-hidden="true" /></span>
                     <div><strong>{title}</strong><small>{detail}</small></div>
                     <time>{time}</time>
                   </article>
                 ))}
+                {!inventoryMovements.length ? <p className="module-empty-note">Sin movimientos de inventario.</p> : null}
               </div>
             </section>
           </div>
@@ -246,7 +268,7 @@ export function InventoryModule({
 
           <section className="inventory-panel inventory-ai-list">
             <header><strong>Sugerencias de la IA</strong></header>
-            {suggestions.map(([label, text, tone, Icon]) => {
+            {inventorySuggestions.map(([label, text, tone, Icon]) => {
               const SuggestionIcon = Icon;
               return (
                 <article data-tone={tone} key={text}>
@@ -255,6 +277,7 @@ export function InventoryModule({
                 </article>
               );
             })}
+            {!inventorySuggestions.length ? <p className="module-empty-note">La IA generará sugerencias cuando existan productos y stock.</p> : null}
             <button className="inventory-full-button" type="button"><Plus aria-hidden="true" />Ver todas las sugerencias</button>
           </section>
 
@@ -262,9 +285,10 @@ export function InventoryModule({
             <header><strong>Órdenes de compra</strong><button type="button">Ver todas</button></header>
             <table className="inventory-orders-table">
               <tbody>
-                {orders.map(([provider, status, date, total]) => (
+                {inventoryOrders.map(([provider, status, date, total]) => (
                   <tr key={provider}><td>{provider}</td><td><mark>{status}</mark></td><td>{date}</td><td>{cop(total)}</td></tr>
                 ))}
+                {!inventoryOrders.length ? <tr><td colSpan={4}><p className="module-empty-note">Sin órdenes de compra registradas.</p></td></tr> : null}
               </tbody>
             </table>
             <button className="inventory-full-button" type="button"><Plus aria-hidden="true" />Nueva orden de compra</button>

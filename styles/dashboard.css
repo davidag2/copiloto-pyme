@@ -12329,3 +12329,19 @@ body {
     padding-right: env(safe-area-inset-right);
   }
 }
+.module-empty-note {
+  width: 100%;
+  margin: 0;
+  border: 1px dashed rgba(37, 99, 235, 0.24);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.82);
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 1rem;
+}
+
+td .module-empty-note {
+  margin: 0.35rem 0;
+}

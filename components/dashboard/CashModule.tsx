@@ -60,16 +60,17 @@ export function CashModule({
   formatGoal,
   cashDays
 }: CashModuleProps) {
+  const hasCashData = metrics.cash > 0 || metrics.sales > 0;
   const availableCash = Math.max(metrics.cash * 1_000_000, 0);
-  const projectedIncome = Math.max(metrics.sales * 150_000, 12_600_000);
-  const pendingPayments = Math.max(availableCash * 0.44, 8_200_000);
-  const receivablesTotal = Math.max(projectedIncome * 0.38, 4_730_000);
-  const expensesNextWeek = Math.max(pendingPayments * 0.72, 5_900_000);
-  const bankedCash = Math.max(availableCash * 0.73, 1_000_000);
+  const projectedIncome = hasCashData ? Math.max(metrics.sales * 150_000, 0) : 0;
+  const pendingPayments = hasCashData ? Math.max(availableCash * 0.44, 0) : 0;
+  const receivablesTotal = hasCashData ? Math.max(projectedIncome * 0.38, 0) : 0;
+  const expensesNextWeek = hasCashData ? Math.max(pendingPayments * 0.72, 0) : 0;
+  const bankedCash = hasCashData ? Math.max(availableCash * 0.73, 0) : 0;
   const physicalCash = Math.max(availableCash - bankedCash, 0);
   const days = cashDays(metrics.cash);
   const projectedBalance = Math.max(availableCash - pendingPayments + projectedIncome * 0.52, 0);
-  const lowestPoint = Math.max(availableCash * 0.15, 2_800_000);
+  const lowestPoint = hasCashData ? Math.max(availableCash * 0.15, 0) : 0;
   const monthlyGoalText = formatGoal(monthlyGoal);
   const riskDate = "28 may 2026";
 
@@ -104,26 +105,26 @@ export function CashModule({
     }
   ];
 
-  const upcomingPayments = [
+  const upcomingPayments = hasCashData ? [
     ["Nómina", "25 may", 6_200_000, "Próximo", "blue"],
     ["Arriendo", "28 may", 2_100_000, "Pendiente", "red"],
     ["Proveedor Café", "30 may", 4_800_000, "Programado", "purple"]
-  ] as const;
+  ] as const : [];
 
-  const receivables = [
+  const receivables = hasCashData ? [
     ["CO", "Café Oriente", 2_500_000, "15 días pendiente"],
     ["DH", "Dulce Hogar", 1_250_000, "8 días pendiente"],
     ["ML", "Mercado La 80", 980_000, "5 días pendiente"]
-  ] as const;
+  ] as const : [];
 
-  const accounts = [
+  const accounts = hasCashData ? [
     ["Bancolombia Ahorros", "**** 2345", 8_450_000, "yellow"],
     ["Nequi", "**** 5678", 3_200_000, "purple"],
     ["Daviplata", "**** 9876", 1_800_000, "red"],
     ["Efectivo en caja", "", 5_000_000, "orange"]
-  ] as const;
+  ] as const : [];
 
-  const suggestions = [
+  const suggestions = hasCashData ? [
     {
       label: "Optimización",
       title: "Reducir compras de baja rotación",
@@ -145,7 +146,11 @@ export function CashModule({
       tone: "green",
       icon: CheckCircle2
     }
-  ];
+  ] : [];
+  const cashSuggestions: typeof suggestions = [];
+  const cashUpcomingPayments: Array<readonly [string, string, number, string, string]> = [];
+  const cashReceivables: Array<readonly [string, string, number, string]> = [];
+  const cashAccounts: Array<readonly [string, string, number, string]> = [];
 
   const aiSignals = [
     { label: "Ingresos", value: shortMoney(projectedIncome), helper: "ventas esperadas y cartera recuperable", icon: ArrowUpCircle },
@@ -191,13 +196,13 @@ export function CashModule({
         </div>
         <div>
           <span>Motor de sugerencias OpenAI para caja</span>
-          <h3>La IA revisa tu dinero y te dice qué pagar, qué cobrar y qué aplazar.</h3>
+          <h3>{hasCashData ? "La IA revisa tu dinero y te dice qué pagar, qué cobrar y qué aplazar." : "Caja empieza en cero: registra ingresos, egresos y bancos para activar decisiones financieras."}</h3>
           <p>Copiloto Pyme cruza ingresos esperados, egresos próximos, cartera por cobrar, bancos y días de caja para evitar quedarte sin flujo.</p>
         </div>
         <aside>
           <small>Decisión recomendada</small>
-          <strong>Cobrar cartera antes de aprobar compras nuevas</strong>
-          <p>Impacto: +5 a +8 días de caja disponible.</p>
+          <strong>{hasCashData ? "Cobrar cartera antes de aprobar compras nuevas" : "Carga caja para recibir la primera recomendación"}</strong>
+          <p>{hasCashData ? "Impacto: +5 a +8 días de caja disponible." : "Puedes importar un Excel desde Datos o registrar movimientos manuales."}</p>
           <button className="primary-button" type="button">Ver acciones recomendadas</button>
         </aside>
       </article>
@@ -266,7 +271,7 @@ export function CashModule({
           <section className="cash-suggestions">
             <header><strong>Sugerencias de Copiloto <Info aria-hidden="true" /></strong></header>
             <div>
-              {suggestions.map((item) => {
+              {cashSuggestions.map((item) => {
                 const Icon = item.icon;
                 return (
                   <article data-tone={item.tone} key={item.title}>
@@ -277,6 +282,7 @@ export function CashModule({
                   </article>
                 );
               })}
+              {!cashSuggestions.length ? <p className="module-empty-note">La IA generará sugerencias cuando registres ingresos, egresos, cartera y bancos.</p> : null}
             </div>
           </section>
         </main>
@@ -287,7 +293,7 @@ export function CashModule({
             <table>
               <thead><tr><th>Concepto</th><th>Fecha</th><th>Valor</th><th>Estado</th><th>Acciones</th></tr></thead>
               <tbody>
-                {upcomingPayments.map(([concept, date, value, status, tone]) => (
+                {cashUpcomingPayments.map(([concept, date, value, status, tone]) => (
                   <tr key={concept}>
                     <td><span className="cash-table-icon"><Clock3 aria-hidden="true" /></span>{concept}</td>
                     <td>{date}</td>
@@ -296,6 +302,7 @@ export function CashModule({
                     <td><button aria-label={`Opciones ${concept}`} type="button"><MoreHorizontal aria-hidden="true" /></button></td>
                   </tr>
                 ))}
+                {!cashUpcomingPayments.length ? <tr><td colSpan={5}><p className="module-empty-note">Sin pagos próximos registrados.</p></td></tr> : null}
               </tbody>
             </table>
             <button className="cash-full-button" type="button"><CalendarDays aria-hidden="true" />Ver calendario completo</button>
@@ -304,7 +311,7 @@ export function CashModule({
           <article className="cash-panel cash-receivables-panel">
             <header><strong>Cuentas por cobrar</strong><button type="button">Ver todas</button></header>
             <div className="cash-receivables-list">
-              {receivables.map(([initials, name, value, delay]) => (
+              {cashReceivables.map(([initials, name, value, delay]) => (
                 <div key={name}>
                   <i>{initials}</i>
                   <span>{name}</span>
@@ -312,14 +319,15 @@ export function CashModule({
                   <button type="button">Cobrar</button>
                 </div>
               ))}
+              {!cashReceivables.length ? <p className="module-empty-note">No hay cuentas por cobrar registradas.</p> : null}
             </div>
-            <p><Sparkles aria-hidden="true" />Prioriza cobrar Café Oriente esta semana.</p>
+            <p><Sparkles aria-hidden="true" />{hasCashData ? "Prioriza los cobros con mayor impacto en caja." : "La IA activará prioridades cuando haya cartera registrada."}</p>
           </article>
 
           <article className="cash-panel">
             <header><strong>Bancos y medios de pago</strong><button type="button">Ver todos</button></header>
             <div className="cash-accounts-list">
-              {accounts.map(([name, digits, value, tone]) => (
+              {cashAccounts.map(([name, digits, value, tone]) => (
                 <div key={name}>
                   <span data-tone={tone}><CreditCard aria-hidden="true" /></span>
                   <b>{name}</b>
@@ -327,6 +335,7 @@ export function CashModule({
                   <strong>{shortMoney(value)}</strong>
                 </div>
               ))}
+              {!cashAccounts.length ? <p className="module-empty-note">Sin bancos o efectivo registrados.</p> : null}
             </div>
             <footer><span>Total disponible</span><strong>{shortMoney(availableCash)}</strong></footer>
           </article>

@@ -130,6 +130,16 @@ const followUpItems: Array<{ title: string; channel: string; time: string; icon:
 }));
 
 export function ClientsModule({ isActive }: ClientsModuleProps) {
+  const clientRows: typeof importantClients = [];
+  const pipelineRows: typeof pipeline = [];
+  const followUpRows: typeof followUpItems = [];
+  const insightRows: typeof insights = [];
+  const zeroClientKpis = clientKpis.map((card) => ({
+    ...card,
+    helper: card.label === "Ticket promedio" ? "Sin compras registradas" : "Sin datos cargados",
+    value: card.label === "Ticket promedio" ? "$0" : "0"
+  }));
+  const zeroAiSignals = aiSignals.map((signal) => ({ ...signal, value: "0" }));
   return (
     <section className="clients-command-center dashboard-module-section" data-active={isActive}>
       <header className="clients-page-heading">
@@ -154,8 +164,8 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
         </div>
         <aside>
           <small>Decisión recomendada</small>
-          <strong>Contactar Café Oriente y Dulce Hogar esta semana.</strong>
-          <p>Posibles ventas: +$2.800.000 y menor riesgo de clientes inactivos.</p>
+          <strong>Carga clientes para recibir la primera recomendación.</strong>
+          <p>Importa una base o crea contactos manualmente para activar recompra, fidelización y recuperación.</p>
           <button className="secondary-button" type="button">Ver recomendaciones</button>
         </aside>
       </article>
@@ -169,7 +179,7 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
             <p>La IA necesita contactos, historial de compra, canal preferido, última interacción, deuda, frecuencia y próximos seguimientos.</p>
           </div>
         </article>
-        {aiSignals.map((signal) => {
+        {zeroAiSignals.map((signal) => {
           const Icon = signal.icon;
           return (
             <article className="clients-ai-signal-card" key={signal.label}>
@@ -183,7 +193,7 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
       </section>
 
       <div className="clients-hero-grid">
-        {clientKpis.map(({ label, value, helper, icon: KpiIcon, tone }) => (
+        {zeroClientKpis.map(({ label, value, helper, icon: KpiIcon, tone }) => (
           <article className="clients-kpi-card" data-tone={tone} key={String(label)}>
             <span><KpiIcon aria-hidden="true" /></span>
             <small>{label}</small>
@@ -197,7 +207,7 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
         <section className="clients-important-panel">
           <header><strong>Clientes importantes</strong><button type="button">Ver todos</button></header>
           <div>
-            {importantClients.map(([initials, name, email, phone, lastBuy, total, status]) => (
+            {clientRows.map(([initials, name, email, phone, lastBuy, total, status]) => (
               <article key={email}>
                 <i>{initials}</i>
                 <div><strong>{name}</strong><span>{email}</span><small><MessageCircle aria-hidden="true" />{phone}</small></div>
@@ -206,13 +216,14 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
                 <button aria-label={`Ver ${name}`} type="button"><ChevronRight aria-hidden="true" /></button>
               </article>
             ))}
+            {!clientRows.length ? <p className="module-empty-note">Sin clientes cargados. Importa una base o crea tu primer cliente.</p> : null}
           </div>
         </section>
 
         <section className="clients-pipeline-panel">
           <header><strong>Pipeline de ventas</strong><button type="button">Ver embudo completo</button></header>
           <div>
-            {pipeline.map(([title, count, unit, names, tone]) => (
+            {pipelineRows.map(([title, count, unit, names, tone]) => (
               <article data-tone={tone} key={String(title)}>
                 <span>{title}</span>
                 <strong>{count}</strong>
@@ -220,6 +231,7 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
                 {(names as string[]).map((name) => <p key={name}>{name}</p>)}
               </article>
             ))}
+            {!pipelineRows.length ? <p className="module-empty-note">El pipeline se activará cuando registres contactos y seguimientos.</p> : null}
           </div>
         </section>
       </div>
@@ -227,13 +239,14 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
       <div className="clients-bottom-layout">
         <section className="clients-follow-panel">
           <header><strong>Seguimientos próximos</strong><button type="button">Ver todos</button></header>
-          {followUpItems.map(({ title, channel, time, icon: FollowIcon }) => (
+          {followUpRows.map(({ title, channel, time, icon: FollowIcon }) => (
             <article key={String(title)}>
               <span><FollowIcon aria-hidden="true" /></span>
               <div><strong>{title}</strong><small>{channel}</small></div>
               <time>{time}</time>
             </article>
           ))}
+          {!followUpRows.length ? <p className="module-empty-note">Sin seguimientos programados.</p> : null}
           <button className="clients-full-button" type="button"><Plus aria-hidden="true" />Agregar seguimiento</button>
         </section>
 
@@ -241,7 +254,7 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
           <header><strong>Cliente destacado</strong><button type="button">Ver perfil completo</button></header>
           <div className="clients-featured-head">
             <i>CO</i>
-            <div><strong>Café Oriente</strong><span>Activo</span><small>Cliente desde Abr 2024</small></div>
+            <div><strong>Sin cliente destacado</strong><span>En espera</span><small>Se activará con tus datos</small></div>
           </div>
           <div className="clients-contact-actions">
             <button type="button"><MessageCircle aria-hidden="true" />WhatsApp</button>
@@ -249,30 +262,31 @@ export function ClientsModule({ isActive }: ClientsModuleProps) {
             <button type="button"><Mail aria-hidden="true" />Correo</button>
           </div>
           <div className="clients-featured-kpis">
-            <article><span>Total compras</span><strong>$3.850.000</strong></article>
-            <article><span>Compras</span><strong>12</strong></article>
+            <article><span>Total compras</span><strong>$0</strong></article>
+            <article><span>Compras</span><strong>0</strong></article>
             <article><span>Deuda actual</span><strong>$0</strong></article>
-            <article><span>Ticket promedio</span><strong>$320.000</strong></article>
+            <article><span>Ticket promedio</span><strong>$0</strong></article>
           </div>
-          <footer><span>Café Premium</span><span>Panela Orgánica</span><span>Azúcar Integral</span></footer>
+          <footer><span>Sin productos favoritos</span><span>Sin historial</span><span>Sin deuda</span></footer>
         </section>
 
         <section className="clients-insights-panel">
           <header><strong>Insights de la IA</strong><button type="button">Ver todos</button></header>
-          {insights.map(([label, title, text, InsightIcon, tone]) => (
+          {insightRows.map(([label, title, text, InsightIcon, tone]) => (
             <article data-tone={tone} key={String(title)}>
               <span><InsightIcon aria-hidden="true" /></span>
               <div><strong>{label}</strong><p>{title}</p>{text && <small>{text}</small>}</div>
             </article>
           ))}
+          {!insightRows.length ? <p className="module-empty-note">La IA generará insights cuando existan clientes y compras.</p> : null}
           <button className="clients-link-button" type="button">Ver todas las recomendaciones <ChevronRight aria-hidden="true" /></button>
         </section>
 
         <section className="clients-segments-panel">
           <header><strong>Segmentos para actuar</strong><button type="button">Crear campaña</button></header>
-          <article><UserCheck aria-hidden="true" /><div><strong>Frecuentes</strong><span>Clientes que compran cada mes</span></div><b>42</b></article>
-          <article><Repeat2 aria-hidden="true" /><div><strong>Listos para recompra</strong><span>Probabilidad alta esta semana</span></div><b>3</b></article>
-          <article><TriangleAlert aria-hidden="true" /><div><strong>En riesgo</strong><span>Más de 25 días sin comprar</span></div><b>12</b></article>
+          <article><UserCheck aria-hidden="true" /><div><strong>Frecuentes</strong><span>Clientes que compran cada mes</span></div><b>0</b></article>
+          <article><Repeat2 aria-hidden="true" /><div><strong>Listos para recompra</strong><span>Probabilidad alta esta semana</span></div><b>0</b></article>
+          <article><TriangleAlert aria-hidden="true" /><div><strong>En riesgo</strong><span>Más de 25 días sin comprar</span></div><b>0</b></article>
         </section>
       </div>
     </section>

@@ -232,11 +232,12 @@ export function SalesModule({
   formatMoney,
   formatShortDate
 }: SalesModuleProps) {
+  const hasSalesData = filteredSales.length > 0;
   const todayTotal = parseMoneyLabel(salesSummaryCards.find((card) => {
     const label = card.label.toLowerCase();
     return label.includes("día") || label.includes("dia");
-  })?.value || "") || weeklyTotal;
-  const monthTotal = parseMoneyLabel(salesSummaryCards.find((card) => card.label.toLowerCase().includes("mes"))?.value || "") || weeklyTotal;
+  })?.value || "");
+  const monthTotal = parseMoneyLabel(salesSummaryCards.find((card) => card.label.toLowerCase().includes("mes"))?.value || "");
   const pendingTotal = sumSales(filteredSales, (sale) => sale.status === "pendiente");
   const discountTotal = filteredSales.reduce((total, sale) => total + Number(sale.discount || 0), 0);
   const averageTicket = filteredSales.length ? filteredSalesTotal / filteredSales.length : 0;
@@ -271,15 +272,17 @@ export function SalesModule({
     setSalesTableScrollTop(event.currentTarget.scrollTop);
   };
 
-  const aiSuggestion = salesPercent < salesRule
+  const aiSuggestion = !hasSalesData
+    ? "Importa ventas desde Datos o registra tu primera venta manual para activar recomendaciones reales."
+    : salesPercent < salesRule
     ? `Contactar clientes que compraron ${products[0]?.name ?? "tu producto líder"} hace más de 15 días.`
     : recommendedAction();
   const estimatedTotal = Math.max((Number(manualSaleForm.quantity) * Number(manualSaleForm.unitPrice)) - Number(manualSaleForm.discount || 0), 0);
   const dataSignals = [
     { label: "Ventas registradas", value: filteredSales.length, helper: "base para tendencias" },
-    { label: "Clientes", value: salesCatalogs.customers.length, helper: "recompra y frecuencia" },
-    { label: "Productos", value: salesCatalogs.products.length, helper: "rotación y margen" },
-    { label: "Canales", value: salesCatalogs.channels.length, helper: "dónde vendes mejor" }
+    { label: "Clientes", value: hasSalesData ? salesCatalogs.customers.length : 0, helper: "recompra y frecuencia" },
+    { label: "Productos", value: hasSalesData ? salesCatalogs.products.length : 0, helper: "rotación y margen" },
+    { label: "Canales", value: hasSalesData ? salesCatalogs.channels.length : 0, helper: "dónde vendes mejor" }
   ];
 
   return (
@@ -298,8 +301,8 @@ export function SalesModule({
 
       <div className="sales-kpi-row">
         {[
-          { label: "Ventas de hoy", value: todayTotal, helper: `${weeklyVariation >= 0 ? "+" : ""}${weeklyVariation}% vs ayer`, icon: BarChart3, tone: "purple" },
-          { label: "Ventas del mes", value: monthTotal, helper: "+12% vs mes anterior", icon: CalendarDays, tone: "blue" },
+          { label: "Ventas de hoy", value: hasSalesData ? todayTotal : 0, helper: hasSalesData ? `${weeklyVariation >= 0 ? "+" : ""}${weeklyVariation}% vs ayer` : "Sin ventas registradas", icon: BarChart3, tone: "purple" },
+          { label: "Ventas del mes", value: hasSalesData ? monthTotal : 0, helper: hasSalesData ? "Calculado con tus ventas" : "Importa o registra ventas", icon: CalendarDays, tone: "blue" },
           { label: "Pagos pendientes", value: pendingTotal, helper: `${pendingCount} cliente(s) por cobrar`, icon: FileText, tone: "amber" },
           { label: "Ticket promedio", value: averageTicket, helper: "promedio por venta", icon: DollarSign, tone: "green" }
         ].map((card) => {
@@ -321,7 +324,7 @@ export function SalesModule({
         <div className="sales-ai-orb" aria-hidden="true"><Bot /></div>
         <div>
           <span>Motor de sugerencias OpenAI</span>
-          <h3>Convierte cada venta en una decisión comercial y administrativa.</h3>
+          <h3>{hasSalesData ? "Convierte cada venta en una decisión comercial y administrativa." : "Ventas empieza en cero: importa o registra datos para activar la IA."}</h3>
           <p><b>Lectura actual:</b> {aiSuggestion}</p>
           <ul className="sales-ai-signal-list">
             <li><Brain aria-hidden="true" /> Cruza cliente, producto, canal, vendedor, descuento y estado de pago.</li>
@@ -331,7 +334,7 @@ export function SalesModule({
         </div>
         <aside>
           <span>Impacto estimado</span>
-          <strong>{formatMoney(Math.max(pendingTotal * 0.2, 1_250_000))}</strong>
+          <strong>{formatMoney(hasSalesData ? Math.max(pendingTotal * 0.2, 0) : 0)}</strong>
           <small>Posible ingreso o cartera recuperada</small>
           <button className="primary-button micro-button" type="button" onClick={onGenerateSalesReading}>Generar sugerencia</button>
         </aside>
@@ -411,14 +414,16 @@ export function SalesModule({
 
           <article className="sales-side-card sales-recent-card">
             <header><strong>Ventas recientes</strong><button type="button" onClick={onRefreshSalesData}>Ver todas</button></header>
-            <table><tbody>{recentSales.map((sale) => <tr key={sale.id}><td>{formatShortDate(sale.saleDate)}</td><td>{sale.customerName}</td><td>{money(sale.total)}</td><td><span data-status={sale.status}>{sale.status}</span></td><td><button type="button" onClick={() => onStartEditingSale(sale)}>Editar</button></td></tr>)}</tbody></table>
+            {recentSales.length ? (
+              <table><tbody>{recentSales.map((sale) => <tr key={sale.id}><td>{formatShortDate(sale.saleDate)}</td><td>{sale.customerName}</td><td>{money(sale.total)}</td><td><span data-status={sale.status}>{sale.status}</span></td><td><button type="button" onClick={() => onStartEditingSale(sale)}>Editar</button></td></tr>)}</tbody></table>
+            ) : <p className="module-empty-note">Sin ventas registradas. Importa un archivo o guarda tu primera venta manual.</p>}
           </article>
 
           <div className="sales-mini-grid">
             <article className="sales-side-card">
               <header><strong>Por cobrar</strong><button type="button" onClick={() => onFilterChange("status", "pendiente")}>Ver todas</button></header>
               <div className="sales-receivable-list">
-                {receivables.map((sale) => <p key={sale.id}><span>{sale.customerName}</span><b>{money(sale.total)}</b><small>pendiente</small></p>)}
+                {receivables.length ? receivables.map((sale) => <p key={sale.id}><span>{sale.customerName}</span><b>{money(sale.total)}</b><small>pendiente</small></p>) : <p className="module-empty-note">No hay cuentas por cobrar registradas.</p>}
               </div>
               <footer><span>Total por cobrar</span><strong>{money(pendingTotal)}</strong></footer>
             </article>
@@ -426,7 +431,7 @@ export function SalesModule({
             <article className="sales-side-card">
               <header><strong>Ventas por canal</strong></header>
               <div className="sales-channel-card">
-                <div className="sales-donut" style={{ "--p1": "35%", "--p2": "65%", "--p3": "82%" } as CSSProperties} />
+                <div className="sales-donut" data-empty={!channels.length} style={{ "--p1": "0%", "--p2": "0%", "--p3": "0%" } as CSSProperties} />
                 <div>{channels.map((channel, index) => <p key={channel.label}><i data-index={index} /><span>{channel.label}</span><b>{Math.round((channel.amount / channelTotal) * 100)}%</b></p>)}</div>
               </div>
               <footer><span>Total</span><strong>{money(filteredSalesTotal)}</strong></footer>
@@ -436,9 +441,9 @@ export function SalesModule({
           <article className="sales-side-card">
             <header><strong>Productos más vendidos</strong><button type="button">Ver todas</button></header>
             <div className="sales-product-list">
-              {(topProducts.length ? topProducts : products.slice(0, 3).map((product) => ({ label: product.name, amount: Number(product.sales.replace(/[^\d-]/g, "")), count: 0 }))).map((product, index) => (
+              {topProducts.length ? topProducts.map((product, index) => (
                 <p key={product.label}><span>{product.label}</span><small>{product.count || 0} uds</small><b>{money(product.amount)}</b><em className={index === 2 ? "danger" : "positive"}>{index === 2 ? "-5%" : `+${18 - index * 6}%`}</em></p>
-              ))}
+              )) : <p className="module-empty-note">Sin productos vendidos todavía.</p>}
             </div>
           </article>
 
@@ -491,6 +496,7 @@ export function SalesModule({
                   </tr>
                 );
               })}
+              {!virtualSales.totalRows ? <tr><td colSpan={9}><p className="module-empty-note">No hay ventas para mostrar con estos filtros.</p></td></tr> : null}
               {virtualSales.bottomPadding ? <tr className="sales-spacer-row" aria-hidden="true"><td colSpan={9} style={{ height: virtualSales.bottomPadding }} /></tr> : null}
             </tbody>
           </table>
