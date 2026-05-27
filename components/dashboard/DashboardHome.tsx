@@ -79,6 +79,8 @@ type DashboardHomeProps = {
   persistenceStatus: string;
   microFeedback: string;
   microAction: string | null;
+  isGeneratingAi: boolean;
+  onGenerateAiDecisions: () => void;
   onRefreshSuggestions: () => void;
   onShowAllCategories: () => void;
   onRefreshActivity: () => void;
@@ -128,6 +130,8 @@ export function DashboardHome({
   persistenceStatus,
   microFeedback,
   microAction,
+  isGeneratingAi,
+  onGenerateAiDecisions,
   onRefreshSuggestions,
   onShowAllCategories,
   formatCopCompact,
@@ -171,8 +175,8 @@ export function DashboardHome({
                 <span data-status={overallStatusTone}>{overallStatus}</span>
                 <span><Database aria-hidden="true" />{hasBusinessData ? hasRealAiSuggestions ? "Datos reales conectados" : "Datos cargados" : "Sin datos cargados"}</span>
               </div>
-              <button className="primary-button ai-command-action" type="button" onClick={onRefreshSuggestions}>
-                {hasSuggestions ? "Ver detalle de la sugerencia" : "Buscar sugerencias"} <ArrowRight aria-hidden="true" />
+              <button className="primary-button ai-command-action" type="button" onClick={onGenerateAiDecisions} disabled={isGeneratingAi}>
+                {isGeneratingAi ? "Analizando datos..." : hasSuggestions ? "Generar nueva lectura IA" : "Generar sugerencias IA"} <ArrowRight aria-hidden="true" />
               </button>
             </div>
 

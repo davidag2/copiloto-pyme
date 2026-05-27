@@ -227,6 +227,11 @@ type AiActivityItem = {
   tone: string;
   href?: string;
 };
+type AiDecisionGenerationResponse = {
+  persisted: boolean;
+  savedSuggestions: Array<{ id: string; title: string }>;
+  suggestions: Array<{ title: string }>;
+};
 type SalesCatalogOption = { id: string; name: string; unitPrice?: string | number };
 type RecentSale = {
   id: string;
@@ -671,6 +676,7 @@ export default function Home() {
   const [activeDecisionId, setActiveDecisionId] = useState<number | string>("");
   const [aiSuggestionRows, setAiSuggestionRows] = useState<AiSuggestionRow[]>([]);
   const [aiSuggestionsStatus, setAiSuggestionsStatus] = useState("Sin sugerencias todavía.");
+  const [isGeneratingAiDecisions, setIsGeneratingAiDecisions] = useState(false);
   const [activityRows, setActivityRows] = useState<ActivityEventRow[]>([]);
   const [activityStatus, setActivityStatus] = useState("Sin actividad todavía.");
   const [notifications, setNotifications] = useState<NotificationRow[]>([]);
@@ -1169,6 +1175,47 @@ export default function Home() {
     setAiSuggestionsStatus(result.data.suggestions.length
       ? `${result.data.suggestions.length} sugerencia(s) cargadas desde PostgreSQL.`
       : "Sin sugerencias reales todavía.");
+  }
+
+  async function generateAiDecisions(activeCompanyId = companyId) {
+    if (!activeCompanyId) {
+      setAiSuggestionsStatus("Inicia sesión con una empresa para generar sugerencias IA.");
+      return;
+    }
+
+    if (!hasBusinessData) {
+      setAiSuggestionsStatus("Carga ventas, caja, inventario o clientes antes de pedir una lectura IA.");
+      triggerMicroInteraction("decision", "Primero carga datos reales para que la IA pueda decidir.");
+      return;
+    }
+
+    setIsGeneratingAiDecisions(true);
+    setAiSuggestionsStatus("Copiloto IA está analizando ventas, caja, inventario y clientes...");
+
+    try {
+      const result = await apiJson<AiDecisionGenerationResponse>("/api/ai/decisions", {
+        body: JSON.stringify({ companyId: activeCompanyId, persist: true }),
+        method: "POST"
+      });
+
+      if (!result.ok) {
+        setAiSuggestionsStatus(`No se pudo generar la lectura IA: ${result.error}`);
+        return;
+      }
+
+      await Promise.all([
+        loadAiSuggestions(activeCompanyId),
+        loadActivity(activeCompanyId),
+        loadNotifications(activeCompanyId),
+        loadDashboardData(activeCompanyId)
+      ]);
+
+      const count = result.data.savedSuggestions.length || result.data.suggestions.length;
+      setAiSuggestionsStatus(`${count} sugerencia(s) nuevas generadas por Copiloto IA.`);
+      triggerMicroInteraction("decision", "Copiloto IA generó nuevas sugerencias para tu negocio.");
+    } finally {
+      setIsGeneratingAiDecisions(false);
+    }
   }
 
   async function loadActivity(activeCompanyId = companyId) {
@@ -2089,6 +2136,8 @@ ${recommendedAction()}`;
           persistenceStatus={persistenceStatus}
           microFeedback={microFeedback}
           microAction={microAction}
+          isGeneratingAi={isGeneratingAiDecisions}
+          onGenerateAiDecisions={() => { void generateAiDecisions(); }}
           onRefreshSuggestions={() => {
             void loadAiSuggestions();
             setAnswer(`Brief para gerencia: ventas ${formatMoney(metrics.sales)}, caja ${formatMoney(metrics.cash)}, margen ${metrics.margin.toFixed(1)}%, decisiones abiertas ${openDecisions}. ${recommendedAction()}`);
