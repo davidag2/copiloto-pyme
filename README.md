@@ -465,6 +465,15 @@ Copiloto Pyme centraliza sus modelos en `lib/ai-models.ts` para evitar valores d
 - `OPENAI_VOICE_MODEL=gpt-4o-mini-realtime-preview`: asistente de voz con Twilio.
 - `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`: busqueda semantica y memoria del negocio.
 
+### Motor IA Base
+
+La integracion tecnica inicial esta separada en dos capas:
+
+- `lib/openai-client.ts`: cliente centralizado para llamar la API de OpenAI desde funciones del servidor.
+- `lib/ai-decision-engine.ts`: prompts, tipos y normalizacion de respuestas para convertir metricas de la PYME en sugerencias accionables.
+
+Esta base permite conectar despues el dashboard, reportes y alertas sin duplicar prompts ni modelos en cada endpoint.
+
 Infraestructura:
 
 - Vercel
