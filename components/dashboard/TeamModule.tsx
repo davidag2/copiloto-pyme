@@ -6,12 +6,7 @@ type TeamModuleProps = {
   isActive: boolean;
 };
 
-const members = [
-  ["Andrés Vélez", "Propietario", "andres@copilotopyme.co", "Activo"],
-  ["Laura Gómez", "Administradora", "laura@copilotopyme.co", "Activo"],
-  ["Carlos Ríos", "Contador", "carlos@copilotopyme.co", "Invitado"],
-  ["María Pérez", "Ventas", "maria@copilotopyme.co", "Activo"]
-];
+const members: string[][] = [];
 
 const roles = [
   ["Propietario", "Control total del negocio, pagos, usuarios y configuración."],
@@ -32,9 +27,9 @@ export function TeamModule({ isActive }: TeamModuleProps) {
       </header>
 
       <div className="team-kpi-row">
-        <article><Users aria-hidden="true" /><span>Usuarios activos</span><strong>3</strong><small>1 invitación pendiente</small></article>
-        <article><ShieldCheck aria-hidden="true" /><span>Roles configurados</span><strong>4</strong><small>Permisos por empresa</small></article>
-        <article><UserRoundCheck aria-hidden="true" /><span>Último acceso</span><strong>Hoy</strong><small>8:30 a.m.</small></article>
+        <article><Users aria-hidden="true" /><span>Usuarios activos</span><strong>0</strong><small>Sin invitaciones pendientes</small></article>
+        <article><ShieldCheck aria-hidden="true" /><span>Roles disponibles</span><strong>{roles.length}</strong><small>Listos para asignar</small></article>
+        <article><UserRoundCheck aria-hidden="true" /><span>Último acceso</span><strong>Sin accesos</strong><small>Invita usuarios para empezar</small></article>
       </div>
 
       <div className="team-command-layout">
@@ -49,6 +44,7 @@ export function TeamModule({ isActive }: TeamModuleProps) {
                 <mark data-status={status}>{status}</mark>
               </article>
             ))}
+            {!members.length ? <p className="module-empty-note">Sin miembros de equipo. Invita usuarios cuando quieras delegar ventas, caja, inventario o reportes.</p> : null}
           </div>
         </section>
 
