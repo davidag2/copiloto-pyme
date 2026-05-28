@@ -7,13 +7,11 @@ import {
   Brain,
   Building2,
   CalendarDays,
-  CheckCircle2,
   ChevronRight,
   Crown,
   FileText,
   HelpCircle,
   Mail,
-  MoreHorizontal,
   Plus,
   Settings2,
   Sparkles,
@@ -121,16 +119,12 @@ type SettingsModuleProps = {
   onCustomerChange: (customer: CompanySettings) => void;
 };
 
-const users: Array<[string, string, string, string, string]> = [
-  ["Andrés Vélez", "andres@cafeoriente.com", "Administrador", "purple", "AV"],
-  ["María Gómez", "maria@cafeoriente.com", "Ventas", "blue", "MG"],
-  ["Juan Pablo Ruiz", "juan@cafeoriente.com", "Inventario", "orange", "JR"]
-];
+const users: Array<[string, string, string, string, string]> = [];
 
 const notificationChannels: Array<[string, string, string, LucideIcon]> = [
-  ["WhatsApp", "Recibe alertas importantes", "green", Bell],
-  ["Email", "Recibe reportes y novedades", "blue", Mail],
-  ["Alertas de IA", "Recomendaciones y riesgos", "purple", Sparkles]
+  ["WhatsApp", "Sin configurar", "green", Bell],
+  ["Email", "Sin configurar", "blue", Mail],
+  ["Alertas de IA", "Sin configurar", "purple", Sparkles]
 ];
 
 const integrationIcons: Record<string, LucideIcon> = {
@@ -141,17 +135,15 @@ const integrationIcons: Record<string, LucideIcon> = {
 };
 
 const aiPreferences: Array<[string, string, LucideIcon]> = [
-  ["Resumen ejecutivo diario", "Recibe un resumen de tu negocio cada día", CalendarDays],
-  ["Alertas automáticas", "La IA te avisa sobre riesgos importantes", Bell],
-  ["Recomendaciones IA", "Sugerencias para mejorar tus ventas y operación", Sparkles]
+  ["Resumen ejecutivo diario", "Pendiente de configurar", CalendarDays],
+  ["Alertas automáticas", "Pendiente de configurar", Bell],
+  ["Recomendaciones IA", "Pendiente de configurar", Sparkles]
 ];
 
 export function SettingsModule({
   isActive,
   customer,
   integrations,
-  connectedIntegrations,
-  activeIntegrationId,
   canManageIntegrations,
   microAction,
   onCustomerChange,
@@ -160,6 +152,9 @@ export function SettingsModule({
 }: SettingsModuleProps) {
   const visibleIntegrations = integrations.filter((integration) => integration.id !== "banking").slice(0, 3);
   const [editingCompany, setEditingCompany] = useState(false);
+  const companyPlan = customer.plan?.trim() ? customer.plan.toUpperCase() : "SIN PLAN";
+  const hasUsers = users.length > 0;
+  const hasIntegrations = false;
 
   return (
     <section className="settings-command-center settings-2026 dashboard-module-section" data-active={isActive}>
@@ -186,7 +181,7 @@ export function SettingsModule({
           <article><small>Empresa</small><strong>{customer.companyName}</strong></article>
           <article><small>Tipo</small><strong>{customer.businessType}</strong></article>
           <article><small>País</small><strong>{customer.country}</strong></article>
-          <article><small>Plan</small><strong>{customer.plan.toUpperCase()}</strong></article>
+          <article><small>Plan</small><strong>{companyPlan}</strong></article>
         </div>
         {editingCompany ? (
           <form className="settings-company-form" onSubmit={(event) => { event.preventDefault(); setEditingCompany(false); }}>
@@ -207,14 +202,14 @@ export function SettingsModule({
           <header><span><Crown aria-hidden="true" /></span><strong>Plan y facturación</strong></header>
           <div className="settings-plan-box">
             <small>Plan actual</small>
-            <h3>Pyme Pro</h3>
-            <em>Activo</em>
+            <h3>{companyPlan}</h3>
+            <em>Sin pago registrado</em>
             <p>Próximo pago</p>
-            <strong><CalendarDays aria-hidden="true" />18 de junio de 2026</strong>
+            <strong><CalendarDays aria-hidden="true" />Sin programar</strong>
           </div>
           <div className="settings-payment-row">
-            <div><small>Método de pago</small><strong>VISA</strong><span>•••• 4242</span></div>
-            <em>Predeterminado</em>
+            <div><small>Método de pago</small><strong>Sin método</strong><span>Agrega un medio de pago</span></div>
+            <em>Pendiente</em>
           </div>
           <footer>
             <button type="button">Cambiar plan</button>
@@ -225,14 +220,13 @@ export function SettingsModule({
         <article className="settings-card settings-users-card">
           <header><span><Users aria-hidden="true" /></span><strong>Usuarios</strong><button type="button"><Plus aria-hidden="true" />Agregar usuario</button></header>
           <div>
-            {users.map(([name, email, role, tone, initials]) => (
+            {hasUsers ? users.map(([name, email, role, tone, initials]) => (
               <article key={email}>
                 <i data-tone={tone}>{initials}</i>
                 <div><strong>{name}</strong><p>{email}</p></div>
                 <em data-tone={tone}>{role}</em>
-                <button aria-label={`Opciones de ${name}`} type="button"><MoreHorizontal aria-hidden="true" /></button>
               </article>
-            ))}
+            )) : <p className="module-empty-note">Sin usuarios invitados todavía. Agrega integrantes cuando quieras delegar ventas, caja, inventario o reportes.</p>}
           </div>
           <a href="#equipo">Ver todos los usuarios <ChevronRight aria-hidden="true" /></a>
         </article>
@@ -244,7 +238,7 @@ export function SettingsModule({
               <article key={title}>
                 <Icon aria-hidden="true" data-tone={tone} />
                 <div><strong>{title}</strong><p>{text}</p></div>
-                <button aria-label={`Activar ${title}`} className="settings-toggle is-on" type="button"><span /></button>
+                <button aria-label={`Activar ${title}`} className="settings-toggle" type="button"><span /></button>
               </article>
             ))}
           </div>
@@ -258,16 +252,15 @@ export function SettingsModule({
             <span><Settings2 aria-hidden="true" /></span>
             <strong>Integraciones</strong>
             <button type="button" onClick={onSyncIntegrations} disabled={!canManageIntegrations}>
-              {connectedIntegrations ? "Ver todas" : "Sincronizar"}
+              {hasIntegrations ? "Ver todas" : "Sincronizar"}
             </button>
           </header>
           <div className="settings-integration-list">
             {visibleIntegrations.map((integration) => {
               const Icon = integrationIcons[integration.id] ?? Settings2;
-              const isActiveIntegration = activeIntegrationId === integration.id;
               return (
                 <button
-                  data-motion={isActiveIntegration || microAction === "sync" ? "active" : undefined}
+                  data-motion={microAction === "sync" ? "active" : undefined}
                   key={integration.id}
                   onClick={() => onConnectIntegration(integration.id)}
                   disabled={!canManageIntegrations}
@@ -275,12 +268,12 @@ export function SettingsModule({
                 >
                   <Icon aria-hidden="true" />
                   <strong>{integration.name}</strong>
-                  <span>{integration.status === "Conectado" ? "Conectado" : "Disponible"}</span>
-                  <CheckCircle2 aria-hidden="true" />
+                  <span>Disponible</span>
                   <ChevronRight aria-hidden="true" />
                 </button>
               );
             })}
+            {!visibleIntegrations.length ? <p className="module-empty-note">Sin integraciones configuradas todavía.</p> : null}
           </div>
           <a href="#datos">Gestionar integraciones <ChevronRight aria-hidden="true" /></a>
         </article>
@@ -292,7 +285,7 @@ export function SettingsModule({
               <article key={title}>
                 <Icon aria-hidden="true" />
                 <div><strong>{title}</strong><p>{text}</p></div>
-                <button aria-label={`Activar ${title}`} className="settings-toggle is-on" type="button"><span /></button>
+                <button aria-label={`Activar ${title}`} className="settings-toggle" type="button"><span /></button>
               </article>
             ))}
           </div>
