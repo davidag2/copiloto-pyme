@@ -24,10 +24,14 @@ export const commercialPlans: CommercialPlan[] = [
     href: "/register?plan=go",
     features: [
       "1 mes gratis",
-      "Acceso a Inicio",
-      "Módulo Ventas",
-      "Módulo Caja",
-      "Dashboard simple con IA",
+      "Inicio",
+      "Ventas",
+      "Caja",
+      "Equipo",
+      "Datos",
+      "Reportes",
+      "Alertas",
+      "Configuración",
       "1 asiento para ver y editar información"
     ]
   },
@@ -42,13 +46,9 @@ export const commercialPlans: CommercialPlan[] = [
     highlighted: true,
     features: [
       "1 mes gratis",
-      "Acceso a Inicio",
-      "Módulo Ventas",
-      "Módulo Caja",
-      "Módulo Inventario",
-      "Módulo Clientes",
-      "Alertas básicas",
-      "Reportes principales",
+      "Todo lo de GO",
+      "Inventario",
+      "Clientes",
       "3 asientos para ver y editar información"
     ]
   },
@@ -61,13 +61,9 @@ export const commercialPlans: CommercialPlan[] = [
     href: "/register?plan=pro",
     features: [
       "1 mes gratis",
-      "Acceso a todos los módulos",
-      "Ventas, Caja, Inventario y Clientes",
-      "Equipo, Datos, Reportes, Alertas y Configuración",
-      "Alertas inteligentes",
-      "Proyección de caja",
-      "Decisiones y recomendaciones con IA",
-      "Roles de equipo",
+      "Todo lo de BASIC",
+      "Proyecciones",
+      "Motor IA para tendencias y resultados esperados",
       "5 asientos para ver y editar información",
       "Prioridad en soporte"
     ]
