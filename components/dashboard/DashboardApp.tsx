@@ -43,6 +43,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
+import { planIncludesModule } from "@/lib/plans";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
 
 function DashboardModuleLoader() {
@@ -800,6 +801,12 @@ export default function Home() {
     }
   }, [companyId, authUser, dateRange, customRange.start, customRange.end]);
 
+  useEffect(() => {
+    if (!planIncludesModule(customer.plan, activeModule)) {
+      setActiveModule("inicio");
+    }
+  }, [activeModule, customer.plan]);
+
   const salesPercent = Math.round((metrics.sales / (customer.monthlyGoal / 1_000_000)) * 100);
   const connectedIntegrations = useMemo(() => integrations.filter((integration) => integration.status === "Conectado").length, [integrations]);
   const openDecisions = useMemo(() => decisions.filter((decision) => decision.status !== "Completada").length, [decisions]);
@@ -938,7 +945,9 @@ export default function Home() {
     label: type === "vendedor" ? "Por vendedor" : type === "producto" ? "Por producto" : type === "cliente" ? "Por cliente" : "Por canal",
     rows: salesReportGroups[type].slice(0, 3)
   })), [salesReportGroups]);
-  const activeNavItem = navItems.find((item) => item.id === activeModule) || navItems[0];
+  const accessibleNavItems = useMemo(() => navItems.filter((item) => planIncludesModule(customer.plan, item.id)), [customer.plan]);
+  const activeNavItem = accessibleNavItems.find((item) => item.id === activeModule) || accessibleNavItems[0] || navItems[0];
+  const canAccessActiveModule = planIncludesModule(customer.plan, activeModule);
   const moduleVisibility = useMemo<Record<DashboardModule, boolean>>(() => ({
     inicio: activeModule === "inicio",
     ventas: activeModule === "ventas",
@@ -1926,11 +1935,15 @@ ${recommendedAction()}`;
   }
 
   const navigateModule = useCallback((moduleId: DashboardModule) => {
+    if (!planIncludesModule(customer.plan, moduleId)) {
+      setActiveModule("inicio");
+      return;
+    }
     setActiveModule(moduleId);
     window.requestAnimationFrame(() => {
       document.querySelector(".main-panel")?.scrollTo({ top: 0, behavior: "smooth" });
     });
-  }, []);
+  }, [customer.plan]);
 
   async function toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -1980,7 +1993,7 @@ ${recommendedAction()}`;
 
         <span className="sidebar-section-label">Módulos</span>
         <nav className="nav-list" aria-label="Principal">
-          {navItems.map((item) => {
+          {accessibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -2113,7 +2126,7 @@ ${recommendedAction()}`;
         </header>
 
         <div className="dashboard-module-content" aria-live="polite">
-          {activeModule === "inicio" ? (
+          {canAccessActiveModule && activeModule === "inicio" ? (
           <DashboardHome
           isActive
           overallStatusTone={overallStatusTone}
@@ -2153,7 +2166,7 @@ ${recommendedAction()}`;
           />
           ) : null}
 
-        {activeModule === "clientes" ? (
+        {canAccessActiveModule && activeModule === "clientes" ? (
         <ClientsModule
           isActive
           companyName={customer.companyName}
@@ -2172,7 +2185,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "proyecciones" ? (
+        {canAccessActiveModule && activeModule === "proyecciones" ? (
         <ProjectionsModule
           isActive
           hasBusinessData={hasBusinessData}
@@ -2185,19 +2198,19 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "equipo" ? (
+        {canAccessActiveModule && activeModule === "equipo" ? (
         <TeamModule
           isActive
         />
         ) : null}
 
-        {activeModule === "datos" ? (
+        {canAccessActiveModule && activeModule === "datos" ? (
         <DataModule
           isActive
         />
         ) : null}
 
-        {activeModule === "configuracion" ? (
+        {canAccessActiveModule && activeModule === "configuracion" ? (
         <SettingsModule
           isActive
           customer={customer}
@@ -2229,7 +2242,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "inventario" ? (
+        {canAccessActiveModule && activeModule === "inventario" ? (
         <InventoryModule
           isActive
           metrics={metrics}
@@ -2238,7 +2251,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "reportes" ? (
+        {canAccessActiveModule && activeModule === "reportes" ? (
         <ReportsModule
           isActive
           showReports={visible.reports}
@@ -2255,7 +2268,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "caja" ? (
+        {canAccessActiveModule && activeModule === "caja" ? (
         <CashModule
           isActive
           metrics={metrics}
@@ -2271,7 +2284,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "alertas" ? (
+        {canAccessActiveModule && activeModule === "alertas" ? (
         <AlertsModule
           isActive
           alerts={alerts}
@@ -2283,7 +2296,7 @@ ${recommendedAction()}`;
         />
         ) : null}
 
-        {activeModule === "ventas" ? (
+        {canAccessActiveModule && activeModule === "ventas" ? (
         <SalesModule
           isActive
           visibleProducts={visible.products}
@@ -2353,7 +2366,7 @@ ${recommendedAction()}`;
       </main>
 
       <nav className="mobile-quick-nav" aria-label="Módulos principales móviles">
-        {navItems.map((item) => {
+        {accessibleNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <button aria-current={activeModule === item.id ? "page" : undefined} type="button" onClick={() => navigateModule(item.id)} key={item.id}>

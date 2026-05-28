@@ -1,4 +1,16 @@
 export type PlanId = "go" | "basic" | "pro";
+export type PlanModuleId =
+  | "inicio"
+  | "ventas"
+  | "caja"
+  | "inventario"
+  | "clientes"
+  | "proyecciones"
+  | "equipo"
+  | "datos"
+  | "reportes"
+  | "alertas"
+  | "configuracion";
 
 export type CommercialPlan = {
   id: PlanId;
@@ -70,6 +82,12 @@ export const commercialPlans: CommercialPlan[] = [
   }
 ];
 
+export const planModuleAccess: Record<PlanId, PlanModuleId[]> = {
+  go: ["inicio", "ventas", "caja", "equipo", "datos", "reportes", "alertas", "configuracion"],
+  basic: ["inicio", "ventas", "caja", "equipo", "datos", "reportes", "alertas", "configuracion", "inventario", "clientes"],
+  pro: ["inicio", "ventas", "caja", "equipo", "datos", "reportes", "alertas", "configuracion", "inventario", "clientes", "proyecciones"]
+};
+
 export function normalizePlanId(value: unknown): PlanId {
   const normalized = String(value || "").trim().toLowerCase();
   return commercialPlans.some((plan) => plan.id === normalized) ? normalized as PlanId : "go";
@@ -78,6 +96,14 @@ export function normalizePlanId(value: unknown): PlanId {
 export function getPlanById(value: unknown) {
   const planId = normalizePlanId(value);
   return commercialPlans.find((plan) => plan.id === planId) ?? commercialPlans[0];
+}
+
+export function getPlanModuleAccess(value: unknown) {
+  return planModuleAccess[normalizePlanId(value)];
+}
+
+export function planIncludesModule(plan: unknown, moduleId: PlanModuleId) {
+  return getPlanModuleAccess(plan).includes(moduleId);
 }
 
 export function getTrialEndsAt(startDate = new Date()) {
