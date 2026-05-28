@@ -2201,6 +2201,7 @@ ${recommendedAction()}`;
         {canAccessActiveModule && activeModule === "equipo" ? (
         <TeamModule
           isActive
+          plan={customer.plan}
         />
         ) : null}
 

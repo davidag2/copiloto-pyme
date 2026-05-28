@@ -24,6 +24,13 @@ export type CommercialPlan = {
   features: string[];
 };
 
+export type PlanSeatAccess = {
+  masterSeats: number;
+  invitedSeats: number;
+  totalSeats: number;
+  label: string;
+};
+
 export const trialDays = 30;
 
 export const commercialPlans: CommercialPlan[] = [
@@ -44,7 +51,8 @@ export const commercialPlans: CommercialPlan[] = [
       "Reportes",
       "Alertas",
       "Configuración",
-      "1 asiento para ver y editar información"
+      "Cuenta maestra incluida",
+      "Sin invitados incluidos"
     ]
   },
   {
@@ -61,7 +69,8 @@ export const commercialPlans: CommercialPlan[] = [
       "Todo lo de GO",
       "Inventario",
       "Clientes",
-      "3 asientos para ver y editar información"
+      "Cuenta maestra + 2 invitados",
+      "Invitados con permiso para ver y editar"
     ]
   },
   {
@@ -76,11 +85,33 @@ export const commercialPlans: CommercialPlan[] = [
       "Todo lo de BASIC",
       "Proyecciones",
       "Motor IA para tendencias y resultados esperados",
-      "5 asientos para ver y editar información",
+      "Cuenta maestra + 4 invitados",
+      "Invitados con permiso para ver y editar",
       "Prioridad en soporte"
     ]
   }
 ];
+
+export const planSeatAccess: Record<PlanId, PlanSeatAccess> = {
+  go: {
+    masterSeats: 1,
+    invitedSeats: 0,
+    totalSeats: 1,
+    label: "Cuenta maestra incluida"
+  },
+  basic: {
+    masterSeats: 1,
+    invitedSeats: 2,
+    totalSeats: 3,
+    label: "Cuenta maestra + 2 invitados"
+  },
+  pro: {
+    masterSeats: 1,
+    invitedSeats: 4,
+    totalSeats: 5,
+    label: "Cuenta maestra + 4 invitados"
+  }
+};
 
 export const planModuleAccess: Record<PlanId, PlanModuleId[]> = {
   go: ["inicio", "ventas", "caja", "equipo", "datos", "reportes", "alertas", "configuracion"],
@@ -100,6 +131,10 @@ export function getPlanById(value: unknown) {
 
 export function getPlanModuleAccess(value: unknown) {
   return planModuleAccess[normalizePlanId(value)];
+}
+
+export function getPlanSeatAccess(value: unknown) {
+  return planSeatAccess[normalizePlanId(value)];
 }
 
 export function planIncludesModule(plan: unknown, moduleId: PlanModuleId) {

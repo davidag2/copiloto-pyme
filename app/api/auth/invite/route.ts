@@ -1,6 +1,7 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { createPlainToken, hashToken, normalizeEmail } from "@/lib/auth";
 import { query, transaction } from "@/lib/db";
+import { getPlanSeatAccess } from "@/lib/plans";
 import { canManageTeam, companyRoles, normalizeRole } from "@/lib/roles";
 import { requireCompanySession } from "@/lib/session";
 
@@ -29,6 +30,30 @@ export async function POST(request: Request) {
     }
 
     const invitation = await transaction(async (client) => {
+      const seatStatus = await client.query<{ plan: string; usedSeats: string }>(
+        `SELECT companies.plan,
+                COUNT(users.id) FILTER (
+                  WHERE users.status IN ('active', 'invited')
+                  AND LOWER(users.email) <> LOWER($2)
+                )::text AS "usedSeats"
+         FROM companies
+         LEFT JOIN users ON users.company_id = companies.id
+         WHERE companies.id = $1
+         GROUP BY companies.id, companies.plan
+         LIMIT 1`,
+        [companyId, email]
+      );
+      const companyPlan = seatStatus.rows[0]?.plan || "go";
+      const seatAccess = getPlanSeatAccess(companyPlan);
+      const usedSeats = Number(seatStatus.rows[0]?.usedSeats || 0);
+
+      if (usedSeats >= seatAccess.totalSeats) {
+        const inviteText = seatAccess.invitedSeats
+          ? `cuenta maestra + ${seatAccess.invitedSeats} invitado(s)`
+          : "solo la cuenta maestra";
+        throw new Error(`Tu plan ${companyPlan.toUpperCase()} incluye ${seatAccess.totalSeats} asiento(s): ${inviteText}. Actualiza tu plan para invitar más usuarios.`);
+      }
+
       const result = await client.query(
         `INSERT INTO team_invitations (company_id, invited_by, email, role, token_hash, expires_at)
          VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days')
