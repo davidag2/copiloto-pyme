@@ -47,23 +47,12 @@ type AlertsModuleProps = {
 };
 
 const criticalAlerts: Array<[string, string, string, string, string, string, string, LucideIcon]> = [
-  ["Inventario", "Panela Orgánica se agotará en 4 días.", "Stock actual: 28 unidades", "Stock mínimo: 60 unidades", "Reponer", "Ver detalle", "red", Package],
-  ["Caja", "La caja podría bajar bajo el mínimo recomendado.", "Proyección en 6 días: $2.150.000", "Mínimo recomendado: $3.000.000", "Ver proyección", "Ajustar gastos", "orange", WalletCards],
-  ["Clientes", "Mercado La 80 no compra hace 28 días.", "Última compra: 22 abr 2026", "Compras acumuladas: $1.250.000", "Contactar", "Ver cliente", "pink", Users]
 ];
 
 const activity: Array<[string, string, string, string, LucideIcon]> = [
-  ["IA detectó caída de ventas", "Ventas bajaron 12% esta semana", "Hace 5 min", "orange", LineChart],
-  ["Stock bajo en Café Premium 500g", "Quedan 18 unidades", "Hoy, 9:30 a.m.", "red", Package],
-  ["Factura F-1254 pagada", "Café Oriente", "Hoy, 8:20 a.m.", "green", WalletCards],
-  ["Cliente recuperado", "Dulce Hogar volvió a comprar", "Ayer, 4:15 p.m.", "purple", Users],
-  ["Pago próximo", "Proveedor Alimentos SAS", "Ayer, 11:00 a.m.", "blue", CheckCircle2]
 ];
 
 const aiAlerts: Array<[string, string, string, string, LucideIcon]> = [
-  ["Riesgo", "Las ventas bajaron 12% esta semana.", "Ver análisis", "orange", LineChart],
-  ["Oportunidad", "Instagram generó 28% más ventas este mes.", "Ver detalles", "green", Megaphone],
-  ["Optimización", "Reduce inventario lento y mejora tu caja.", "Ver recomendación", "blue", CheckCircle2]
 ];
 
 const filters = ["Todas", "Ventas", "Caja", "Inventario", "Clientes", "Compras", "Financieras"];
@@ -78,10 +67,10 @@ const quickActions: Array<[string, LucideIcon]> = [
 ];
 
 const kpiCards: Array<[string, string, string, LucideIcon, string]> = [
-  ["Alertas activas", "12", "Total pendientes", Bell, "red"],
-  ["Críticas", "3", "Atención inmediata", TriangleAlert, "red"],
-  ["Resueltas hoy", "8", "Progreso positivo", CheckCircle2, "green"],
-  ["Riesgos IA", "5", "Detectados", Settings2, "purple"]
+  ["Alertas activas", "0", "Total pendientes", Bell, "red"],
+  ["Críticas", "0", "Atención inmediata", TriangleAlert, "red"],
+  ["Resueltas hoy", "0", "Sin actividad", CheckCircle2, "green"],
+  ["Riesgos IA", "0", "Detectados", Settings2, "purple"]
 ];
 
 export function AlertsModule({
@@ -93,7 +82,7 @@ export function AlertsModule({
   onRulesChange,
   onApplyRules
 }: AlertsModuleProps) {
-  const activeAlerts = Math.max(alerts.length, 12);
+  const activeAlerts = alerts.length;
 
   return (
     <section className="alerts-command-center dashboard-module-section" data-active={isActive}>
@@ -115,11 +104,11 @@ export function AlertsModule({
           <div className="alerts-ai-orb"><Sparkles aria-hidden="true" /></div>
           <div>
             <span>Copiloto de alertas</span>
-            <h3>La IA detectó 3 situaciones que requieren atención.</h3>
+            <h3>Alertas empieza en cero: la IA te avisará cuando encuentre riesgos reales.</h3>
             <ul>
-              <li>Stock crítico en Panela Orgánica</li>
-              <li>Caja ajustada en 6 días</li>
-              <li>Mercado La 80 no compra hace 28 días</li>
+              <li>Sin alertas críticas por ahora</li>
+              <li>Conecta ventas, caja, inventario y clientes</li>
+              <li>Configura reglas para recibir avisos importantes</li>
             </ul>
             <button className="secondary-button" type="button">Ver acciones recomendadas <ChevronRight aria-hidden="true" /></button>
           </div>
@@ -151,6 +140,7 @@ export function AlertsModule({
                 <footer><button type="button">{actionA}</button><button type="button">{actionB}</button></footer>
               </article>
             ))}
+            {!criticalAlerts.length ? <p className="module-empty-note">Sin alertas críticas. Aparecerán aquí cuando una regla detecte riesgo en ventas, caja, inventario o clientes.</p> : null}
           </div>
         </section>
 
@@ -164,6 +154,7 @@ export function AlertsModule({
                 <time>{time}</time>
               </article>
             ))}
+            {!activity.length ? <p className="module-empty-note">Sin actividad reciente. La línea de tiempo se llenará cuando se generen alertas reales.</p> : null}
           </div>
         </section>
       </div>
@@ -179,6 +170,7 @@ export function AlertsModule({
                   <div><strong>{label}</strong><p>{text}</p><button type="button">{action}</button></div>
                 </article>
               ))}
+              {!aiAlerts.length ? <p className="module-empty-note">Sin alertas de IA. Copiloto empezará a sugerir acciones cuando existan datos suficientes.</p> : null}
             </div>
           </section>
 
