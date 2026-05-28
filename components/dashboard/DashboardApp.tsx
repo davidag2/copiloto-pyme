@@ -18,6 +18,7 @@ import {
   Clock3,
   Database,
   FileText,
+  LineChart,
   Link2,
   LogOut,
   LockKeyhole,
@@ -63,6 +64,7 @@ const ReportsModule = dynamic(() => import("@/components/dashboard/ReportsModule
 const CashModule = dynamic(() => import("@/components/dashboard/CashModule").then((module) => module.CashModule), { loading: DashboardModuleLoader, ssr: false });
 const AlertsModule = dynamic(() => import("@/components/dashboard/AlertsModule").then((module) => module.AlertsModule), { loading: DashboardModuleLoader, ssr: false });
 const SalesModule = dynamic(() => import("@/components/dashboard/SalesModule").then((module) => module.SalesModule), { loading: DashboardModuleLoader, ssr: false });
+const ProjectionsModule = dynamic(() => import("@/components/dashboard/ProjectionsModule").then((module) => module.ProjectionsModule), { loading: DashboardModuleLoader, ssr: false });
 
 type SalePoint = { day: string; value: number; previous?: number; cash?: number; margin?: number; criticalStock?: number };
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -111,7 +113,7 @@ type DashboardSalesReportRow = {
 type ThemeMode = "light" | "dark";
 type DateRangeMode = "today" | "7d" | "30d" | "month" | "custom";
 type MicroAction = "integration" | "sync" | "rules" | "report" | "decision" | null;
-type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "equipo" | "datos" | "reportes" | "alertas" | "configuracion";
+type DashboardModule = "inicio" | "ventas" | "caja" | "inventario" | "clientes" | "proyecciones" | "equipo" | "datos" | "reportes" | "alertas" | "configuracion";
 type NavItem = { id: DashboardModule; label: string; icon: LucideIcon };
 type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string };
 type CompanyCreateResponse = { company: { id: string }; user: { id: string } };
@@ -309,6 +311,7 @@ const navItems: NavItem[] = [
   { id: "caja", label: "Caja", icon: WalletCards },
   { id: "inventario", label: "Inventario", icon: Boxes },
   { id: "clientes", label: "Clientes", icon: Users },
+  { id: "proyecciones", label: "Proyecciones", icon: LineChart },
   { id: "equipo", label: "Equipo", icon: UserRoundCog },
   { id: "datos", label: "Datos", icon: TableProperties },
   { id: "reportes", label: "Reportes", icon: FileText },
@@ -942,6 +945,7 @@ export default function Home() {
     caja: activeModule === "caja",
     inventario: activeModule === "inventario",
     clientes: activeModule === "clientes",
+    proyecciones: activeModule === "proyecciones",
     equipo: activeModule === "equipo",
     datos: activeModule === "datos",
     reportes: activeModule === "reportes",
@@ -2165,6 +2169,19 @@ ${recommendedAction()}`;
           onLogout={() => { void logout(); }}
           onInviteFormChange={setInviteForm}
           onInviteTeamMember={inviteTeamMember}
+        />
+        ) : null}
+
+        {activeModule === "proyecciones" ? (
+        <ProjectionsModule
+          isActive
+          hasBusinessData={hasBusinessData}
+          dateRangeLabel={dateRangeLabel}
+          metrics={metrics}
+          chartData={chartData}
+          isGeneratingAi={isGeneratingAiDecisions}
+          onGenerateProjection={() => { void generateAiDecisions(); }}
+          formatMoney={formatMoney}
         />
         ) : null}
 
