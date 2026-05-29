@@ -29,8 +29,41 @@ function statusLabel(value: string | null | undefined) {
   return "Pendiente";
 }
 
+async function getPublicSupportTickets() {
+  try {
+    return await query<{
+      id: string;
+      ticketNumber: string;
+      companyName: string;
+      title: string;
+      description: string;
+      priority: string;
+      status: string;
+      estimatedResponse: string;
+      contactEmail: string;
+      createdAt: string;
+    }>(
+      `SELECT id,
+              ticket_number AS "ticketNumber",
+              COALESCE(NULLIF(company_name, ''), 'Visitante del sitio') AS "companyName",
+              subject AS title,
+              message AS description,
+              priority,
+              status,
+              estimated_response AS "estimatedResponse",
+              contact_email AS "contactEmail",
+              created_at AS "createdAt"
+       FROM public_support_tickets
+       ORDER BY created_at DESC
+       LIMIT 30`
+    );
+  } catch {
+    return { rows: [] };
+  }
+}
+
 export async function getAdminSupport() {
-  const [summary, manualCases, operations] = await Promise.all([
+  const [summary, manualCases, publicTickets, operations] = await Promise.all([
     query<{
       openCases: string;
       inProgressCases: string;
@@ -71,6 +104,7 @@ export async function getAdminSupport() {
        ORDER BY support_cases.created_at DESC
        LIMIT 30`
     ),
+    getPublicSupportTickets(),
     query<{
       id: string;
       companyId: string;
@@ -162,14 +196,29 @@ export async function getAdminSupport() {
   ]);
 
   const summaryRow = summary.rows[0];
+  const manualRows = manualCases.rows.map((supportCase) => ({
+    ...supportCase,
+    caseUrl: `/admin/clientes/${supportCase.companyId}`,
+    createdLabel: toDateLabel(supportCase.createdAt),
+    priorityLabel: priorityLabel(supportCase.priority),
+    sourceLabel: "Cliente",
+    statusLabel: statusLabel(supportCase.status)
+  }));
+  const publicRows = publicTickets.rows.map((supportCase) => ({
+    ...supportCase,
+    caseUrl: "",
+    companyId: "",
+    createdLabel: toDateLabel(supportCase.createdAt),
+    description: `${supportCase.description}${supportCase.contactEmail ? ` · Responder a ${supportCase.contactEmail}` : ""}${supportCase.estimatedResponse ? ` · ${supportCase.estimatedResponse}` : ""}`,
+    priorityLabel: priorityLabel(supportCase.priority),
+    sourceLabel: "Chatbot",
+    statusLabel: statusLabel(supportCase.status)
+  }));
 
   return {
-    cases: manualCases.rows.map((supportCase) => ({
-      ...supportCase,
-      createdLabel: toDateLabel(supportCase.createdAt),
-      priorityLabel: priorityLabel(supportCase.priority),
-      statusLabel: statusLabel(supportCase.status)
-    })),
+    cases: [...publicRows, ...manualRows]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 30),
     operations: operations.rows.map((item) => ({
       ...item,
       createdLabel: toDateLabel(item.createdAt),

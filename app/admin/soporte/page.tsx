@@ -36,11 +36,11 @@ export default async function AdminSupportPage() {
               <div>
                 <strong>{supportCase.title}</strong>
                 <small>{supportCase.companyName} · {supportCase.description || "Sin descripción"}</small>
-                <small>Creado: {supportCase.createdLabel}</small>
+                <small>{supportCase.sourceLabel} · Creado: {supportCase.createdLabel}</small>
               </div>
               <span data-status={supportCase.priorityLabel}>{supportCase.priorityLabel}</span>
               <span data-status={supportCase.statusLabel}>{supportCase.statusLabel}</span>
-              <a href={`/admin/clientes/${supportCase.companyId}`}>Ver ficha</a>
+              {supportCase.caseUrl ? <a href={supportCase.caseUrl}>Ver ficha</a> : <span data-status="Pendiente">Chatbot</span>}
             </article>
           )) : (
             <p className="admin-empty-note">No hay casos manuales de soporte abiertos todavía.</p>

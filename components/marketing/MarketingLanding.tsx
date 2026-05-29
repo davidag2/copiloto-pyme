@@ -3,6 +3,7 @@
 import { AlertTriangle, Bell, Check, Clock3, ClipboardCheck, CreditCard, Eye, Headphones, MessageSquareText, ShieldCheck, Sparkles, Target, TrendingUp, UserCheck, Users, WalletCards } from "lucide-react";
 import { useState } from "react";
 import { ContactForm } from "./ContactForm";
+import { ChatbotWidget } from "./ChatbotWidget";
 import { FeatureCard } from "./FeatureCard";
 import { Footer } from "./Footer";
 import { Header, type MarketingPageKey } from "./Header";
@@ -128,6 +129,7 @@ export function MarketingLanding({ activePage = "inicio", theme, onToggleTheme }
           </section>
         )}
       </main>
+      <ChatbotWidget />
       <Footer />
     </div>
   );

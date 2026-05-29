@@ -214,6 +214,25 @@ CREATE TABLE IF NOT EXISTS support_cases (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public_support_tickets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_number TEXT NOT NULL UNIQUE,
+  source TEXT NOT NULL DEFAULT 'landing_chatbot',
+  contact_name TEXT NOT NULL DEFAULT '',
+  contact_email TEXT NOT NULL DEFAULT '',
+  contact_phone TEXT NOT NULL DEFAULT '',
+  company_name TEXT NOT NULL DEFAULT '',
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT 'general',
+  priority TEXT NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
+  estimated_response TEXT NOT NULL DEFAULT '',
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS admin_client_actions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
@@ -669,6 +688,7 @@ CREATE INDEX IF NOT EXISTS idx_siigo_invoice_logs_company_status ON siigo_invoic
 CREATE INDEX IF NOT EXISTS idx_companies_deleted_at ON companies(deleted_at, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_companies_access_blocked ON companies(access_blocked_at, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_support_cases_company_status ON support_cases(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_public_support_tickets_status ON public_support_tickets(status, priority, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_client_actions_company_time ON admin_client_actions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_client_actions_admin_time ON admin_client_actions(admin_user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_client_actions_action_time ON admin_client_actions(action, created_at DESC);
