@@ -7047,12 +7047,18 @@ select:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .mkt-header-actions .mkt-button,
-  .mkt-header-actions .mkt-button::before {
+  .mkt-header-actions .mkt-button::before,
+  .mkt-hero-actions .mkt-button,
+  .mkt-hero-actions .mkt-button::before,
+  .mkt-hero-actions .mkt-button svg {
     transition: none;
   }
 
   .mkt-header-actions .mkt-button:hover,
-  .mkt-header-actions .mkt-button:active {
+  .mkt-header-actions .mkt-button:active,
+  .mkt-hero-actions .mkt-button:hover,
+  .mkt-hero-actions .mkt-button:active,
+  .mkt-hero-actions .mkt-button:hover svg {
     transform: none;
   }
 }
@@ -7169,6 +7175,68 @@ select:focus-visible {
   flex-wrap: wrap;
   gap: 16px;
   margin-top: 34px;
+}
+
+.mkt-hero-actions .mkt-button {
+  isolation: isolate;
+  min-width: 224px;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(0) scale(1);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+.mkt-hero-actions .mkt-button::before {
+  background: linear-gradient(120deg, transparent 6%, rgba(255, 255, 255, 0.46) 44%, transparent 70%);
+  content: "";
+  inset: -42% auto -42% -72%;
+  position: absolute;
+  transform: skewX(-18deg);
+  transition: left 460ms ease;
+  width: 56%;
+  z-index: -1;
+}
+
+.mkt-hero-actions .mkt-button:hover {
+  transform: translateY(-3px) scale(1.018);
+}
+
+.mkt-hero-actions .mkt-button:hover::before {
+  left: 120%;
+}
+
+.mkt-hero-actions .mkt-button.primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #2563eb 58%, #1d4ed8);
+  box-shadow: 0 24px 52px rgba(37, 99, 235, 0.36), 0 0 0 5px rgba(37, 99, 235, 0.08);
+}
+
+.mkt-hero-actions .mkt-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(37, 99, 235, 0.34);
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.1), 0 0 0 5px rgba(37, 99, 235, 0.06);
+  color: var(--mkt-ink);
+}
+
+.mkt-hero-actions .mkt-button svg {
+  transition: transform 220ms ease, color 180ms ease;
+}
+
+.mkt-hero-actions .mkt-button:hover svg {
+  transform: translateX(3px) scale(1.04);
+}
+
+.mkt-hero-actions .mkt-button.secondary:hover svg {
+  color: var(--mkt-blue-2);
+}
+
+.mkt-hero-actions .mkt-button:active {
+  transform: translateY(-1px) scale(0.985);
 }
 
 .mkt-hero-copy small {
