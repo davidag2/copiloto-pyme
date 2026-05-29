@@ -8,6 +8,7 @@ type ChatMessage = {
 };
 
 type ChatbotResult = {
+  fallbackReason?: "missing_openai_key" | "openai_request_failed" | "empty_openai_output";
   provider: "openai" | "fallback";
   reply: string;
 };
@@ -113,6 +114,7 @@ Objeciones frecuentes:
 function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { number: string; estimatedResponse: string }): ChatbotResult {
   if (ticket) {
     return {
+      fallbackReason: "openai_request_failed",
       provider: "fallback",
       reply: `Ya cree tu ticket de soporte ${ticket.number}. ${ticket.estimatedResponse} El equipo de Tecnotitan S.A.S. revisara el caso y te contactara con el siguiente paso.`
     };
@@ -120,6 +122,7 @@ function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { n
 
   if (supportIntent) {
     return {
+      fallbackReason: "openai_request_failed",
       provider: "fallback",
       reply: "Puedo ayudarte con soporte. Cuentame tu email, empresa y que ocurrio para crear un ticket y darte un numero de seguimiento."
     };
@@ -127,6 +130,7 @@ function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { n
 
   if (/precio|plan|cu[aá]nto|costo|vale/i.test(lastMessage)) {
     return {
+      fallbackReason: "openai_request_failed",
       provider: "fallback",
       reply: "Copiloto Pyme tiene 3 planes con 1 mes gratis: Go por COP $20.000/mes, Basic por COP $50.000/mes y Pro por COP $100.000/mes. Basic es el recomendado porque agrega Inventario y Clientes, y Pro suma Proyecciones con IA."
     };
@@ -134,12 +138,14 @@ function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { n
 
   if (/venta|ventas|cliente|clientes|caja|inventario|dato|datos|m[oó]dulo|modulo/i.test(lastMessage)) {
     return {
+      fallbackReason: "openai_request_failed",
       provider: "fallback",
       reply: "La idea central es simple: registras o importas datos por modulo, como Ventas, Caja, Inventario y Clientes. Luego Inicio cruza esa informacion y convierte el estado de tu PYME en decisiones concretas para vender mas, cuidar la caja y reducir riesgos."
     };
   }
 
     return {
+      fallbackReason: "openai_request_failed",
       provider: "fallback",
       reply: "Estoy en modo basico por ahora. Copiloto Pyme funciona asi: registras ventas, caja, inventario y clientes; luego Inicio cruza esos datos y te dice que riesgo atender, que oportunidad aprovechar y que accion tomar hoy."
     };
@@ -188,7 +194,10 @@ async function askOpenAI(messages: ChatMessage[], supportIntent: boolean, ticket
 
   if (!apiKey) {
     console.warn("[chatbot] OPENAI_CHATBOT_API_KEY is not configured. Using fallback.");
-    return fallbackReply(lastMessage, supportIntent, ticket);
+    return {
+      ...fallbackReply(lastMessage, supportIntent, ticket),
+      fallbackReason: "missing_openai_key"
+    };
   }
 
   const input = [
@@ -233,14 +242,20 @@ async function askOpenAI(messages: ChatMessage[], supportIntent: boolean, ticket
       model,
       status: response.status
     });
-    return fallbackReply(lastMessage, supportIntent, ticket);
+    return {
+      ...fallbackReply(lastMessage, supportIntent, ticket),
+      fallbackReason: "openai_request_failed"
+    };
   }
 
   const data = await response.json();
   const output = typeof data.output_text === "string" ? data.output_text.trim() : "";
   if (!output) {
     console.error("[chatbot] OpenAI response did not include output_text");
-    return fallbackReply(lastMessage, supportIntent, ticket);
+    return {
+      ...fallbackReply(lastMessage, supportIntent, ticket),
+      fallbackReason: "empty_openai_output"
+    };
   }
 
   return { provider: "openai", reply: output };
@@ -262,6 +277,7 @@ export async function POST(request: Request) {
     const result = await askOpenAI(messages, supportIntent, ticket);
 
     return ok({
+      fallbackReason: result.fallbackReason,
       provider: result.provider,
       reply: result.reply,
       supportIntent,
