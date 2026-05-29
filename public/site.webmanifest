@@ -1,0 +1,17 @@
+{
+  "name": "Copiloto Pyme",
+  "short_name": "Copiloto Pyme",
+  "description": "Sistema operativo para administrar la PYME con IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EFF6FF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
