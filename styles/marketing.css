@@ -2922,6 +2922,56 @@ select:focus-visible {
   padding: 12px 14px;
 }
 
+.auth-route-card form .mkt-button {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(0) scale(1);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+.auth-route-card form .mkt-button::before {
+  background: linear-gradient(120deg, transparent 6%, rgba(255, 255, 255, 0.46) 44%, transparent 70%);
+  content: "";
+  inset: -42% auto -42% -72%;
+  position: absolute;
+  transform: skewX(-18deg);
+  transition: left 460ms ease;
+  width: 56%;
+  z-index: -1;
+}
+
+.auth-route-card form .mkt-button:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.018);
+}
+
+.auth-route-card form .mkt-button:hover:not(:disabled)::before {
+  left: 120%;
+}
+
+.auth-route-card form .mkt-button.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4f46e5, #2563eb 58%, #1d4ed8);
+  box-shadow: 0 24px 52px rgba(37, 99, 235, 0.36), 0 0 0 5px rgba(37, 99, 235, 0.08);
+}
+
+.auth-route-card form .mkt-button svg {
+  transition: transform 220ms ease;
+}
+
+.auth-route-card form .mkt-button:hover:not(:disabled) svg {
+  transform: translateX(3px) scale(1.04);
+}
+
+.auth-route-card form .mkt-button:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.985);
+}
+
 .mkt-contact-form textarea {
   min-height: 120px;
   resize: vertical;
@@ -7053,7 +7103,10 @@ select:focus-visible {
   .mkt-hero-actions .mkt-button svg,
   .mkt-final-cta .mkt-button,
   .mkt-final-cta .mkt-button::before,
-  .mkt-final-cta .mkt-button svg {
+  .mkt-final-cta .mkt-button svg,
+  .auth-route-card form .mkt-button,
+  .auth-route-card form .mkt-button::before,
+  .auth-route-card form .mkt-button svg {
     transition: none;
   }
 
@@ -7064,7 +7117,10 @@ select:focus-visible {
   .mkt-hero-actions .mkt-button:hover svg,
   .mkt-final-cta .mkt-button:hover,
   .mkt-final-cta .mkt-button:active,
-  .mkt-final-cta .mkt-button:hover svg {
+  .mkt-final-cta .mkt-button:hover svg,
+  .auth-route-card form .mkt-button:hover,
+  .auth-route-card form .mkt-button:active,
+  .auth-route-card form .mkt-button:hover svg {
     transform: none;
   }
 }
