@@ -6996,6 +6996,67 @@ select:focus-visible {
   padding-inline: 28px;
 }
 
+.mkt-header-actions .mkt-button {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(0) scale(1);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+.mkt-header-actions .mkt-button::before {
+  background: linear-gradient(120deg, transparent 8%, rgba(255, 255, 255, 0.42) 44%, transparent 68%);
+  content: "";
+  inset: -40% auto -40% -70%;
+  position: absolute;
+  transform: skewX(-18deg);
+  transition: left 420ms ease;
+  width: 54%;
+  z-index: -1;
+}
+
+.mkt-header-actions .mkt-button:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+.mkt-header-actions .mkt-button:hover::before {
+  left: 118%;
+}
+
+.mkt-header-actions .mkt-button.primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #1d4ed8);
+  box-shadow: 0 20px 42px rgba(37, 99, 235, 0.34), 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.mkt-header-actions .mkt-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1), 0 0 0 4px rgba(37, 99, 235, 0.06);
+  color: var(--mkt-ink);
+}
+
+.mkt-header-actions .mkt-button:active {
+  transform: translateY(0) scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt-header-actions .mkt-button,
+  .mkt-header-actions .mkt-button::before {
+    transition: none;
+  }
+
+  .mkt-header-actions .mkt-button:hover,
+  .mkt-header-actions .mkt-button:active {
+    transform: none;
+  }
+}
+
 .mkt-theme-button,
 .mkt-menu-button {
   cursor: pointer;
