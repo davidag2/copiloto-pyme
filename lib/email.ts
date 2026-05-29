@@ -3,11 +3,14 @@ import { query } from "@/lib/db";
 type EmailStatus = "sent" | "configuration_required" | "failed";
 
 type SendEmailInput = {
+  actionLabel?: string;
+  actionUrl?: string;
   body: string;
   companyId?: string | null;
   from?: string;
   metadata?: Record<string, unknown>;
   preheader?: string;
+  sensitive?: boolean;
   sentByAdminUserId?: string | null;
   subject: string;
   templateKey?: string;
@@ -39,7 +42,11 @@ function paragraphs(value: string) {
     .join("");
 }
 
-export function renderBrandedEmail({ body, preheader, title }: { body: string; preheader?: string; title: string }) {
+export function renderBrandedEmail({ actionLabel, actionUrl, body, preheader, title }: { actionLabel?: string; actionUrl?: string; body: string; preheader?: string; title: string }) {
+  const action = actionUrl && actionLabel
+    ? `<p style="margin:28px 0 8px;"><a href="${escapeHtml(actionUrl)}" style="display:inline-block;border-radius:16px;background:linear-gradient(135deg,#4338ca,#2563eb);color:#ffffff;font-weight:900;padding:14px 22px;text-decoration:none;">${escapeHtml(actionLabel)}</a></p>`
+    : "";
+
   return `<!doctype html>
 <html lang="es">
   <head>
@@ -60,6 +67,7 @@ export function renderBrandedEmail({ body, preheader, title }: { body: string; p
         </header>
         <div style="padding:30px;color:#1F2937;font-size:16px;line-height:1.65;">
           ${paragraphs(body)}
+          ${action}
           <div style="margin-top:28px;padding:18px;border-radius:18px;background:#f3f6fb;border:1px solid #dbe4f0;">
             <strong style="color:#0A2540;">Tecnotitan S.A.S</strong>
             <p style="margin:6px 0 0;color:#667085;">Este correo fue enviado desde Copiloto Pyme para acompañar la administración y toma de decisiones de tu empresa.</p>
@@ -73,6 +81,8 @@ export function renderBrandedEmail({ body, preheader, title }: { body: string; p
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const html = renderBrandedEmail({
+    actionLabel: input.actionLabel,
+    actionUrl: input.actionUrl,
     body: input.body,
     preheader: input.preheader,
     title: input.subject
@@ -140,7 +150,7 @@ async function logEmail(input: SendEmailInput, status: EmailStatus, messageId: s
         input.to,
         input.subject,
         input.preheader || "",
-        input.body,
+        input.sensitive ? "[contenido sensible]" : input.body,
         input.templateKey || null,
         status,
         messageId,

@@ -82,6 +82,7 @@ export function LoginForm() {
         <ArrowRight aria-hidden="true" />{status === "loading" ? "Entrando..." : "Entrar"}
       </button>
       <p className={`auth-form-status ${status === "error" ? "is-error" : ""} ${status === "success" ? "is-success" : ""}`}>{message}</p>
+      <a href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
     </form>
   );
 }

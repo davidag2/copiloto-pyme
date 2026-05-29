@@ -2972,6 +2972,28 @@ select:focus-visible {
   transform: translateY(-1px) scale(0.985);
 }
 
+.auth-route-card form > a {
+  align-items: center;
+  color: var(--mkt-blue-2);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  gap: 8px;
+  justify-self: start;
+  text-decoration: none;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.auth-route-card form > a:hover {
+  color: #1d4ed8;
+  transform: translateX(2px);
+}
+
+.auth-route-card form > a svg {
+  height: 16px;
+  width: 16px;
+}
+
 .mkt-contact-form textarea {
   min-height: 120px;
   resize: vertical;
