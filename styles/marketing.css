@@ -7050,7 +7050,10 @@ select:focus-visible {
   .mkt-header-actions .mkt-button::before,
   .mkt-hero-actions .mkt-button,
   .mkt-hero-actions .mkt-button::before,
-  .mkt-hero-actions .mkt-button svg {
+  .mkt-hero-actions .mkt-button svg,
+  .mkt-final-cta .mkt-button,
+  .mkt-final-cta .mkt-button::before,
+  .mkt-final-cta .mkt-button svg {
     transition: none;
   }
 
@@ -7058,7 +7061,10 @@ select:focus-visible {
   .mkt-header-actions .mkt-button:active,
   .mkt-hero-actions .mkt-button:hover,
   .mkt-hero-actions .mkt-button:active,
-  .mkt-hero-actions .mkt-button:hover svg {
+  .mkt-hero-actions .mkt-button:hover svg,
+  .mkt-final-cta .mkt-button:hover,
+  .mkt-final-cta .mkt-button:active,
+  .mkt-final-cta .mkt-button:hover svg {
     transform: none;
   }
 }
@@ -7817,6 +7823,68 @@ select:focus-visible {
   gap: 14px;
   justify-content: center;
   margin-top: 28px;
+}
+
+.mkt-final-cta .mkt-button {
+  isolation: isolate;
+  min-width: 224px;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(0) scale(1);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+.mkt-final-cta .mkt-button::before {
+  background: linear-gradient(120deg, transparent 6%, rgba(255, 255, 255, 0.48) 44%, transparent 70%);
+  content: "";
+  inset: -42% auto -42% -72%;
+  position: absolute;
+  transform: skewX(-18deg);
+  transition: left 460ms ease;
+  width: 56%;
+  z-index: -1;
+}
+
+.mkt-final-cta .mkt-button:hover {
+  transform: translateY(-3px) scale(1.018);
+}
+
+.mkt-final-cta .mkt-button:hover::before {
+  left: 120%;
+}
+
+.mkt-final-cta .mkt-button.primary:hover {
+  background: linear-gradient(135deg, #6366f1, #2563eb 58%, #1d4ed8);
+  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.26), 0 0 0 5px rgba(255, 255, 255, 0.12);
+}
+
+.mkt-final-cta .mkt-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 22px 48px rgba(2, 6, 23, 0.2), 0 0 0 5px rgba(255, 255, 255, 0.12);
+  color: var(--mkt-ink);
+}
+
+.mkt-final-cta .mkt-button svg {
+  transition: transform 220ms ease, color 180ms ease;
+}
+
+.mkt-final-cta .mkt-button:hover svg {
+  transform: translateX(3px) scale(1.04);
+}
+
+.mkt-final-cta .mkt-button.secondary:hover svg {
+  color: var(--mkt-blue-2);
+}
+
+.mkt-final-cta .mkt-button:active {
+  transform: translateY(-1px) scale(0.985);
 }
 
 .mkt-section,
