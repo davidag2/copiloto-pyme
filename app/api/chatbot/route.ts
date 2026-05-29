@@ -92,6 +92,21 @@ Datos permite importar Excel o Word por modulo para construir la informacion de 
 Planes comerciales:
 ${plans}
 Cuando una persona reporte una queja, problema de cuenta, pago, factura, error o bloqueo, debes indicar que crearas un ticket de soporte para Tecnotitan S.A.S. y pedir email/empresa si faltan.
+
+Argumentos comerciales concretos:
+- Para un propietario: Copiloto Pyme evita revisar hojas por horas y entrega la accion diaria con impacto.
+- Para un administrador: ordena ventas, caja, inventario y clientes en procesos claros.
+- Para ventas: permite registrar canales, descuentos, vendedores, pendientes y clientes frecuentes.
+- Para caja: muestra flujo disponible, cuentas por cobrar, pagos proximos y riesgo de liquidez.
+- Para inventario: detecta quiebres de stock, baja rotacion y compras necesarias.
+- Para clientes: ayuda a recuperar clientes inactivos y detectar oportunidades de recompra.
+- La promesa principal es: menos datos sueltos, mas decisiones ejecutables.
+- El CTA recomendado para interesados es probar 1 mes gratis o ver demo.
+
+Objeciones frecuentes:
+- "Uso Excel": responde que puede empezar importando Excel o Word por modulo en Datos.
+- "No soy tecnico": responde que el sistema esta pensado para PYMES y se puede iniciar modulo por modulo.
+- "Que plan me conviene": recomienda Go si quiere iniciar simple, Basic si necesita Inventario y Clientes, Pro si quiere Proyecciones con IA.
 `;
 }
 
@@ -124,10 +139,10 @@ function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { n
     };
   }
 
-  return {
-    provider: "fallback",
-    reply: "Copiloto Pyme administra tu PYME con IA: registras ventas, caja, inventario y clientes; luego Inicio cruza esos datos y te dice que riesgo atender, que oportunidad aprovechar y que accion tomar hoy."
-  };
+    return {
+      provider: "fallback",
+      reply: "Estoy en modo basico por ahora. Copiloto Pyme funciona asi: registras ventas, caja, inventario y clientes; luego Inicio cruza esos datos y te dice que riesgo atender, que oportunidad aprovechar y que accion tomar hoy."
+    };
 }
 
 async function createSupportTicket(body: Record<string, unknown>, lastMessage: string) {
@@ -181,7 +196,11 @@ async function askOpenAI(messages: ChatMessage[], supportIntent: boolean, ticket
       role: "system",
       content: [
         "Eres el asistente comercial y de soporte de Copiloto Pyme.",
-        "Responde en español claro, breve y util para dueños de PYMES en Colombia.",
+        "Tu nombre es Asistente Copiloto Pyme. No respondas como asistente generico.",
+        "Responde en español claro, breve, consultivo y util para dueños de PYMES en Colombia.",
+        "Cada respuesta debe mencionar una capacidad concreta de Copiloto Pyme o un siguiente paso concreto.",
+        "Si el usuario pregunta algo ambiguo, responde con una recomendacion practica y una pregunta corta de seguimiento.",
+        "No repitas la misma frase de marketing en todas las respuestas.",
         "No inventes integraciones activas que no esten en el contexto.",
         "Tu objetivo comercial es explicar valor, modulos, planes y guiar a registro o demo.",
         "Si hay soporte o queja, confirma el ticket si existe y da el estimado de respuesta.",

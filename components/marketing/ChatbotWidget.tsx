@@ -58,6 +58,9 @@ export function ChatbotWidget() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "No pude responder en este momento.");
       if (data.ticket) setTicket(data.ticket);
+      if (data.provider !== "openai") {
+        console.warn("[Copiloto Pyme Chatbot] Respuesta en modo fallback. Revisa OPENAI_CHATBOT_API_KEY y logs de Vercel.");
+      }
       setMessages((current) => [...current, { role: "assistant", content: data.reply }]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "No pude responder en este momento.";
