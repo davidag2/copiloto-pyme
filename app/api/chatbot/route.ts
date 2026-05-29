@@ -111,6 +111,30 @@ Objeciones frecuentes:
 `;
 }
 
+function extractResponseText(data: unknown) {
+  if (!data || typeof data !== "object") return "";
+  const direct = (data as { output_text?: unknown }).output_text;
+  if (typeof direct === "string" && direct.trim()) return direct.trim();
+
+  const output = (data as { output?: unknown }).output;
+  if (!Array.isArray(output)) return "";
+
+  return output
+    .flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const content = (item as { content?: unknown }).content;
+      return Array.isArray(content) ? content : [];
+    })
+    .map((content) => {
+      if (!content || typeof content !== "object") return "";
+      const text = (content as { text?: unknown }).text;
+      return typeof text === "string" ? text : "";
+    })
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
 function fallbackReply(lastMessage: string, supportIntent: boolean, ticket?: { number: string; estimatedResponse: string }): ChatbotResult {
   if (ticket) {
     return {
@@ -249,7 +273,7 @@ async function askOpenAI(messages: ChatMessage[], supportIntent: boolean, ticket
   }
 
   const data = await response.json();
-  const output = typeof data.output_text === "string" ? data.output_text.trim() : "";
+  const output = extractResponseText(data);
   if (!output) {
     console.error("[chatbot] OpenAI response did not include output_text");
     return {
