@@ -6,10 +6,10 @@
       <stop offset="1" stop-color="#22C55E"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#cpAppleGradient)"/>
-  <path d="M181 295C151 295 128 272 128 242C128 212 151 189 181 189C203 189 220 199 230 216L199 237C195 229 189 225 181 225C171 225 164 232 164 242C164 252 171 259 181 259C189 259 195 255 199 247L230 268C220 285 203 295 181 295Z" fill="white"/>
-  <path d="M254 292V190H304C330 190 349 207 349 232C349 257 330 274 304 274H291V292H254ZM291 240H302C309 240 314 237 314 232C314 227 309 224 302 224H291V240Z" fill="white"/>
-  <rect x="318" y="318" width="78" height="16" rx="8" fill="white" fill-opacity="0.72"/>
-  <circle cx="370" cy="147" r="22" fill="white" fill-opacity="0.18"/>
-  <path d="M370 116V178M339 147H401" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <rect x="18" y="18" width="476" height="476" rx="112" fill="url(#cpAppleGradient)"/>
+  <path d="M160 306C124 306 96 278 96 242C96 206 124 178 160 178C186 178 207 190 219 211L182 236C177 227 170 222 160 222C148 222 140 230 140 242C140 254 148 262 160 262C170 262 177 257 182 248L219 273C207 294 186 306 160 306Z" fill="white"/>
+  <path d="M244 302V180H304C335 180 358 200 358 230C358 260 335 280 304 280H288V302H244ZM288 239H302C310 239 316 236 316 230C316 224 310 221 302 221H288V239Z" fill="white"/>
+  <rect x="305" y="330" width="98" height="18" rx="9" fill="white" fill-opacity="0.78"/>
+  <circle cx="382" cy="132" r="25" fill="white" fill-opacity="0.18"/>
+  <path d="M382 96V168M346 132H418" stroke="white" stroke-width="14" stroke-linecap="round"/>
 </svg>
