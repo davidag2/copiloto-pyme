@@ -6,7 +6,7 @@ import { useState } from "react";
 export type MarketingPageKey = "inicio" | "ventajas" | "precio" | "contactenos";
 
 type HeaderProps = {
-  activePage: MarketingPageKey;
+  activePage?: MarketingPageKey;
   theme: "light" | "dark";
   onToggleTheme: () => void;
 };
