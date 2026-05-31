@@ -318,6 +318,20 @@ CREATE TABLE IF NOT EXISTS team_invitations (
   UNIQUE(company_id, email)
 );
 
+CREATE TABLE IF NOT EXISTS legal_acceptances (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  legal_version TEXT NOT NULL,
+  accepted_documents JSONB NOT NULL DEFAULT '{}'::jsonb,
+  source TEXT NOT NULL DEFAULT 'registration' CHECK (source IN ('registration', 'login_update', 'admin_import')),
+  ip_address TEXT,
+  user_agent TEXT,
+  accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(company_id, user_id, legal_version, source)
+);
+
 UPDATE team_invitations SET role = CASE role
   WHEN 'dueno' THEN 'propietario'
   WHEN 'owner' THEN 'propietario'
@@ -697,6 +711,8 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_expires ON sessions(user_id, expire
 CREATE INDEX IF NOT EXISTS idx_sessions_company_created ON sessions(company_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id, expires_at DESC);
 CREATE INDEX IF NOT EXISTS idx_team_invitations_company_status ON team_invitations(company_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_legal_acceptances_company_time ON legal_acceptances(company_id, accepted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_legal_acceptances_user_version ON legal_acceptances(user_id, legal_version, accepted_at DESC);
 
 CREATE TABLE IF NOT EXISTS admin_email_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
