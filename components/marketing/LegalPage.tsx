@@ -33,11 +33,6 @@ export function LegalPage({ badge, title, description, effectiveDate, sections }
         </section>
 
         <section className="mkt-legal-document">
-          <article className="mkt-legal-note">
-            <strong>Nota importante</strong>
-            <p>Este documento es una base operativa para Copiloto Pyme y debe ser revisado por asesoría legal antes de usarse como texto definitivo en producción.</p>
-          </article>
-
           {sections.map((section) => (
             <article className="mkt-legal-section" key={section.title}>
               <h2>{section.title}</h2>

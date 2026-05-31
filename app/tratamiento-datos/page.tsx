@@ -6,7 +6,7 @@ const sections: LegalSection[] = [
     title: "1. Responsable",
     body: [
       "Tecnotitan S.A.S. actúa como responsable del tratamiento de datos personales recolectados mediante Copiloto Pyme, sus formularios, canales de soporte, procesos de registro, facturación y uso de la plataforma.",
-      "El correo de contacto para consultas, reclamos o solicitudes relacionadas con datos personales es hola@copilotopyme.com."
+      "El correo de contacto para consultas, reclamos, solicitudes y notificaciones legales relacionadas con datos personales es info@tecnotitan.com."
     ]
   },
   {
