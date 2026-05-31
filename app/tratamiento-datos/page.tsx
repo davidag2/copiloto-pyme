@@ -1,4 +1,5 @@
 import { LegalPage, type LegalSection } from "@/components/marketing/LegalPage";
+import { legalVersions } from "@/lib/legal";
 
 const sections: LegalSection[] = [
   {
@@ -57,7 +58,7 @@ export default function DataTreatmentPage() {
     <LegalPage
       badge="Datos personales"
       description="Política base para el tratamiento de datos personales de clientes, usuarios, visitantes y contactos de Copiloto Pyme."
-      effectiveDate="30 de mayo de 2026"
+      effectiveDate={legalVersions.dataProcessing.effectiveDate}
       sections={sections}
       title="Política de Tratamiento de Datos Personales"
     />

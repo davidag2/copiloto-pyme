@@ -1,4 +1,5 @@
 import { LegalPage, type LegalSection } from "@/components/marketing/LegalPage";
+import { legalVersions } from "@/lib/legal";
 
 const sections: LegalSection[] = [
   {
@@ -45,7 +46,7 @@ export default function CookiesPage() {
     <LegalPage
       badge="Cookies"
       description="Información sobre el uso de cookies y tecnologías similares en el sitio y plataforma de Copiloto Pyme."
-      effectiveDate="30 de mayo de 2026"
+      effectiveDate={legalVersions.cookies.effectiveDate}
       sections={sections}
       title="Política de Cookies"
     />

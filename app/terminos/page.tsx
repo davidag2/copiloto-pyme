@@ -1,4 +1,5 @@
 import { LegalPage, type LegalSection } from "@/components/marketing/LegalPage";
+import { legalVersions } from "@/lib/legal";
 
 const sections: LegalSection[] = [
   {
@@ -64,7 +65,7 @@ export default function TermsPage() {
     <LegalPage
       badge="Términos"
       description="Reglas de uso de Copiloto Pyme, prueba gratuita, planes, pagos, responsabilidades y alcance de las recomendaciones con IA."
-      effectiveDate="30 de mayo de 2026"
+      effectiveDate={legalVersions.terms.effectiveDate}
       sections={sections}
       title="Términos y Condiciones"
     />
