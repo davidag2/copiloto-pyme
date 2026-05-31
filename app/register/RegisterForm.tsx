@@ -2,6 +2,7 @@
 
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { currentLegalAcceptance, legalDocumentsList } from "@/lib/legal";
 import { commercialPlans, type CommercialPlan, type PlanId } from "@/lib/plans";
 
 type RegisterFormProps = {
@@ -123,6 +124,19 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
       <label>Empresa<input name="companyName" placeholder="Nombre de tu empresa" required /></label>
       <label>Email<input name="ownerEmail" type="email" placeholder="correo@empresa.com" required /></label>
       <label>Contraseña<input name="password" type="password" placeholder="Mínimo 8 caracteres" required minLength={8} /></label>
+      <input name="legalVersion" type="hidden" value={currentLegalAcceptance.version} />
+      <label className="auth-legal-consent">
+        <input name="acceptLegalTerms" required type="checkbox" value="accepted" />
+        <span>
+          Acepto los documentos legales de Copiloto Pyme para iniciar la prueba gratuita:{" "}
+          {legalDocumentsList.map((document, index) => (
+            <span key={document.id}>
+              <a href={document.path} rel="noopener noreferrer" target="_blank">{document.label}</a>
+              {index < legalDocumentsList.length - 1 ? ", " : "."}
+            </span>
+          ))}
+        </span>
+      </label>
       <button className="mkt-button primary" disabled={status === "loading"} type="submit">
         <ArrowRight aria-hidden="true" />{status === "loading" ? "Creando cuenta..." : `Crear cuenta ${activePlan.name}`}
       </button>

@@ -3299,6 +3299,44 @@ select:focus-visible {
   color: var(--brand-blue);
 }
 
+.auth-legal-consent {
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 18px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  line-height: 1.5;
+  padding: 14px;
+}
+
+.auth-legal-consent input {
+  accent-color: var(--brand-blue);
+  flex: 0 0 auto;
+  height: 18px;
+  margin-top: 3px;
+  width: 18px;
+}
+
+.auth-legal-consent span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-legal-consent a {
+  color: var(--brand-blue);
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.auth-legal-consent a:hover,
+.auth-legal-consent a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .auth-plan-picker {
   display: grid;
   gap: 10px;
@@ -3521,6 +3559,19 @@ select:focus-visible {
 
 .theme-dark .mkt-footer-legal a:hover,
 .theme-dark .mkt-footer-legal a:focus-visible {
+  color: #93c5fd;
+}
+
+.theme-dark .auth-legal-consent {
+  background: rgba(15, 23, 42, 0.68);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+.theme-dark .auth-legal-consent span {
+  color: #cbd5e1;
+}
+
+.theme-dark .auth-legal-consent a {
   color: #93c5fd;
 }
 
