@@ -3337,6 +3337,25 @@ select:focus-visible {
   text-underline-offset: 3px;
 }
 
+.auth-legal-helper {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  margin-top: -4px;
+}
+
+.auth-route-card form .mkt-button:disabled {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.86);
+  cursor: not-allowed;
+  opacity: 0.82;
+}
+
+.auth-route-card form .mkt-button:disabled::before {
+  display: none;
+}
+
 .auth-plan-picker {
   display: grid;
   gap: 10px;

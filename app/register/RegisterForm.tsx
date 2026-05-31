@@ -48,11 +48,18 @@ type RegisterResponse = {
 export function RegisterForm({ selectedPlan }: RegisterFormProps) {
   const [planId, setPlanId] = useState<PlanId>(selectedPlan.id);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [hasAcceptedLegalTerms, setHasAcceptedLegalTerms] = useState(false);
   const [message, setMessage] = useState("Completa tus datos para activar tu mes gratis.");
   const activePlan = commercialPlans.find((plan) => plan.id === planId) ?? selectedPlan;
 
   async function submitRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!hasAcceptedLegalTerms) {
+      setStatus("error");
+      setMessage("Debes aceptar los documentos legales para crear la cuenta y activar la prueba gratuita.");
+      return;
+    }
+
     setStatus("loading");
     setMessage("Creando tu empresa, usuario y mes gratis...");
 
@@ -126,7 +133,14 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
       <label>Contraseña<input name="password" type="password" placeholder="Mínimo 8 caracteres" required minLength={8} /></label>
       <input name="legalVersion" type="hidden" value={currentLegalAcceptance.version} />
       <label className="auth-legal-consent">
-        <input name="acceptLegalTerms" required type="checkbox" value="accepted" />
+        <input
+          checked={hasAcceptedLegalTerms}
+          name="acceptLegalTerms"
+          onChange={(event) => setHasAcceptedLegalTerms(event.target.checked)}
+          required
+          type="checkbox"
+          value="accepted"
+        />
         <span>
           Acepto los documentos legales de Copiloto Pyme para iniciar la prueba gratuita:{" "}
           {legalDocumentsList.map((document, index) => (
@@ -137,7 +151,10 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
           ))}
         </span>
       </label>
-      <button className="mkt-button primary" disabled={status === "loading"} type="submit">
+      {!hasAcceptedLegalTerms ? (
+        <small className="auth-legal-helper">Marca la aceptación legal para habilitar la creación de la cuenta.</small>
+      ) : null}
+      <button className="mkt-button primary" disabled={status === "loading" || !hasAcceptedLegalTerms} type="submit">
         <ArrowRight aria-hidden="true" />{status === "loading" ? "Creando cuenta..." : `Crear cuenta ${activePlan.name}`}
       </button>
       <p className={`auth-form-status ${status === "error" ? "is-error" : ""} ${status === "success" ? "is-success" : ""}`}>{message}</p>
