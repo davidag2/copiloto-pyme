@@ -3029,14 +3029,42 @@ select:focus-visible {
   border-top: 1px solid var(--line);
   color: var(--muted);
   display: flex;
+  gap: 22px;
   justify-content: space-between;
   margin: 0 auto;
   max-width: 1160px;
   padding: 24px clamp(18px, 4vw, 28px) 34px;
 }
 
+.mkt-footer-brand {
+  display: grid;
+  gap: 4px;
+}
+
 .mkt-footer strong {
   color: var(--brand-primary);
+}
+
+.mkt-footer-legal {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  justify-content: flex-end;
+}
+
+.mkt-footer-legal a {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.mkt-footer-legal a:hover,
+.mkt-footer-legal a:focus-visible {
+  color: #2563eb;
+  transform: translateY(-1px);
 }
 
 .demo-page,
@@ -3487,6 +3515,15 @@ select:focus-visible {
   color: white;
 }
 
+.theme-dark .mkt-footer-legal a {
+  color: #cbd5e1;
+}
+
+.theme-dark .mkt-footer-legal a:hover,
+.theme-dark .mkt-footer-legal a:focus-visible {
+  color: #93c5fd;
+}
+
 .theme-dark .mkt-bullets span,
 .theme-dark .mkt-trust-pills span,
 .theme-dark .mkt-dashboard-decision,
@@ -3643,7 +3680,11 @@ select:focus-visible {
   .mkt-footer {
     align-items: flex-start;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
+  }
+
+  .mkt-footer-legal {
+    justify-content: flex-start;
   }
 }
 
