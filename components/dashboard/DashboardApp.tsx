@@ -41,6 +41,7 @@ import {
   WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { currentLegalAcceptance, legalDocumentsList } from "@/lib/legal";
 import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { planIncludesModule } from "@/lib/plans";
@@ -138,6 +139,18 @@ type TeamMember = { id: string; companyId: string; name: string; email: string; 
 type InviteResponse = { invitation: Invitation; inviteToken: string; inviteUrl: string };
 type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; createdAt?: string; updatedAt?: string };
 type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[]; salesReports?: DashboardSalesReportRow[] };
+type DashboardAppProps = {
+  requiresLegalAcceptance?: boolean;
+};
+type LegalAcceptanceResponse = {
+  legalAcceptance: {
+    id: string;
+    companyId: string;
+    userId: string;
+    legalVersion: string;
+    acceptedAt: string;
+  };
+};
 type CsvColumnMapping = {
   fecha: string;
   cliente: string;
@@ -599,8 +612,11 @@ function dashboardRange(range: DateRangeMode, customRange: { start: string; end:
   return { startDate: toInputDate(start), endDate: toInputDate(end) };
 }
 
-export default function Home() {
+export default function DashboardApp({ requiresLegalAcceptance = false }: DashboardAppProps) {
   const [theme, setTheme] = useState<ThemeMode>("light");
+  const [legalUpdateRequired, setLegalUpdateRequired] = useState(requiresLegalAcceptance);
+  const [legalUpdateAccepted, setLegalUpdateAccepted] = useState(false);
+  const [legalUpdateStatus, setLegalUpdateStatus] = useState("Para continuar usando Copiloto Pyme debes aceptar la versión vigente.");
   const [companyId, setCompanyId] = useState("");
   const [persistenceStatus, setPersistenceStatus] = useState("Conecta tu empresa para empezar a cargar datos reales.");
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -1953,8 +1969,67 @@ ${recommendedAction()}`;
     await document.documentElement.requestFullscreen();
   }
 
+  async function acceptLegalUpdate() {
+    if (!legalUpdateAccepted) {
+      setLegalUpdateStatus("Marca la aceptación para continuar.");
+      return;
+    }
+
+    setLegalUpdateStatus("Guardando aceptación legal...");
+    const result = await apiJson<LegalAcceptanceResponse>("/api/legal/acceptance", {
+      method: "POST",
+      body: JSON.stringify({
+        acceptLegalTerms: true,
+        legalVersion: currentLegalAcceptance.version
+      })
+    });
+
+    if (!result.ok) {
+      setLegalUpdateStatus(`No se pudo guardar la aceptación: ${result.error}`);
+      return;
+    }
+
+    setLegalUpdateRequired(false);
+    setLegalUpdateStatus("Aceptación legal guardada.");
+  }
+
   return (
     <div id="appView" className={`app-shell theme-${theme} ${sidebarCollapsed ? "app-shell--sidebar-collapsed" : ""} ${isFullscreen ? "dashboard-fullscreen" : ""}`}>
+      {legalUpdateRequired ? (
+        <div className="legal-update-overlay" role="presentation">
+          <section className="legal-update-modal" role="dialog" aria-modal="true" aria-labelledby="legal-update-title">
+            <div className="legal-update-icon">
+              <ShieldCheck aria-hidden="true" />
+            </div>
+            <span>Actualización legal requerida</span>
+            <h2 id="legal-update-title">Acepta la versión vigente para continuar</h2>
+            <p>
+              Actualizamos los documentos legales de Copiloto Pyme. Para proteger tu empresa,
+              registrar auditoría y mantener el acceso al dashboard, necesitamos tu aceptación.
+            </p>
+            <div className="legal-update-documents" aria-label="Documentos legales vigentes">
+              {legalDocumentsList.map((document) => (
+                <a href={document.path} key={document.id} rel="noopener noreferrer" target="_blank">
+                  <FileText aria-hidden="true" />
+                  <span>{document.label}</span>
+                </a>
+              ))}
+            </div>
+            <label className="legal-update-check">
+              <input
+                checked={legalUpdateAccepted}
+                onChange={(event) => setLegalUpdateAccepted(event.target.checked)}
+                type="checkbox"
+              />
+              <span>Acepto la versión {currentLegalAcceptance.version} de los documentos legales de Copiloto Pyme.</span>
+            </label>
+            <button className="primary-button legal-update-action" disabled={!legalUpdateAccepted} onClick={() => { void acceptLegalUpdate(); }} type="button">
+              <CheckCircle2 aria-hidden="true" /> Aceptar y continuar
+            </button>
+            <small className={legalUpdateStatus.startsWith("No se pudo") ? "is-error" : ""}>{legalUpdateStatus}</small>
+          </section>
+        </div>
+      ) : null}
       <header className="mobile-app-bar">
         <div className="brand"><div className="brand-mark">CP</div><div><strong>Copiloto Pyme</strong><span>{customer.companyName}</span></div></div>
         <div className="mobile-app-actions">

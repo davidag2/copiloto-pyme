@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardApp from "@/components/dashboard/DashboardApp";
+import { query } from "@/lib/db";
+import { currentLegalAcceptance } from "@/lib/legal";
 import { validateRequestSession } from "@/lib/session";
 import { getSubscriptionAccess } from "@/lib/subscription-access";
 
@@ -14,5 +16,15 @@ export default async function DashboardPage() {
   const access = await getSubscriptionAccess(session.companyId);
   if (!access.allowed) redirect(access.redirectTo || "/billing");
 
-  return <DashboardApp />;
+  const legalAcceptance = await query<{ id: string }>(
+    `SELECT id
+     FROM legal_acceptances
+     WHERE company_id = $1
+       AND user_id = $2
+       AND legal_version = $3
+     LIMIT 1`,
+    [session.companyId, session.userId, currentLegalAcceptance.version]
+  );
+
+  return <DashboardApp requiresLegalAcceptance={legalAcceptance.rowCount === 0} />;
 }
