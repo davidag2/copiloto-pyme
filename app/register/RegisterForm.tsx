@@ -73,6 +73,8 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
         companyName: form.get("companyName"),
         ownerEmail: form.get("ownerEmail"),
         password: form.get("password"),
+        acceptLegalTerms: hasAcceptedLegalTerms,
+        legalVersion: form.get("legalVersion"),
         country: "Colombia",
         businessType: "PYME",
         currency: "COP",

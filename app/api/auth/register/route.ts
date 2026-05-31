@@ -2,6 +2,7 @@ import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassword } from "@/lib/auth";
 import { transaction } from "@/lib/db";
 import { sendEmail, welcomeEmailBody } from "@/lib/email";
+import { currentLegalAcceptance, legalDocumentsList } from "@/lib/legal";
 import { getPlanById, getTrialEndsAt } from "@/lib/plans";
 import { normalizeRole } from "@/lib/roles";
 import { setSessionCookie } from "@/lib/session";
@@ -31,6 +32,14 @@ const defaultPaymentMethods = [
   ["Crédito cliente", "credit"]
 ];
 
+function getRequestIp(headers: Headers) {
+  return (
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headers.get("x-real-ip") ||
+    null
+  );
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -40,6 +49,25 @@ export async function POST(request: Request) {
     const ownerEmail = normalizeEmail(requiredString(body.ownerEmail, "ownerEmail"));
     const password = requirePassword(body.password);
     const selectedPlan = getPlanById(body.plan);
+    const acceptedLegalTerms = body.acceptLegalTerms === true || body.acceptLegalTerms === "accepted";
+    const legalVersion = requiredString(body.legalVersion, "legalVersion");
+    if (!acceptedLegalTerms || legalVersion !== currentLegalAcceptance.version) {
+      throw new Error("Debes aceptar la version vigente de los documentos legales para crear la cuenta.");
+    }
+
+    const acceptedDocuments = Object.fromEntries(
+      legalDocumentsList.map((document) => [
+        document.id,
+        {
+          effectiveDate: document.effectiveDate,
+          label: document.label,
+          path: document.path,
+          version: document.version
+        }
+      ])
+    );
+    const ipAddress = getRequestIp(headers);
+    const userAgent = headers.get("user-agent") || null;
     const trialStartsAt = new Date();
     const trialEndsAt = getTrialEndsAt(trialStartsAt);
 
@@ -111,6 +139,20 @@ export async function POST(request: Request) {
         [companyId, user.rows[0].id, ownerName, ownerEmail]
       );
 
+      const legalAcceptance = await client.query(
+        `INSERT INTO legal_acceptances (company_id, user_id, legal_version, accepted_documents, source, ip_address, user_agent)
+         VALUES ($1, $2, $3, $4::jsonb, 'registration', $5, $6)
+         RETURNING id, company_id AS "companyId", user_id AS "userId", legal_version AS "legalVersion", accepted_at AS "acceptedAt"`,
+        [
+          companyId,
+          user.rows[0].id,
+          legalVersion,
+          JSON.stringify(acceptedDocuments),
+          ipAddress,
+          userAgent
+        ]
+      );
+
       const sessionToken = createPlainToken();
       const sessionTokenHash = hashToken(sessionToken);
       const sessionExpiresAt = new Date();
@@ -138,8 +180,8 @@ export async function POST(request: Request) {
           user.rows[0].id,
           companyId,
           sessionTokenHash,
-          headers.get("user-agent") || null,
-          headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+          userAgent,
+          ipAddress,
           sessionExpiresAt
         ]
       );
@@ -154,6 +196,7 @@ export async function POST(request: Request) {
         },
         subscription: subscription.rows[0],
         onboarding: onboarding.rows[0],
+        legalAcceptance: legalAcceptance.rows[0],
         registration: {
           plan: selectedPlan,
           trial: {
