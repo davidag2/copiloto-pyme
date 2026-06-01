@@ -139,6 +139,8 @@ https://copilotopyme.com/api/voice/incoming
 
 Este endpoint responde TwiML con `Content-Type: text/xml` para que Twilio pueda ejecutar el flujo de llamada.
 
+Para la prueba inicial se usa `voice="woman"` y `language="es-ES"` porque es una combinacion mas compatible con Twilio `<Say>` que `alice` con region `es-CO`.
+
 ### Comportamiento Actual
 
 Cuando una persona llama al numero beta de Twilio, el sistema debe:

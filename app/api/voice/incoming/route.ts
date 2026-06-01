@@ -8,9 +8,9 @@ const voiceIntro =
 function createVoiceResponse() {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="alice" language="es-CO">${voiceIntro}</Say>
+  <Say voice="woman" language="es-ES">${voiceIntro}</Say>
   <Pause length="1"/>
-  <Say voice="alice" language="es-CO">Para conocer Copiloto Pyme, visita copilotopyme punto com.</Say>
+  <Say voice="woman" language="es-ES">Para conocer Copiloto Pyme, visita copilotopyme punto com.</Say>
   <Hangup/>
 </Response>`;
 }
