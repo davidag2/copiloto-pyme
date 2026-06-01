@@ -141,6 +141,16 @@ Este endpoint responde TwiML con `Content-Type: text/xml` para que Twilio pueda 
 
 Para la prueba inicial se usa `voice="woman"` y `language="es-ES"` porque es una combinacion mas compatible con Twilio `<Say>` que `alice` con region `es-CO`.
 
+### URL Estatica Para Diagnostico
+
+Si Twilio muestra el error `11750 - TwiML response body too large`, significa que el numero esta recibiendo una pagina HTML grande en vez de TwiML. Para aislar el problema, existe una version estatica del XML en:
+
+```text
+https://copilotopyme.com/twilio/voice.xml
+```
+
+Esta URL evita pasar por una funcion de Next.js y sirve un TwiML minimo directamente desde `public/twilio/voice.xml`.
+
 ### Comportamiento Actual
 
 Cuando una persona llama al numero beta de Twilio, el sistema debe:
@@ -169,6 +179,12 @@ a:
 
 ```text
 https://copilotopyme.com/api/voice/incoming
+```
+
+Si aparece el error 11750, usar temporalmente:
+
+```text
+https://copilotopyme.com/twilio/voice.xml
 ```
 
 Metodo:
