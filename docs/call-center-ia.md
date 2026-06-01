@@ -187,10 +187,16 @@ Si aparece el error 11750, usar temporalmente:
 https://copilotopyme.com/twilio/voice.xml
 ```
 
-Metodo:
+Metodo para el endpoint API:
 
 ```text
 POST
+```
+
+Metodo para el archivo estatico `voice.xml`:
+
+```text
+GET
 ```
 
 ### Objetivo De Esta Prueba
