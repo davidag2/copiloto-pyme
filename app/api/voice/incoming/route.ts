@@ -1,24 +1,13 @@
-import { NextResponse } from "next/server";
-
-const voiceIntro =
-  "Hola, estas llamando a Copiloto Pyme, el sistema operativo con inteligencia artificial para administrar tu empresa. " +
-  "Muy pronto este numero atendera ventas, soporte, quejas y reclamos. " +
-  "Por ahora estamos probando la linea telefonica. Gracias por llamar.";
-
-function createVoiceResponse() {
-  return `<?xml version="1.0" encoding="UTF-8"?>
+const voiceResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="woman" language="es-ES">${voiceIntro}</Say>
-  <Pause length="1"/>
-  <Say voice="woman" language="es-ES">Para conocer Copiloto Pyme, visita copilotopyme punto com.</Say>
-  <Hangup/>
+  <Say>Hola. Estas llamando a Copiloto Pyme. La linea telefonica esta funcionando correctamente.</Say>
 </Response>`;
-}
 
 export async function POST() {
-  return new NextResponse(createVoiceResponse(), {
+  return new Response(voiceResponse, {
+    status: 200,
     headers: {
-      "Content-Type": "text/xml; charset=utf-8",
+      "Content-Type": "application/xml",
       "Cache-Control": "no-store",
     },
   });
