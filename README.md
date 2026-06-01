@@ -100,6 +100,16 @@ Primeros segmentos recomendados:
 
 ## Funcionalidades Del MVP
 
+### Call Center IA
+
+El alcance inicial del mini call center con Twilio y OpenAI Voice esta documentado en:
+
+```text
+docs/call-center-ia.md
+```
+
+Este flujo cubre llamadas de ventas, soporte, quejas, reclamos y emergencias criticas que deben quedar registradas en el panel superadmin de Tecnotitan S.A.S.
+
 ### 1. Portal SaaS
 
 El prototipo incluye una pagina inicial donde el cliente puede:
