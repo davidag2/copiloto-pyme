@@ -121,6 +121,80 @@ No se usara inicialmente para:
 
 Queda definido que el producto necesita una linea de voz Twilio dedicada, preferiblemente colombiana, validada en Twilio Console antes de construir endpoints definitivos.
 
+## Paso 3: Flujo De Llamada Entrante
+
+### Endpoint Creado
+
+La primera version del webhook de voz vive en:
+
+```text
+POST /api/voice/incoming
+```
+
+URL publica esperada en produccion:
+
+```text
+https://copilotopyme.com/api/voice/incoming
+```
+
+Este endpoint responde TwiML con `Content-Type: text/xml` para que Twilio pueda ejecutar el flujo de llamada.
+
+### Comportamiento Actual
+
+Cuando una persona llama al numero beta de Twilio, el sistema debe:
+
+1. Contestar la llamada.
+2. Reproducir un saludo de Copiloto Pyme en espanol.
+3. Informar que la linea esta en prueba.
+4. Mencionar el sitio web `copilotopyme.com`.
+5. Colgar la llamada.
+
+### Configuracion En Twilio
+
+En el numero activo de Twilio:
+
+```text
++1 914 732 0344
+```
+
+Cambiar el webhook actual de voz desde:
+
+```text
+https://demo.twilio.com/welcome/voice/
+```
+
+a:
+
+```text
+https://copilotopyme.com/api/voice/incoming
+```
+
+Metodo:
+
+```text
+POST
+```
+
+### Objetivo De Esta Prueba
+
+Esta prueba confirma que:
+
+- Twilio llama correctamente a Copiloto Pyme.
+- Vercel sirve el endpoint publico.
+- Twilio entiende la respuesta TwiML.
+- La llamada reproduce el mensaje de bienvenida.
+- El numero beta queda listo para evolucionar hacia IA de voz.
+
+### Siguiente Evolucion
+
+Despues de probar esta version, el flujo debe avanzar hacia:
+
+- Menu inicial por voz o teclado.
+- Captura de intencion: ventas, soporte, queja, reclamo o emergencia.
+- Registro de llamada en base de datos.
+- Integracion con OpenAI Voice.
+- Creacion automatica de tickets y leads.
+
 ## Casos De Uso Principales
 
 ### 1. Ventas
