@@ -141,6 +141,8 @@ type AlertRuleRow = CompanyAlertRule & { id: string; companyId?: string; created
 type DashboardDataResponse = { kpis?: DashboardKpis; alertRules?: AlertRuleRow[]; decisions?: Decision[]; salesReports?: DashboardSalesReportRow[] };
 type DashboardAppProps = {
   requiresLegalAcceptance?: boolean;
+  captureModule?: DashboardModule;
+  capturePlan?: string;
 };
 type LegalAcceptanceResponse = {
   legalAcceptance: {
@@ -612,7 +614,7 @@ function dashboardRange(range: DateRangeMode, customRange: { start: string; end:
   return { startDate: toInputDate(start), endDate: toInputDate(end) };
 }
 
-export default function DashboardApp({ requiresLegalAcceptance = false }: DashboardAppProps) {
+export default function DashboardApp({ requiresLegalAcceptance = false, captureModule = "inicio", capturePlan = "go" }: DashboardAppProps) {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [legalUpdateRequired, setLegalUpdateRequired] = useState(requiresLegalAcceptance);
   const [legalUpdateAccepted, setLegalUpdateAccepted] = useState(false);
@@ -632,7 +634,7 @@ export default function DashboardApp({ requiresLegalAcceptance = false }: Dashbo
     ownerEmail: "",
     companyName: "Tu empresa",
     country: "Colombia",
-    plan: "go",
+    plan: capturePlan,
     businessType: "Distribuidora",
     currency: "COP - Peso colombiano",
     monthlyGoal: 100_000_000,
@@ -729,7 +731,7 @@ export default function DashboardApp({ requiresLegalAcceptance = false }: Dashbo
   const [editingSale, setEditingSale] = useState<EditingSale>({ saleDate: "", status: "pagada", discount: "0", notes: "" });
   const [kpiSourceStatus, setKpiSourceStatus] = useState("KPIs en cero hasta cargar datos reales.");
   const [kpiRowCount, setKpiRowCount] = useState(0);
-  const [activeModule, setActiveModule] = useState<DashboardModule>("inicio");
+  const [activeModule, setActiveModule] = useState<DashboardModule>(captureModule);
   const [topbarCollapsed, setTopbarCollapsed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);

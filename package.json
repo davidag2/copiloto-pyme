@@ -12,7 +12,8 @@
     "db:check": "node scripts/db/check.mjs",
     "db:audit": "node scripts/db/audit-schema.mjs",
     "db:apply": "node scripts/db/apply-schema.mjs",
-    "db:seed": "node scripts/db/seed-demo.mjs"
+    "db:seed": "node scripts/db/seed-demo.mjs",
+    "capture:figma-dashboard": "node scripts/figma/capture-dashboard.mjs"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0",

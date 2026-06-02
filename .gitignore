@@ -30,3 +30,4 @@ out/
 coverage/
 .npm-cache/
 tsconfig.tsbuildinfo
+figma-dashboard-screens/
