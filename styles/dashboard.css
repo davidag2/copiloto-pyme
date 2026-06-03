@@ -13369,44 +13369,6 @@ td .module-empty-note {
   width: 52px;
 }
 
-.sales-modal-drag-edge {
-  cursor: default;
-  position: absolute;
-  z-index: 2;
-}
-
-.sales-modal-drag-edge:active {
-  cursor: default;
-}
-
-.sales-modal-drag-edge-top {
-  height: 12px;
-  left: 18px;
-  right: 56px;
-  top: 0;
-}
-
-.sales-modal-drag-edge-right {
-  bottom: 18px;
-  right: 0;
-  top: 18px;
-  width: 12px;
-}
-
-.sales-modal-drag-edge-bottom {
-  bottom: 0;
-  height: 12px;
-  left: 18px;
-  right: 18px;
-}
-
-.sales-modal-drag-edge-left {
-  bottom: 18px;
-  left: 0;
-  top: 18px;
-  width: 12px;
-}
-
 .sales-action-modal > header span {
   color: var(--figma-blue);
   font-size: 12px;

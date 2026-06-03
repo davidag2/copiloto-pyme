@@ -320,24 +320,31 @@ export function SalesModule({
     const target = event.target as HTMLElement;
     if (target.closest("button, input, select, textarea, a")) return;
 
-    const modal = event.currentTarget.closest(".sales-action-modal");
-    if (!modal) return;
+    const modal = event.currentTarget;
 
     const rect = modal.getBoundingClientRect();
+    const edgeSize = 22;
+    const isOnEdge =
+      event.clientX - rect.left <= edgeSize ||
+      rect.right - event.clientX <= edgeSize ||
+      event.clientY - rect.top <= edgeSize ||
+      rect.bottom - event.clientY <= edgeSize;
+
+    if (!isOnEdge) return;
+
     event.preventDefault();
     salesModalDragOffset.current = {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     };
     setSalesModalPosition({ x: rect.left, y: rect.top });
-    event.currentTarget.setPointerCapture(event.pointerId);
+    modal.setPointerCapture(event.pointerId);
   };
 
   const moveSalesModal = (event: PointerEvent<HTMLElement>) => {
     if (!salesModalDragOffset.current) return;
 
-    const modal = event.currentTarget.closest(".sales-action-modal");
-    if (!modal) return;
+    const modal = event.currentTarget;
 
     const rect = modal.getBoundingClientRect();
     const margin = 12;
@@ -608,20 +615,13 @@ export function SalesModule({
             aria-modal="true"
             aria-labelledby="sales-action-modal-title"
             onClick={(event) => event.stopPropagation()}
+            onLostPointerCapture={stopSalesModalDrag}
+            onPointerCancel={stopSalesModalDrag}
+            onPointerDown={startSalesModalDrag}
+            onPointerMove={moveSalesModal}
+            onPointerUp={stopSalesModalDrag}
             style={salesModalPosition ? { left: salesModalPosition.x, position: "fixed", right: "auto", top: salesModalPosition.y } : undefined}
           >
-            {["top", "right", "bottom", "left"].map((edge) => (
-              <span
-                aria-hidden="true"
-                className={`sales-modal-drag-edge sales-modal-drag-edge-${edge}`}
-                key={edge}
-                onLostPointerCapture={stopSalesModalDrag}
-                onPointerCancel={stopSalesModalDrag}
-                onPointerDown={startSalesModalDrag}
-                onPointerMove={moveSalesModal}
-                onPointerUp={stopSalesModalDrag}
-              />
-            ))}
             <header>
               <div className="sales-modal-icon">
                 <activeSalesActionConfig.icon aria-hidden="true" />
