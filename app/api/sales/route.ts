@@ -26,6 +26,23 @@ function money(value: unknown, field: string, minimum = 0) {
   return parsed;
 }
 
+function validDate(value: unknown, field: string) {
+  const text = requiredString(value, field);
+  const date = new Date(`${text}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Fecha invalida para ${field}.`);
+  }
+  return text;
+}
+
+function validEmail(value: unknown, field: string) {
+  const email = requiredString(value, field).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error(`Email invalido para ${field}.`);
+  }
+  return email;
+}
+
 async function findByIdOrName(
   client: PoolClient,
   table: string,
@@ -158,7 +175,7 @@ async function createSalesChannel(client: PoolClient, companyId: string, body: R
 
 async function createSalesRep(client: PoolClient, companyId: string, body: Record<string, unknown>) {
   const name = requiredString(body.name, "vendedor");
-  const email = requiredString(body.email, "email");
+  const email = validEmail(body.email, "email");
   const role = optionalTrim(body.role) || "Vendedor";
   const channel = optionalTrim(body.channel) || "Sin canal asignado";
 
@@ -176,8 +193,9 @@ async function createSalesRep(client: PoolClient, companyId: string, body: Recor
 async function createSalesDiscount(client: PoolClient, companyId: string, userId: string, body: Record<string, unknown>) {
   const product = requiredString(body.product, "producto");
   const percent = money(body.percent, "porcentaje", 0);
+  if (percent > 100) throw new Error("El porcentaje de descuento no puede ser mayor a 100.");
   const reason = requiredString(body.reason, "motivo");
-  const date = requiredString(body.date, "fecha");
+  const date = validDate(body.date, "fecha");
 
   await client.query(
     `INSERT INTO activity_events
@@ -197,7 +215,7 @@ async function createSalesDiscount(client: PoolClient, companyId: string, userId
 async function createSalesReceivable(client: PoolClient, companyId: string, userId: string, body: Record<string, unknown>) {
   const customerName = requiredString(body.customer, "cliente");
   const amount = money(body.amount, "valor", 0.01);
-  const dueDate = requiredString(body.dueDate, "vencimiento");
+  const dueDate = validDate(body.dueDate, "vencimiento");
   const receivableStatus = optionalTrim(body.status) || "Pendiente";
 
   const customer = await findByIdOrName(client, "sales_customers", companyId, null, customerName);
@@ -246,9 +264,29 @@ async function handleSecondarySalesAction(
   action: string,
   body: Record<string, unknown>
 ) {
-  if (action === "product") return createSalesProduct(client, companyId, body);
-  if (action === "channel") return createSalesChannel(client, companyId, body);
-  if (action === "seller") return createSalesRep(client, companyId, body);
+  if (action === "product" || action === "channel" || action === "seller") {
+    const message = action === "product"
+      ? await createSalesProduct(client, companyId, body)
+      : action === "channel"
+      ? await createSalesChannel(client, companyId, body)
+      : await createSalesRep(client, companyId, body);
+
+    await client.query(
+      `INSERT INTO activity_events
+       (company_id, actor_user_id, event_type, entity_type, title, description, severity, metadata)
+       VALUES ($1, $2, $3, $4, 'Registro comercial guardado', $5, 'success', $6::jsonb)`,
+      [
+        companyId,
+        userId,
+        `sales_${action}_saved`,
+        `sales_${action}`,
+        message,
+        JSON.stringify({ action, name: optionalTrim(body.name) })
+      ]
+    );
+
+    return message;
+  }
   if (action === "discount") return createSalesDiscount(client, companyId, userId, body);
   if (action === "receivable") return createSalesReceivable(client, companyId, userId, body);
   throw new Error(`Acción de ventas no permitida: ${action}`);

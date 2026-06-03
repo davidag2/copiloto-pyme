@@ -302,8 +302,59 @@ export function SalesModule({
     { label: "Pago pendiente", helper: "Crear cuenta por cobrar", icon: CreditCard, action: "receivable" }
   ] satisfies { label: string; helper: string; icon: LucideIcon; action: SalesAction }[];
   const activeSalesActionConfig = salesActionButtons.find((item) => item.action === activeSalesAction);
+  const operationalGroups = [
+    {
+      action: "product" as const,
+      count: salesCatalogs.products.length,
+      empty: "Sin productos creados",
+      helper: "precio, categoria y stock",
+      icon: PackageCheck,
+      items: salesCatalogs.products.slice(0, 3).map((item) => item.name),
+      label: "Productos"
+    },
+    {
+      action: "channel" as const,
+      count: salesCatalogs.channels.length,
+      empty: "Sin canales creados",
+      helper: "tienda, WhatsApp, web",
+      icon: BarChart3,
+      items: salesCatalogs.channels.slice(0, 3).map((item) => item.name),
+      label: "Canales"
+    },
+    {
+      action: "seller" as const,
+      count: salesCatalogs.reps.length,
+      empty: "Sin vendedores creados",
+      helper: "responsables comerciales",
+      icon: UserCheck,
+      items: salesCatalogs.reps.slice(0, 3).map((item) => item.name),
+      label: "Vendedores"
+    },
+    {
+      action: "receivable" as const,
+      count: pendingCount,
+      empty: "Sin cartera pendiente",
+      helper: "cuentas por cobrar",
+      icon: CreditCard,
+      items: receivables.slice(0, 3).map((sale) => `${sale.customerName} · ${money(sale.total)}`),
+      label: "Pagos pendientes"
+    },
+    {
+      action: "discount" as const,
+      count: discountTotal > 0 ? 1 : 0,
+      empty: "Sin descuentos registrados",
+      helper: "promociones y margen",
+      icon: Percent,
+      items: discountTotal > 0 ? [`Descuentos aplicados · ${money(discountTotal)}`] : [],
+      label: "Descuentos"
+    }
+  ];
 
   const openSalesAction = (action: SalesAction) => {
+    if (!canRegisterSales) {
+      setSalesActionStatus("Tu plan actual no permite registrar datos de ventas.");
+      return;
+    }
     setSalesActionStatus("");
     setSalesModalPosition(null);
     setActiveSalesAction(action);
@@ -370,7 +421,7 @@ export function SalesModule({
         <div className="sales-page-actions">
           <button className="sales-date-button" type="button"><CalendarDays aria-hidden="true" />14 may - 20 may, 2026</button>
           <button className="sales-icon-button" type="button" onClick={onRefreshSalesData} aria-label="Actualizar ventas"><TrendingUp aria-hidden="true" /></button>
-          <button className="primary-button" type="button" onClick={() => openSalesAction("sale")}><ShoppingCart aria-hidden="true" />Nueva venta</button>
+          <button className="primary-button" type="button" onClick={() => openSalesAction("sale")} disabled={!canRegisterSales}><ShoppingCart aria-hidden="true" />Nueva venta</button>
         </div>
       </header>
 
@@ -386,6 +437,7 @@ export function SalesModule({
               <button
                 className="sales-action-button"
                 data-action={item.action}
+                disabled={!canRegisterSales}
                 key={item.action}
                 onClick={() => openSalesAction(item.action)}
                 type="button"
@@ -394,6 +446,37 @@ export function SalesModule({
                 <span>{item.label}</span>
                 <small>{item.helper}</small>
               </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="sales-operational-ledger" aria-label="Registros operativos de ventas">
+        <div className="sales-ledger-heading">
+          <span>Registros operativos</span>
+          <h3>Lo que guardes aqui alimenta KPIs, Inicio y sugerencias IA</h3>
+          <p>{canRegisterSales ? "Cada bloque crece desde su popup sin llenar la pantalla con formularios permanentes." : "Tu plan actual no permite registrar acciones de ventas."}</p>
+        </div>
+        <div className="sales-ledger-grid">
+          {operationalGroups.map((group) => {
+            const Icon = group.icon;
+            const hasItems = group.items.length > 0;
+            return (
+              <article className="sales-ledger-card" data-empty={!hasItems} key={group.label}>
+                <header>
+                  <span><Icon aria-hidden="true" /></span>
+                  <div>
+                    <strong>{group.label}</strong>
+                    <small>{group.count} registro(s) · {group.helper}</small>
+                  </div>
+                </header>
+                <div>
+                  {hasItems ? group.items.map((item) => <p key={item}>{item}</p>) : <p className="module-empty-note">{group.empty}. Crea el primero desde el boton.</p>}
+                </div>
+                <button type="button" onClick={() => openSalesAction(group.action)} disabled={!canRegisterSales}>
+                  Agregar
+                </button>
+              </article>
             );
           })}
         </div>
@@ -671,7 +754,7 @@ export function SalesModule({
                   <label><span>Categoría</span><input name="category" placeholder="Alimentos, servicio, accesorio..." required /></label>
                   <label><span>Stock opcional</span><input name="stock" type="number" min="0" placeholder="0" /></label>
                 </div>
-                <footer><p>{salesActionStatus || "La IA usará producto, precio, categoría y stock para detectar rotación, margen y riesgo comercial."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar producto</button></footer>
+                <footer><p>{salesActionStatus || "La IA usará producto, precio, categoría y stock para detectar rotación, margen y riesgo comercial."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit" disabled={!canRegisterSales}>Guardar producto</button></footer>
               </form>
             ) : null}
 
@@ -683,7 +766,7 @@ export function SalesModule({
                   <label><span>Responsable</span><input name="owner" placeholder="Andrés Vélez" /></label>
                   <label><span>Meta mensual</span><input name="goal" type="number" min="0" step="1000" placeholder="5000000" /></label>
                 </div>
-                <footer><p>{salesActionStatus || "Copiloto comparará canales para saber dónde vendes más, dónde baja la conversión y qué canal merece más foco."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar canal</button></footer>
+                <footer><p>{salesActionStatus || "Copiloto comparará canales para saber dónde vendes más, dónde baja la conversión y qué canal merece más foco."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit" disabled={!canRegisterSales}>Guardar canal</button></footer>
               </form>
             ) : null}
 
@@ -695,7 +778,7 @@ export function SalesModule({
                   <label><span>Rol</span><select name="role" required><option value="">Seleccionar</option><option>Vendedor</option><option>Administrador comercial</option><option>Atención al cliente</option><option>Operaciones</option></select></label>
                   <label><span>Canal asignado</span><input name="channel" placeholder="Tienda, WhatsApp, web..." /></label>
                 </div>
-                <footer><p>{salesActionStatus || "Con vendedores asignados, la IA puede identificar desempeño, cartera pendiente y oportunidades por responsable."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar vendedor</button></footer>
+                <footer><p>{salesActionStatus || "Con vendedores asignados, la IA puede identificar desempeño, cartera pendiente y oportunidades por responsable."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit" disabled={!canRegisterSales}>Guardar vendedor</button></footer>
               </form>
             ) : null}
 
@@ -707,7 +790,7 @@ export function SalesModule({
                   <label><span>Motivo</span><input name="reason" placeholder="Promoción, cliente frecuente, liquidación..." required /></label>
                   <label><span>Fecha</span><input name="date" type="date" required /></label>
                 </div>
-                <footer><p>{salesActionStatus || "La IA revisará descuentos excesivos, impacto en margen y promociones que sí generan recompra."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar descuento</button></footer>
+                <footer><p>{salesActionStatus || "La IA revisará descuentos excesivos, impacto en margen y promociones que sí generan recompra."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit" disabled={!canRegisterSales}>Guardar descuento</button></footer>
               </form>
             ) : null}
 
@@ -719,7 +802,7 @@ export function SalesModule({
                   <label><span>Vencimiento</span><input name="dueDate" type="date" required /></label>
                   <label><span>Estado</span><select name="status" required><option>Pendiente</option><option>Vence pronto</option><option>Vencido</option><option>En acuerdo</option></select></label>
                 </div>
-                <footer><p>{salesActionStatus || "Copiloto usará cartera, vencimiento y estado para alertar caja, riesgo y prioridad de cobro."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar pago pendiente</button></footer>
+                <footer><p>{salesActionStatus || "Copiloto usará cartera, vencimiento y estado para alertar caja, riesgo y prioridad de cobro."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit" disabled={!canRegisterSales}>Guardar pago pendiente</button></footer>
               </form>
             ) : null}
           </section>
@@ -728,3 +811,4 @@ export function SalesModule({
     </section>
   );
 }
+

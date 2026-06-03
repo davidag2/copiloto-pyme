@@ -13101,6 +13101,15 @@ td .module-empty-note {
   opacity: 1;
 }
 
+.sales-action-button:disabled,
+.sales-ledger-card button:disabled,
+.sales-page-actions .primary-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+  opacity: 0.58;
+  transform: none;
+}
+
 .sales-action-button svg {
   height: 20px;
   position: relative;
@@ -13123,6 +13132,134 @@ td .module-empty-note {
   font-size: 11px;
   font-weight: 600;
   line-height: 1.25;
+}
+
+.sales-operational-ledger {
+  background: var(--figma-card);
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  box-shadow: var(--figma-shadow);
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.sales-ledger-heading {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.sales-ledger-heading > span {
+  color: var(--figma-blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sales-ledger-heading h3 {
+  color: var(--figma-ink);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.sales-ledger-heading p {
+  color: var(--figma-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 520px;
+}
+
+.sales-ledger-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.sales-ledger-card {
+  background: #f8fafc;
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  min-height: 168px;
+  padding: 14px;
+}
+
+.theme-dark .sales-ledger-card {
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.sales-ledger-card header {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 38px minmax(0, 1fr);
+}
+
+.sales-ledger-card header > span {
+  align-items: center;
+  background: color-mix(in srgb, var(--figma-blue) 12%, transparent);
+  border-radius: 10px;
+  color: var(--figma-blue);
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.sales-ledger-card strong {
+  color: var(--figma-ink);
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.sales-ledger-card small,
+.sales-ledger-card p {
+  color: var(--figma-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.sales-ledger-card p {
+  margin: 0 0 6px;
+}
+
+.sales-ledger-card .module-empty-note {
+  background: transparent;
+  border: 1px dashed var(--figma-line);
+  border-radius: 10px;
+  margin: 0;
+  padding: 10px;
+}
+
+.sales-ledger-card button {
+  align-self: end;
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  color: var(--figma-blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 36px;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.sales-ledger-card button:hover,
+.sales-ledger-card button:focus-visible {
+  background: color-mix(in srgb, var(--figma-blue) 8%, #ffffff);
+  box-shadow: 0 10px 24px rgba(21, 93, 252, 0.16);
+  transform: translateY(-1px);
 }
 
 .sales-kpi-card {
@@ -13587,6 +13724,15 @@ td .module-empty-note {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .sales-ledger-heading {
+    align-items: start;
+    display: grid;
+  }
+
+  .sales-ledger-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .sales-ai-banner aside {
     border-left: 0;
     border-top: 1px solid var(--figma-line);
@@ -13616,6 +13762,10 @@ td .module-empty-note {
 
   .sales-action-button {
     min-height: 74px;
+  }
+
+  .sales-ledger-grid {
+    grid-template-columns: 1fr;
   }
 
   .sales-modal-backdrop {
