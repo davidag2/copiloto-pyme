@@ -284,6 +284,14 @@ export function SalesModule({
     { label: "Productos", value: hasSalesData ? salesCatalogs.products.length : 0, helper: "rotación y margen" },
     { label: "Canales", value: hasSalesData ? salesCatalogs.channels.length : 0, helper: "dónde vendes mejor" }
   ];
+  const salesActionButtons = [
+    { label: "Nueva venta", helper: "Registrar venta completa", icon: ShoppingCart, action: "sale" },
+    { label: "Producto", helper: "Crear producto o servicio", icon: PackageCheck, action: "product" },
+    { label: "Canal", helper: "Agregar canal de venta", icon: BarChart3, action: "channel" },
+    { label: "Vendedor", helper: "Asignar responsable", icon: UserCheck, action: "seller" },
+    { label: "Descuento", helper: "Registrar promoción", icon: Percent, action: "discount" },
+    { label: "Pago pendiente", helper: "Crear cuenta por cobrar", icon: CreditCard, action: "receivable" }
+  ];
 
   return (
     <section className="sales-command-center dashboard-module-section" data-active={isActive}>
@@ -298,6 +306,35 @@ export function SalesModule({
           <button className="primary-button" type="button"><ShoppingCart aria-hidden="true" />Nueva venta</button>
         </div>
       </header>
+
+      <section className="sales-action-launchpad" aria-label="Acciones operativas de ventas">
+        <div>
+          <span>Herramientas comerciales</span>
+          <h3>Registra la operación que alimenta las decisiones de IA</h3>
+        </div>
+        <div className="sales-action-buttons">
+          {salesActionButtons.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                className="sales-action-button"
+                data-action={item.action}
+                key={item.action}
+                onClick={() => {
+                  if (item.action === "sale") {
+                    document.querySelector(".sales-register-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                type="button"
+              >
+                <Icon aria-hidden="true" />
+                <span>{item.label}</span>
+                <small>{item.helper}</small>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       <div className="sales-kpi-row">
         {[
