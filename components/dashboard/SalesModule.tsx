@@ -610,14 +610,19 @@ export function SalesModule({
             onClick={(event) => event.stopPropagation()}
             style={salesModalPosition ? { left: salesModalPosition.x, position: "fixed", right: "auto", top: salesModalPosition.y } : undefined}
           >
-            <header
-              className="sales-modal-drag-handle"
-              onPointerCancel={stopSalesModalDrag}
-              onPointerDown={startSalesModalDrag}
-              onLostPointerCapture={stopSalesModalDrag}
-              onPointerMove={moveSalesModal}
-              onPointerUp={stopSalesModalDrag}
-            >
+            {["top", "right", "bottom", "left"].map((edge) => (
+              <span
+                aria-hidden="true"
+                className={`sales-modal-drag-edge sales-modal-drag-edge-${edge}`}
+                key={edge}
+                onLostPointerCapture={stopSalesModalDrag}
+                onPointerCancel={stopSalesModalDrag}
+                onPointerDown={startSalesModalDrag}
+                onPointerMove={moveSalesModal}
+                onPointerUp={stopSalesModalDrag}
+              />
+            ))}
+            <header>
               <div className="sales-modal-icon">
                 <activeSalesActionConfig.icon aria-hidden="true" />
               </div>

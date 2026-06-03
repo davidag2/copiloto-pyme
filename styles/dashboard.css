@@ -13333,6 +13333,7 @@ td .module-empty-note {
   border: 1px solid var(--figma-line);
   border-radius: 18px;
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+  cursor: default;
   display: grid;
   gap: 18px;
   max-height: min(760px, calc(100vh - 48px));
@@ -13340,6 +13341,7 @@ td .module-empty-note {
   overflow: auto;
   padding: 22px;
   pointer-events: auto;
+  position: relative;
   transform-origin: top right;
   width: min(100%, 760px);
 }
@@ -13356,17 +13358,6 @@ td .module-empty-note {
   grid-template-columns: 52px minmax(0, 1fr) 42px;
 }
 
-.sales-modal-drag-handle {
-  cursor: grab;
-  -webkit-user-select: none;
-  touch-action: none;
-  user-select: none;
-}
-
-.sales-modal-drag-handle:active {
-  cursor: grabbing;
-}
-
 .sales-modal-icon {
   align-items: center;
   background: linear-gradient(135deg, var(--figma-purple), var(--figma-blue));
@@ -13376,6 +13367,44 @@ td .module-empty-note {
   height: 52px;
   justify-content: center;
   width: 52px;
+}
+
+.sales-modal-drag-edge {
+  cursor: default;
+  position: absolute;
+  z-index: 2;
+}
+
+.sales-modal-drag-edge:active {
+  cursor: default;
+}
+
+.sales-modal-drag-edge-top {
+  height: 12px;
+  left: 18px;
+  right: 56px;
+  top: 0;
+}
+
+.sales-modal-drag-edge-right {
+  bottom: 18px;
+  right: 0;
+  top: 18px;
+  width: 12px;
+}
+
+.sales-modal-drag-edge-bottom {
+  bottom: 0;
+  height: 12px;
+  left: 18px;
+  right: 18px;
+}
+
+.sales-modal-drag-edge-left {
+  bottom: 18px;
+  left: 0;
+  top: 18px;
+  width: 12px;
 }
 
 .sales-action-modal > header span {
