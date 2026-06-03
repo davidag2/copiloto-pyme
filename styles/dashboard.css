@@ -13346,6 +13346,7 @@ td .module-empty-note {
 
 .sales-action-modal[data-dragged="true"] {
   margin: 0;
+  transform: none;
 }
 
 .sales-action-modal > header {
@@ -13357,6 +13358,7 @@ td .module-empty-note {
 
 .sales-modal-drag-handle {
   cursor: grab;
+  -webkit-user-select: none;
   touch-action: none;
   user-select: none;
 }

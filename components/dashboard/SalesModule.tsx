@@ -324,10 +324,12 @@ export function SalesModule({
     if (!modal) return;
 
     const rect = modal.getBoundingClientRect();
+    event.preventDefault();
     salesModalDragOffset.current = {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     };
+    setSalesModalPosition({ x: rect.left, y: rect.top });
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -612,6 +614,7 @@ export function SalesModule({
               className="sales-modal-drag-handle"
               onPointerCancel={stopSalesModalDrag}
               onPointerDown={startSalesModalDrag}
+              onLostPointerCapture={stopSalesModalDrag}
               onPointerMove={moveSalesModal}
               onPointerUp={stopSalesModalDrag}
             >
