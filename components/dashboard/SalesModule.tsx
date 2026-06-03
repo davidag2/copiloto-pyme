@@ -114,6 +114,7 @@ type TrendCard = {
 };
 type ChartPoint = Record<string, string | number>;
 type SalesAction = "sale" | "product" | "channel" | "seller" | "discount" | "receivable";
+type SecondarySalesAction = Exclude<SalesAction, "sale">;
 
 type SalesModuleProps = {
   isActive: boolean;
@@ -154,6 +155,7 @@ type SalesModuleProps = {
   onQuickProductChange: (value: string) => void;
   onQuickFieldChange: (field: keyof QuickSaleForm, value: string) => void;
   onSubmitManualSale: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmitSalesAction: (action: SecondarySalesAction, formData: FormData) => Promise<string | void>;
   onManualProductChange: (value: string) => void;
   onManualFieldChange: (field: keyof ManualSaleForm, value: ManualSaleForm[keyof ManualSaleForm]) => void;
   onFilterChange: (field: keyof SalesFilters, value: string) => void;
@@ -220,6 +222,7 @@ export function SalesModule({
   salesRule,
   products,
   onSubmitManualSale,
+  onSubmitSalesAction,
   onManualProductChange,
   onManualFieldChange,
   onFilterChange,
@@ -311,9 +314,13 @@ export function SalesModule({
     setActiveSalesAction(null);
   };
 
-  const submitSecondarySalesAction = (event: FormEvent<HTMLFormElement>, label: string) => {
+  const submitSecondarySalesAction = async (event: FormEvent<HTMLFormElement>, action: SecondarySalesAction, label: string) => {
     event.preventDefault();
-    setSalesActionStatus(`${label} guardado. En el siguiente paso lo conectamos a PostgreSQL para alimentar la IA.`);
+    const form = event.currentTarget;
+    setSalesActionStatus(`Guardando ${label.toLowerCase()}...`);
+    const message = await onSubmitSalesAction(action, new FormData(form));
+    setSalesActionStatus(message || `${label} guardado. La IA ya puede usar este dato en el analisis comercial.`);
+    form.reset();
   };
 
   const startSalesModalDrag = (event: PointerEvent<HTMLElement>) => {
@@ -657,7 +664,7 @@ export function SalesModule({
             ) : null}
 
             {activeSalesAction === "product" ? (
-              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Producto")}>
+              <form className="sales-modal-form" onSubmit={(event) => { void submitSecondarySalesAction(event, "product", "Producto"); }}>
                 <div className="sales-modal-grid">
                   <label><span>Nombre</span><input name="name" placeholder="Café Premium 500g" required /></label>
                   <label><span>Precio</span><input name="price" type="number" min="0" step="100" placeholder="50000" required /></label>
@@ -669,7 +676,7 @@ export function SalesModule({
             ) : null}
 
             {activeSalesAction === "channel" ? (
-              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Canal")}>
+              <form className="sales-modal-form" onSubmit={(event) => { void submitSecondarySalesAction(event, "channel", "Canal"); }}>
                 <div className="sales-modal-grid">
                   <label><span>Tipo de canal</span><select name="type" required><option value="">Seleccionar</option><option>Tienda física</option><option>WhatsApp</option><option>Página web</option><option>Instagram</option><option>Marketplace</option><option>Referidos</option></select></label>
                   <label><span>Nombre visible</span><input name="name" placeholder="WhatsApp principal" required /></label>
@@ -681,7 +688,7 @@ export function SalesModule({
             ) : null}
 
             {activeSalesAction === "seller" ? (
-              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Vendedor")}>
+              <form className="sales-modal-form" onSubmit={(event) => { void submitSecondarySalesAction(event, "seller", "Vendedor"); }}>
                 <div className="sales-modal-grid">
                   <label><span>Nombre</span><input name="name" placeholder="María Gómez" required /></label>
                   <label><span>Email</span><input name="email" type="email" placeholder="maria@empresa.com" required /></label>
@@ -693,7 +700,7 @@ export function SalesModule({
             ) : null}
 
             {activeSalesAction === "discount" ? (
-              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Descuento")}>
+              <form className="sales-modal-form" onSubmit={(event) => { void submitSecondarySalesAction(event, "discount", "Descuento"); }}>
                 <div className="sales-modal-grid">
                   <label><span>Producto</span><input list="sales-products-list" name="product" placeholder="Producto o servicio" required /></label>
                   <label><span>Porcentaje</span><input name="percent" type="number" min="0" max="100" step="0.1" placeholder="10" required /></label>
@@ -705,7 +712,7 @@ export function SalesModule({
             ) : null}
 
             {activeSalesAction === "receivable" ? (
-              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Pago pendiente")}>
+              <form className="sales-modal-form" onSubmit={(event) => { void submitSecondarySalesAction(event, "receivable", "Pago pendiente"); }}>
                 <div className="sales-modal-grid">
                   <label><span>Cliente</span><input list="sales-customers-list" name="customer" placeholder="Cliente por cobrar" required /></label>
                   <label><span>Valor</span><input name="amount" type="number" min="0" step="1000" placeholder="850000" required /></label>

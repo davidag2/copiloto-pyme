@@ -12,6 +12,7 @@ type CatalogRow = {
 };
 
 const allowedStatuses = new Set(["pagada", "pendiente", "anulada"]);
+const secondarySalesActions = new Set(["product", "channel", "seller", "discount", "receivable"]);
 
 function optionalTrim(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -102,6 +103,155 @@ async function findByIdOrName(
     [companyId, name]
   );
   return created.rows[0];
+}
+
+async function createSalesProduct(client: PoolClient, companyId: string, body: Record<string, unknown>) {
+  const name = requiredString(body.name, "producto");
+  const unitPrice = money(body.price, "precio", 0);
+  const category = optionalTrim(body.category) || "General";
+  const stock = body.stock === undefined || body.stock === "" ? null : money(body.stock, "stock", 0);
+
+  const existing = await client.query<{ id: string }>(
+    `SELECT id FROM sales_products WHERE company_id = $1 AND lower(name) = lower($2) LIMIT 1`,
+    [companyId, name]
+  );
+
+  if (existing.rows[0]) {
+    await client.query(
+      `UPDATE sales_products
+       SET unit_price = $3,
+           category = $4,
+           stock = COALESCE($5, stock),
+           status = 'active',
+           updated_at = NOW()
+       WHERE company_id = $1 AND id = $2`,
+      [companyId, existing.rows[0].id, unitPrice, category, stock]
+    );
+  } else {
+    await client.query(
+      `INSERT INTO sales_products (company_id, name, type, category, unit_price, stock, status)
+       VALUES ($1, $2, 'producto', $3, $4, COALESCE($5, 0), 'active')`,
+      [companyId, name, category, unitPrice, stock]
+    );
+  }
+
+  return `Producto ${name} guardado en PostgreSQL.`;
+}
+
+async function createSalesChannel(client: PoolClient, companyId: string, body: Record<string, unknown>) {
+  const type = requiredString(body.type, "tipo de canal");
+  const name = requiredString(body.name, "canal");
+  const owner = optionalTrim(body.owner) || "Sin responsable";
+  const goal = body.goal === undefined || body.goal === "" ? 0 : money(body.goal, "meta mensual", 0);
+  const description = `${type} · Responsable: ${owner} · Meta mensual COP ${Math.round(goal).toLocaleString("es-CO")}`;
+
+  await client.query(
+    `INSERT INTO sales_channels (company_id, name, description, status)
+     VALUES ($1, $2, $3, 'active')
+     ON CONFLICT (company_id, name)
+     DO UPDATE SET description = EXCLUDED.description, status = 'active', updated_at = NOW()`,
+    [companyId, name, description]
+  );
+
+  return `Canal ${name} guardado para análisis comercial.`;
+}
+
+async function createSalesRep(client: PoolClient, companyId: string, body: Record<string, unknown>) {
+  const name = requiredString(body.name, "vendedor");
+  const email = requiredString(body.email, "email");
+  const role = optionalTrim(body.role) || "Vendedor";
+  const channel = optionalTrim(body.channel) || "Sin canal asignado";
+
+  await client.query(
+    `INSERT INTO sales_reps (company_id, name, email, phone, status)
+     VALUES ($1, $2, $3, $4, 'active')
+     ON CONFLICT (company_id, email)
+     DO UPDATE SET name = EXCLUDED.name, phone = EXCLUDED.phone, status = 'active', updated_at = NOW()`,
+    [companyId, name, email, `${role} · ${channel}`]
+  );
+
+  return `Vendedor ${name} guardado para medir desempeño comercial.`;
+}
+
+async function createSalesDiscount(client: PoolClient, companyId: string, userId: string, body: Record<string, unknown>) {
+  const product = requiredString(body.product, "producto");
+  const percent = money(body.percent, "porcentaje", 0);
+  const reason = requiredString(body.reason, "motivo");
+  const date = requiredString(body.date, "fecha");
+
+  await client.query(
+    `INSERT INTO activity_events
+     (company_id, actor_user_id, event_type, entity_type, title, description, severity, metadata)
+     VALUES ($1, $2, 'sales_discount_logged', 'sales_discounts', 'Descuento registrado', $3, 'info', $4::jsonb)`,
+    [
+      companyId,
+      userId,
+      `${product}: ${percent}% por ${reason}.`,
+      JSON.stringify({ product, percent, reason, date })
+    ]
+  );
+
+  return `Descuento de ${percent}% registrado como señal comercial para la IA.`;
+}
+
+async function createSalesReceivable(client: PoolClient, companyId: string, userId: string, body: Record<string, unknown>) {
+  const customerName = requiredString(body.customer, "cliente");
+  const amount = money(body.amount, "valor", 0.01);
+  const dueDate = requiredString(body.dueDate, "vencimiento");
+  const receivableStatus = optionalTrim(body.status) || "Pendiente";
+
+  const customer = await findByIdOrName(client, "sales_customers", companyId, null, customerName);
+  const product = await findByIdOrName(client, "sales_products", companyId, null, "Cuenta por cobrar", "unit_cost, stock", [amount]);
+  const channel = await findByIdOrName(client, "sales_channels", companyId, null, "Cartera");
+  const rep = await findByIdOrName(client, "sales_reps", companyId, null, "Administración");
+  const paymentMethod = await findByIdOrName(client, "sales_payment_methods", companyId, null, "Crédito cliente");
+  const notes = `Cuenta por cobrar registrada manualmente. Vencimiento: ${dueDate}. Estado: ${receivableStatus}.`;
+
+  const order = await client.query<{ id: string }>(
+    `INSERT INTO sales_orders (
+       company_id, customer_id, channel_id, sales_rep_id, payment_method_id,
+       sale_date, status, subtotal, discount_total, tax_total, total, notes, source, created_by
+     )
+     VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, 'pendiente', $6, 0, 0, $6, $7, 'manual', $8)
+     RETURNING id`,
+    [companyId, customer.id, channel.id, rep.id, paymentMethod.id, amount, notes, userId]
+  );
+
+  await client.query(
+    `INSERT INTO sales_order_items (company_id, order_id, product_id, description, quantity, unit_price, discount, tax, total)
+     VALUES ($1, $2, $3, 'Cuenta por cobrar', 1, $4, 0, 0, $4)`,
+    [companyId, order.rows[0].id, product.id, amount]
+  );
+
+  await client.query(
+    `INSERT INTO activity_events
+     (company_id, actor_user_id, event_type, entity_type, entity_id, title, description, severity, metadata)
+     VALUES ($1, $2, 'receivable_created', 'sales_orders', $3, 'Pago pendiente registrado', $4, 'warning', $5::jsonb)`,
+    [
+      companyId,
+      userId,
+      order.rows[0].id,
+      `${customer.name} debe $${Math.round(amount).toLocaleString("es-CO")}. Vence ${dueDate}.`,
+      JSON.stringify({ customerName: customer.name, amount, dueDate, receivableStatus })
+    ]
+  );
+
+  return `Pago pendiente de ${customer.name} guardado en cartera.`;
+}
+
+async function handleSecondarySalesAction(
+  client: PoolClient,
+  companyId: string,
+  userId: string,
+  action: string,
+  body: Record<string, unknown>
+) {
+  if (action === "product") return createSalesProduct(client, companyId, body);
+  if (action === "channel") return createSalesChannel(client, companyId, body);
+  if (action === "seller") return createSalesRep(client, companyId, body);
+  if (action === "discount") return createSalesDiscount(client, companyId, userId, body);
+  if (action === "receivable") return createSalesReceivable(client, companyId, userId, body);
+  throw new Error(`Acción de ventas no permitida: ${action}`);
 }
 
 export async function GET(request: Request) {
@@ -234,6 +384,16 @@ export async function POST(request: Request) {
     const companyId = requiredString(body.companyId, "companyId");
     const session = await requireCompanySession(request, companyId);
     if (!session.ok) return session.response;
+
+    const action = optionalTrim(body.action)?.toLowerCase();
+    if (action) {
+      if (!secondarySalesActions.has(action)) throw new Error(`Acción de ventas no permitida: ${action}`);
+      const message = await transaction(async (client) =>
+        handleSecondarySalesAction(client, companyId, session.session.userId, action, body)
+      );
+      clearCompanyServerCache(companyId);
+      return ok({ message }, 201);
+    }
 
     const saleDate = requiredString(body.saleDate, "fecha");
     const customerName = requiredString(body.customerName, "cliente");

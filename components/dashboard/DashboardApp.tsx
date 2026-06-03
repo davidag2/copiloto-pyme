@@ -1393,6 +1393,35 @@ export default function DashboardApp({ requiresLegalAcceptance = false, captureM
     await loadActivity(companyId);
   }
 
+  async function submitSalesAction(action: "product" | "channel" | "seller" | "discount" | "receivable", formData: FormData) {
+    if (!companyId) {
+      return "Inicia sesión en una empresa para guardar datos de ventas.";
+    }
+
+    const payload = Object.fromEntries(formData.entries());
+    triggerMicroInteraction("sync", "Guardando dato comercial...");
+    setManualSaleStatus("Guardando dato comercial...");
+
+    const result = await apiJson<{ message: string }>("/api/sales", {
+      method: "POST",
+      body: JSON.stringify({ companyId, action, ...payload })
+    });
+
+    if (!result.ok) {
+      const message = `No se pudo guardar: ${result.error}`;
+      setManualSaleStatus(message);
+      return message;
+    }
+
+    setManualSaleStatus(result.data.message);
+    setPersistenceStatus(result.data.message);
+    setRecommendation("Dato comercial actualizado. Copiloto Pyme recalculará señales de ventas para Inicio.");
+    await loadDashboardData(companyId);
+    await loadSalesData(companyId);
+    await loadActivity(companyId);
+    return result.data.message;
+  }
+
   async function submitQuickSale(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!companyId) {
@@ -2414,6 +2443,7 @@ ${recommendedAction()}`;
           onQuickProductChange={selectProductForQuickSale}
           onQuickFieldChange={updateQuickSaleField}
           onSubmitManualSale={submitManualSale}
+          onSubmitSalesAction={submitSalesAction}
           onManualProductChange={selectProductForManualSale}
           onManualFieldChange={updateManualSaleField}
           onFilterChange={updateSalesFilter}
