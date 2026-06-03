@@ -12716,3 +12716,598 @@ td .module-empty-note {
     grid-template-columns: 1fr;
   }
 }
+
+/* Figma reference: "Nueva Ventas" dashboard system */
+.app-shell {
+  --figma-bg: #f8fafc;
+  --figma-card: #ffffff;
+  --figma-ink: #0f172b;
+  --figma-muted: #45556c;
+  --figma-soft: #62748e;
+  --figma-line: #e2e8f0;
+  --figma-blue: #155dfc;
+  --figma-purple: #5b2df7;
+  --figma-green: #00a63e;
+  --figma-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --figma-shadow-soft: 0 16px 42px rgba(15, 23, 42, 0.06);
+  background: var(--figma-bg);
+  grid-template-columns: 256px minmax(0, 1fr);
+}
+
+.app-shell--sidebar-collapsed {
+  grid-template-columns: 88px minmax(0, 1fr);
+}
+
+.app-shell.theme-dark {
+  --figma-bg: #07111f;
+  --figma-card: #0f1b2d;
+  --figma-ink: #edf5ff;
+  --figma-muted: #cbd5e1;
+  --figma-soft: #94a3b8;
+  --figma-line: rgba(148, 163, 184, 0.18);
+}
+
+.sidebar {
+  background: var(--figma-card);
+  border-right: 1px solid var(--figma-line);
+  box-shadow: var(--figma-shadow);
+  gap: 0;
+  padding: 0;
+}
+
+.theme-dark .sidebar {
+  background: var(--figma-card);
+  border-right-color: var(--figma-line);
+}
+
+.sidebar-brand-panel {
+  border-bottom: 1px solid var(--figma-line);
+  gap: 14px;
+  padding: 24px;
+}
+
+.brand-mark {
+  border-radius: 12px;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+  height: 40px;
+  width: 40px;
+}
+
+.brand strong {
+  color: var(--figma-ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.brand span {
+  color: var(--figma-soft);
+  font-size: 12px;
+}
+
+.sidebar-collapse-button {
+  background: transparent;
+  border-color: var(--figma-line);
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--figma-muted);
+  min-height: 38px;
+}
+
+.sidebar-collapse-button:hover {
+  background: #f1f5f9;
+  border-color: #c7d2fe;
+  box-shadow: none;
+}
+
+.theme-dark .sidebar-collapse-button:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.company-switcher {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--figma-line);
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 18px 24px;
+}
+
+.company-switcher:hover,
+.company-switcher:focus-visible {
+  background: color-mix(in srgb, var(--figma-blue) 5%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+
+.company-switcher-label,
+.sidebar-section-label {
+  color: var(--figma-soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.company-switcher-name {
+  color: var(--figma-ink);
+}
+
+.nav-list {
+  gap: 4px;
+  padding: 12px;
+}
+
+.sidebar-section-label {
+  display: block;
+  margin: 18px 24px 6px;
+}
+
+.nav-item {
+  border-radius: 10px;
+  color: var(--figma-muted);
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 40px;
+  padding: 10px 12px;
+}
+
+.nav-item svg {
+  color: currentColor;
+  height: 18px;
+  width: 18px;
+}
+
+.nav-item.active,
+.nav-item:hover,
+.nav-item[aria-current="page"] {
+  background: color-mix(in srgb, var(--figma-blue) 8%, transparent);
+  box-shadow: none;
+  color: var(--figma-blue);
+}
+
+.tenant-card {
+  border: 0;
+  border-top: 1px solid var(--figma-line);
+  border-radius: 0;
+  box-shadow: none;
+  margin: auto 0 0;
+  padding: 18px 24px;
+}
+
+.main-panel {
+  background: var(--figma-bg);
+  padding: 0;
+}
+
+.theme-dark .main-panel {
+  background: var(--figma-bg);
+}
+
+.topbar {
+  background: var(--figma-card);
+  border: 0;
+  border-bottom: 1px solid var(--figma-line);
+  border-radius: 0;
+  box-shadow: none;
+  align-items: center;
+  margin: 0;
+  padding: 18px 40px;
+  top: 0;
+}
+
+.topbar-greeting {
+  min-width: 260px;
+}
+
+.topbar-greeting h1 {
+  color: var(--figma-ink);
+  font-size: clamp(20px, 1.6vw, 26px);
+  font-weight: 800;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.topbar-greeting p {
+  color: var(--figma-soft);
+  font-weight: 500;
+}
+
+.active-module-pill {
+  background: color-mix(in srgb, var(--figma-blue) 8%, transparent);
+  border-color: color-mix(in srgb, var(--figma-blue) 14%, transparent);
+  color: var(--figma-blue);
+  margin-top: 8px;
+  padding: 6px 10px;
+}
+
+.topbar-range-control,
+.custom-date-range,
+.notification-button,
+.topbar-profile,
+.theme-toggle,
+.fullscreen-button,
+.topbar-logout,
+.topbar-collapse-button,
+.secondary-button {
+  background: var(--figma-card);
+  border-color: var(--figma-line);
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--figma-ink);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--figma-purple), var(--figma-blue));
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(21, 93, 252, 0.22);
+  min-height: 42px;
+}
+
+.primary-button:hover {
+  box-shadow: 0 18px 34px rgba(21, 93, 252, 0.28);
+  transform: translateY(-1px);
+}
+
+.secondary-button:hover,
+.topbar-collapse-button:hover,
+.notification-button:hover,
+.topbar-profile:hover,
+.theme-toggle:hover,
+.fullscreen-button:hover,
+.topbar-logout:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.dashboard-module-content {
+  gap: 24px;
+  min-height: auto;
+  padding: 32px 40px 48px;
+}
+
+.dashboard-module-section {
+  color: var(--figma-ink);
+}
+
+.dashboard-module-section :is(article, section, form, aside):where([class*="-card"], [class*="-panel"], [class*="-banner"], [class*="-grid-card"]) {
+  border-color: var(--figma-line);
+}
+
+/* Sales module aligned to "Nueva Ventas" */
+.sales-command-center {
+  background: transparent;
+  gap: 20px;
+  overflow: visible;
+}
+
+.sales-page-heading {
+  align-items: center;
+}
+
+.sales-page-heading h2 {
+  color: var(--figma-ink);
+  font-size: clamp(30px, 2.3vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.sales-page-heading p {
+  color: var(--figma-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 760px;
+}
+
+.sales-page-actions .primary-button,
+.sales-date-button,
+.sales-icon-button {
+  border-radius: 10px;
+  min-height: 42px;
+}
+
+.sales-date-button,
+.sales-icon-button {
+  background: var(--figma-card);
+  border-color: var(--figma-line);
+  box-shadow: none;
+  color: var(--figma-ink);
+}
+
+.sales-kpi-row {
+  gap: 16px;
+}
+
+.sales-kpi-card {
+  background: var(--figma-card);
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  box-shadow: var(--figma-shadow);
+  gap: 18px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  min-height: 112px;
+  padding: 18px;
+}
+
+.sales-kpi-card > span {
+  border-radius: 10px;
+  height: 48px;
+  width: 48px;
+}
+
+.sales-kpi-card small {
+  color: var(--figma-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sales-kpi-card strong {
+  color: var(--figma-ink);
+  font-size: clamp(26px, 2vw, 34px);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.sales-kpi-card em {
+  color: var(--figma-green);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sales-ai-banner {
+  background:
+    radial-gradient(circle at 12% 50%, rgba(91, 45, 247, 0.18), transparent 22%),
+    linear-gradient(135deg, #ffffff 0%, #fbfaff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  box-shadow: var(--figma-shadow);
+  gap: 24px;
+  grid-template-columns: 126px minmax(0, 1fr) minmax(250px, 0.35fr) !important;
+  padding: 24px;
+}
+
+.theme-dark .sales-ai-banner {
+  background:
+    radial-gradient(circle at 12% 50%, rgba(91, 45, 247, 0.28), transparent 22%),
+    linear-gradient(135deg, #0f1b2d 0%, #111827 100%);
+}
+
+.sales-ai-orb {
+  background:
+    radial-gradient(circle at 50% 38%, #ffffff 0 6%, transparent 8%),
+    radial-gradient(circle, #8b5cf6 0%, #5b2df7 58%, #312e81 100%);
+  border: 16px solid rgba(139, 92, 246, 0.16);
+  box-shadow: 0 22px 45px rgba(91, 45, 247, 0.22);
+  height: 108px;
+  width: 108px;
+}
+
+.sales-ai-banner span {
+  color: var(--figma-blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sales-ai-banner h3 {
+  color: var(--figma-ink);
+  font-size: clamp(22px, 1.8vw, 28px);
+  font-weight: 800;
+}
+
+.sales-ai-banner p,
+.sales-ai-signal-list li {
+  color: var(--figma-muted);
+  font-weight: 500;
+}
+
+.sales-ai-banner aside {
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--figma-line);
+  border-radius: 0;
+  padding: 4px 0 4px 24px;
+}
+
+.sales-ai-banner aside strong {
+  color: var(--figma-blue);
+  font-size: clamp(28px, 2vw, 34px);
+  font-weight: 800;
+}
+
+.sales-ai-data-grid {
+  grid-template-columns: minmax(280px, 1.35fr) repeat(4, minmax(130px, 0.6fr));
+}
+
+.sales-ai-data-card,
+.sales-register-card,
+.sales-side-card,
+.sales-advanced-panel,
+.sales-work-tabs {
+  background: var(--figma-card);
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  box-shadow: var(--figma-shadow);
+}
+
+.sales-ai-data-card {
+  padding: 16px;
+}
+
+.sales-work-tabs {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px;
+}
+
+.sales-work-tabs button {
+  border-radius: 10px;
+  color: var(--figma-muted);
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 40px;
+}
+
+.sales-work-tabs button.active {
+  background: color-mix(in srgb, var(--figma-blue) 9%, transparent);
+  color: var(--figma-blue);
+}
+
+.sales-workspace {
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.72fr) !important;
+}
+
+.sales-register-card,
+.sales-side-card {
+  padding: 20px;
+}
+
+.sales-form-heading h3,
+.sales-side-card header strong {
+  color: var(--figma-ink);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.sales-form-heading p,
+.sales-form-heading small {
+  color: var(--figma-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sales-form-grid {
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.sales-form-grid label span,
+.sales-advanced-panel label span {
+  color: var(--figma-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sales-form-grid input,
+.sales-form-grid select,
+.sales-form-grid textarea,
+.sales-advanced-panel input,
+.sales-advanced-panel select {
+  background: #f8fafc;
+  border: 1px solid var(--figma-line);
+  border-radius: 10px;
+  color: var(--figma-ink);
+  min-height: 42px;
+}
+
+.theme-dark .sales-form-grid input,
+.theme-dark .sales-form-grid select,
+.theme-dark .sales-form-grid textarea,
+.theme-dark .sales-advanced-panel input,
+.theme-dark .sales-advanced-panel select {
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.sales-register-footer {
+  border-top: 1px solid var(--figma-line);
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(170px, 0.45fr);
+  padding-top: 18px;
+}
+
+.sales-side-card header button {
+  color: var(--figma-blue);
+  font-weight: 700;
+}
+
+.sales-recent-card table,
+.sales-table {
+  font-size: 12px;
+}
+
+.sales-recent-card td,
+.sales-table th,
+.sales-table td {
+  border-color: var(--figma-line);
+  color: var(--figma-muted);
+}
+
+.sales-table th {
+  color: var(--figma-soft);
+  font-weight: 800;
+}
+
+.sale-status-pill,
+.sales-recent-card span[data-status] {
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.sales-decision-list p,
+.sales-behavior-grid p,
+.sales-receivable-list p,
+.sales-product-list p,
+.sales-channel-card p {
+  background: #f8fafc;
+  border-color: var(--figma-line);
+  border-radius: 10px;
+}
+
+.theme-dark .sales-decision-list p,
+.theme-dark .sales-behavior-grid p,
+.theme-dark .sales-receivable-list p,
+.theme-dark .sales-product-list p,
+.theme-dark .sales-channel-card p {
+  background: rgba(15, 23, 42, 0.62);
+}
+
+@media (max-width: 1180px) {
+  .topbar {
+    padding: 18px 24px;
+  }
+
+  .dashboard-module-content {
+    padding: 24px;
+  }
+
+  .sales-ai-banner,
+  .sales-workspace {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sales-ai-banner aside {
+    border-left: 0;
+    border-top: 1px solid var(--figma-line);
+    padding: 18px 0 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-module-content {
+    padding: 18px 14px 96px;
+  }
+
+  .sales-page-heading,
+  .sales-page-actions {
+    align-items: stretch;
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .sales-kpi-row,
+  .sales-ai-data-grid,
+  .sales-form-grid,
+  .sales-mini-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
