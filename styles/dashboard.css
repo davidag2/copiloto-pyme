@@ -13288,6 +13288,186 @@ td .module-empty-note {
   font-weight: 500;
 }
 
+.sales-compact-operations-card {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+}
+
+.sales-compact-operations-card .sales-form-heading > span {
+  color: var(--figma-blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sales-compact-operations-card .sales-form-grid {
+  display: none;
+}
+
+.sales-compact-operations-card .sales-register-footer {
+  align-items: center;
+  border-top: 1px solid var(--figma-line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(160px, 0.5fr);
+  padding-top: 16px;
+}
+
+.sales-modal-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.46);
+  backdrop-filter: blur(14px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 80;
+}
+
+.sales-action-modal {
+  background: var(--figma-card);
+  border: 1px solid var(--figma-line);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+  display: grid;
+  gap: 18px;
+  max-height: min(760px, calc(100vh - 48px));
+  max-width: 820px;
+  overflow: auto;
+  padding: 22px;
+  width: min(100%, 820px);
+}
+
+.sales-action-modal > header {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 52px minmax(0, 1fr) 42px;
+}
+
+.sales-modal-icon {
+  align-items: center;
+  background: linear-gradient(135deg, var(--figma-purple), var(--figma-blue));
+  border-radius: 14px;
+  color: #ffffff;
+  display: inline-flex;
+  height: 52px;
+  justify-content: center;
+  width: 52px;
+}
+
+.sales-action-modal > header span {
+  color: var(--figma-blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sales-action-modal > header h3 {
+  color: var(--figma-ink);
+  font-size: 26px;
+  font-weight: 800;
+  margin: 2px 0 4px;
+}
+
+.sales-action-modal > header p {
+  color: var(--figma-muted);
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sales-action-modal > header > button {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  color: var(--figma-ink);
+  cursor: pointer;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  width: 42px;
+}
+
+.sales-action-modal > header > button:hover {
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.sales-modal-form {
+  display: grid;
+  gap: 18px;
+}
+
+.sales-modal-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sales-modal-grid label {
+  display: grid;
+  gap: 7px;
+}
+
+.sales-modal-grid label span {
+  color: var(--figma-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sales-modal-grid input,
+.sales-modal-grid select,
+.sales-modal-grid textarea {
+  background: #f8fafc;
+  border: 1px solid var(--figma-line);
+  border-radius: 12px;
+  color: var(--figma-ink);
+  font: inherit;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.sales-modal-grid textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.sales-modal-wide {
+  grid-column: 1 / -1;
+}
+
+.sales-modal-form footer {
+  align-items: center;
+  border-top: 1px solid var(--figma-line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding-top: 16px;
+}
+
+.sales-modal-form footer p,
+.sales-modal-form footer span,
+.sales-modal-form footer small {
+  color: var(--figma-muted);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sales-modal-form footer strong {
+  color: var(--figma-ink);
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+}
+
 .sales-form-grid {
   gap: 14px;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -13426,5 +13606,29 @@ td .module-empty-note {
 
   .sales-action-button {
     min-height: 74px;
+  }
+
+  .sales-modal-backdrop {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .sales-action-modal {
+    border-radius: 18px 18px 12px 12px;
+    max-height: calc(100vh - 20px);
+    padding: 18px;
+  }
+
+  .sales-action-modal > header,
+  .sales-modal-grid,
+  .sales-modal-form footer,
+  .sales-compact-operations-card .sales-register-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-action-modal > header > button {
+    position: absolute;
+    right: 18px;
+    top: 18px;
   }
 }

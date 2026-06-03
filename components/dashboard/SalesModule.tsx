@@ -19,7 +19,8 @@ import {
   ShoppingCart,
   TrendingUp,
   UserCheck,
-  Users
+  Users,
+  X
 } from "lucide-react";
 
 type Product = { name: string; sales: string; stock: "Bajo" | "Normal" | "Critico" };
@@ -112,6 +113,7 @@ type TrendCard = {
   suffix: string;
 };
 type ChartPoint = Record<string, string | number>;
+type SalesAction = "sale" | "product" | "channel" | "seller" | "discount" | "receivable";
 
 type SalesModuleProps = {
   isActive: boolean;
@@ -252,6 +254,8 @@ export function SalesModule({
   const pendingCount = filteredSales.filter((sale) => sale.status === "pendiente").length;
   const cancelledCount = filteredSales.filter((sale) => sale.status === "anulada").length;
   const [salesTableScrollTop, setSalesTableScrollTop] = useState(0);
+  const [activeSalesAction, setActiveSalesAction] = useState<SalesAction | null>(null);
+  const [salesActionStatus, setSalesActionStatus] = useState("");
 
   const virtualSales = useMemo(() => {
     const totalRows = filteredSales.length;
@@ -291,7 +295,22 @@ export function SalesModule({
     { label: "Vendedor", helper: "Asignar responsable", icon: UserCheck, action: "seller" },
     { label: "Descuento", helper: "Registrar promoción", icon: Percent, action: "discount" },
     { label: "Pago pendiente", helper: "Crear cuenta por cobrar", icon: CreditCard, action: "receivable" }
-  ];
+  ] satisfies { label: string; helper: string; icon: LucideIcon; action: SalesAction }[];
+  const activeSalesActionConfig = salesActionButtons.find((item) => item.action === activeSalesAction);
+
+  const openSalesAction = (action: SalesAction) => {
+    setSalesActionStatus("");
+    setActiveSalesAction(action);
+  };
+
+  const closeSalesAction = () => {
+    setActiveSalesAction(null);
+  };
+
+  const submitSecondarySalesAction = (event: FormEvent<HTMLFormElement>, label: string) => {
+    event.preventDefault();
+    setSalesActionStatus(`${label} guardado. En el siguiente paso lo conectamos a PostgreSQL para alimentar la IA.`);
+  };
 
   return (
     <section className="sales-command-center dashboard-module-section" data-active={isActive}>
@@ -303,7 +322,7 @@ export function SalesModule({
         <div className="sales-page-actions">
           <button className="sales-date-button" type="button"><CalendarDays aria-hidden="true" />14 may - 20 may, 2026</button>
           <button className="sales-icon-button" type="button" onClick={onRefreshSalesData} aria-label="Actualizar ventas"><TrendingUp aria-hidden="true" /></button>
-          <button className="primary-button" type="button"><ShoppingCart aria-hidden="true" />Nueva venta</button>
+          <button className="primary-button" type="button" onClick={() => openSalesAction("sale")}><ShoppingCart aria-hidden="true" />Nueva venta</button>
         </div>
       </header>
 
@@ -320,11 +339,7 @@ export function SalesModule({
                 className="sales-action-button"
                 data-action={item.action}
                 key={item.action}
-                onClick={() => {
-                  if (item.action === "sale") {
-                    document.querySelector(".sales-register-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }
-                }}
+                onClick={() => openSalesAction(item.action)}
                 type="button"
               >
                 <Icon aria-hidden="true" />
@@ -410,11 +425,12 @@ export function SalesModule({
       </nav>
 
       <div className="sales-workspace">
-        <form className="sales-register-card" onSubmit={onSubmitManualSale}>
+        <article className="sales-register-card sales-compact-operations-card">
           <div className="sales-form-heading">
-            <h3>Registrar venta con contexto</h3>
-            <p>Captura la información que necesita Copiloto Pyme para entender qué se vendió, quién compró, por dónde llegó, quién atendió y si quedó cartera pendiente.</p>
-            <small>{manualSaleStatus}</small>
+            <span>Centro operativo</span>
+            <h3>Registra solo lo necesario, cuando lo necesites.</h3>
+            <p>Usa los botones superiores para abrir cada popup. Así Ventas se mantiene limpio y la IA recibe datos completos sin llenar la pantalla de formularios.</p>
+            <small>{manualSaleStatus || "Los datos registrados alimentan Inicio, alertas y sugerencias de OpenAI."}</small>
           </div>
 
           <div className="sales-form-grid">
@@ -434,9 +450,9 @@ export function SalesModule({
           <footer className="sales-register-footer">
             <div><span>Total estimado</span><strong>{money(estimatedTotal)}</strong></div>
             <div><span>Señal para IA</span><strong>{manualSaleForm.status === "pendiente" ? "Cartera" : manualSaleForm.discount ? "Descuento" : "Demanda"}</strong></div>
-            <button className="primary-button" type="submit" disabled={!canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
+            <button className="primary-button" type="button" onClick={() => openSalesAction("sale")} disabled={!canRegisterSales}><ClipboardCheck aria-hidden="true" />Nueva venta</button>
           </footer>
-        </form>
+        </article>
 
         <aside className="sales-side-panels">
           <article className="sales-side-card sales-decision-card">
@@ -539,6 +555,121 @@ export function SalesModule({
           </table>
         </div>
       </details>
+
+      {activeSalesAction && activeSalesActionConfig ? (
+        <div className="sales-modal-backdrop" role="presentation" onClick={closeSalesAction}>
+          <section
+            className="sales-action-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sales-action-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header>
+              <div className="sales-modal-icon">
+                <activeSalesActionConfig.icon aria-hidden="true" />
+              </div>
+              <div>
+                <span>Acción comercial</span>
+                <h3 id="sales-action-modal-title">{activeSalesActionConfig.label}</h3>
+                <p>{activeSalesActionConfig.helper}. Estos datos alimentan el análisis de ventas y las sugerencias de OpenAI.</p>
+              </div>
+              <button type="button" aria-label="Cerrar formulario" onClick={closeSalesAction}>
+                <X aria-hidden="true" />
+              </button>
+            </header>
+
+            {activeSalesAction === "sale" ? (
+              <form
+                className="sales-modal-form"
+                onSubmit={(event) => {
+                  onSubmitManualSale(event);
+                  setSalesActionStatus("Venta enviada. Copiloto Pyme actualizará las señales comerciales.");
+                }}
+              >
+                <div className="sales-modal-grid">
+                  <label><span>Fecha</span><input type="date" value={manualSaleForm.saleDate} onChange={(event) => onManualFieldChange("saleDate", event.target.value)} disabled={!canRegisterSales} required /></label>
+                  <label><span>Cliente</span><input list="sales-customers-list" value={manualSaleForm.customerName} onChange={(event) => onManualFieldChange("customerName", event.target.value)} placeholder="Buscar cliente" disabled={!canRegisterSales} required /></label>
+                  <label><span>Producto o servicio</span><input list="sales-products-list" value={manualSaleForm.productName} onChange={(event) => onManualProductChange(event.target.value)} placeholder="Buscar producto" disabled={!canRegisterSales} required /></label>
+                  <label><span>Cantidad</span><input type="number" min="0.01" step="0.01" value={manualSaleForm.quantity} onChange={(event) => onManualFieldChange("quantity", event.target.value)} disabled={!canRegisterSales} required /></label>
+                  <label><span>Precio unitario</span><input type="number" min="0" step="100" value={manualSaleForm.unitPrice} onChange={(event) => onManualFieldChange("unitPrice", event.target.value)} placeholder="50000" disabled={!canRegisterSales} required /></label>
+                  <label><span>Descuento</span><input type="number" min="0" step="100" value={manualSaleForm.discount} onChange={(event) => onManualFieldChange("discount", event.target.value)} disabled={!canRegisterSales} /></label>
+                  <label><span>Canal</span><input list="sales-channels-list" value={manualSaleForm.channelName} onChange={(event) => onManualFieldChange("channelName", event.target.value)} placeholder="WhatsApp, tienda, web..." disabled={!canRegisterSales} required /></label>
+                  <label><span>Vendedor</span><input list="sales-reps-list" value={manualSaleForm.salesRepName} onChange={(event) => onManualFieldChange("salesRepName", event.target.value)} placeholder="Responsable" disabled={!canRegisterSales} required /></label>
+                  <label><span>Método de pago</span><input list="sales-payment-methods-list" value={manualSaleForm.paymentMethodName} onChange={(event) => onManualFieldChange("paymentMethodName", event.target.value)} placeholder="Efectivo, transferencia, crédito cliente" disabled={!canRegisterSales} required /></label>
+                  <label><span>Estado de pago</span><select value={manualSaleForm.status} onChange={(event) => onManualFieldChange("status", event.target.value as ManualSaleForm["status"])} disabled={!canRegisterSales}><option value="pagada">Pagada</option><option value="pendiente">Pendiente</option><option value="anulada">Anulada</option></select></label>
+                  <label className="sales-modal-wide"><span>Notas</span><textarea value={manualSaleForm.notes} onChange={(event) => onManualFieldChange("notes", event.target.value)} placeholder="Observaciones, entrega, condiciones, promoción aplicada..." disabled={!canRegisterSales} /></label>
+                </div>
+                <footer>
+                  <div><span>Total estimado</span><strong>{money(estimatedTotal)}</strong></div>
+                  <button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button>
+                  <button className="primary-button" type="submit" disabled={!canRegisterSales}><ClipboardCheck aria-hidden="true" />Guardar venta</button>
+                </footer>
+              </form>
+            ) : null}
+
+            {activeSalesAction === "product" ? (
+              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Producto")}>
+                <div className="sales-modal-grid">
+                  <label><span>Nombre</span><input name="name" placeholder="Café Premium 500g" required /></label>
+                  <label><span>Precio</span><input name="price" type="number" min="0" step="100" placeholder="50000" required /></label>
+                  <label><span>Categoría</span><input name="category" placeholder="Alimentos, servicio, accesorio..." required /></label>
+                  <label><span>Stock opcional</span><input name="stock" type="number" min="0" placeholder="0" /></label>
+                </div>
+                <footer><p>{salesActionStatus || "La IA usará producto, precio, categoría y stock para detectar rotación, margen y riesgo comercial."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar producto</button></footer>
+              </form>
+            ) : null}
+
+            {activeSalesAction === "channel" ? (
+              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Canal")}>
+                <div className="sales-modal-grid">
+                  <label><span>Tipo de canal</span><select name="type" required><option value="">Seleccionar</option><option>Tienda física</option><option>WhatsApp</option><option>Página web</option><option>Instagram</option><option>Marketplace</option><option>Referidos</option></select></label>
+                  <label><span>Nombre visible</span><input name="name" placeholder="WhatsApp principal" required /></label>
+                  <label><span>Responsable</span><input name="owner" placeholder="Andrés Vélez" /></label>
+                  <label><span>Meta mensual</span><input name="goal" type="number" min="0" step="1000" placeholder="5000000" /></label>
+                </div>
+                <footer><p>{salesActionStatus || "Copiloto comparará canales para saber dónde vendes más, dónde baja la conversión y qué canal merece más foco."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar canal</button></footer>
+              </form>
+            ) : null}
+
+            {activeSalesAction === "seller" ? (
+              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Vendedor")}>
+                <div className="sales-modal-grid">
+                  <label><span>Nombre</span><input name="name" placeholder="María Gómez" required /></label>
+                  <label><span>Email</span><input name="email" type="email" placeholder="maria@empresa.com" required /></label>
+                  <label><span>Rol</span><select name="role" required><option value="">Seleccionar</option><option>Vendedor</option><option>Administrador comercial</option><option>Atención al cliente</option><option>Operaciones</option></select></label>
+                  <label><span>Canal asignado</span><input name="channel" placeholder="Tienda, WhatsApp, web..." /></label>
+                </div>
+                <footer><p>{salesActionStatus || "Con vendedores asignados, la IA puede identificar desempeño, cartera pendiente y oportunidades por responsable."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar vendedor</button></footer>
+              </form>
+            ) : null}
+
+            {activeSalesAction === "discount" ? (
+              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Descuento")}>
+                <div className="sales-modal-grid">
+                  <label><span>Producto</span><input list="sales-products-list" name="product" placeholder="Producto o servicio" required /></label>
+                  <label><span>Porcentaje</span><input name="percent" type="number" min="0" max="100" step="0.1" placeholder="10" required /></label>
+                  <label><span>Motivo</span><input name="reason" placeholder="Promoción, cliente frecuente, liquidación..." required /></label>
+                  <label><span>Fecha</span><input name="date" type="date" required /></label>
+                </div>
+                <footer><p>{salesActionStatus || "La IA revisará descuentos excesivos, impacto en margen y promociones que sí generan recompra."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar descuento</button></footer>
+              </form>
+            ) : null}
+
+            {activeSalesAction === "receivable" ? (
+              <form className="sales-modal-form" onSubmit={(event) => submitSecondarySalesAction(event, "Pago pendiente")}>
+                <div className="sales-modal-grid">
+                  <label><span>Cliente</span><input list="sales-customers-list" name="customer" placeholder="Cliente por cobrar" required /></label>
+                  <label><span>Valor</span><input name="amount" type="number" min="0" step="1000" placeholder="850000" required /></label>
+                  <label><span>Vencimiento</span><input name="dueDate" type="date" required /></label>
+                  <label><span>Estado</span><select name="status" required><option>Pendiente</option><option>Vence pronto</option><option>Vencido</option><option>En acuerdo</option></select></label>
+                </div>
+                <footer><p>{salesActionStatus || "Copiloto usará cartera, vencimiento y estado para alertar caja, riesgo y prioridad de cobro."}</p><button className="secondary-button" type="button" onClick={closeSalesAction}>Cancelar</button><button className="primary-button" type="submit">Guardar pago pendiente</button></footer>
+              </form>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
     </section>
   );
 }
