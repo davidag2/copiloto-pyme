@@ -323,15 +323,6 @@ export function SalesModule({
     const modal = event.currentTarget;
 
     const rect = modal.getBoundingClientRect();
-    const edgeSize = 22;
-    const isOnEdge =
-      event.clientX - rect.left <= edgeSize ||
-      rect.right - event.clientX <= edgeSize ||
-      event.clientY - rect.top <= edgeSize ||
-      rect.bottom - event.clientY <= edgeSize;
-
-    if (!isOnEdge) return;
-
     event.preventDefault();
     salesModalDragOffset.current = {
       x: event.clientX - rect.left,
