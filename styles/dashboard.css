@@ -13316,29 +13316,32 @@ td .module-empty-note {
 }
 
 .sales-modal-backdrop {
-  align-items: center;
-  background: rgba(15, 23, 42, 0.46);
-  backdrop-filter: blur(14px);
+  align-items: flex-start;
+  background: transparent;
   display: flex;
   inset: 0;
-  justify-content: center;
-  padding: 24px;
+  justify-content: flex-end;
+  padding: 150px 40px 28px 300px;
+  pointer-events: none;
   position: fixed;
   z-index: 80;
 }
 
 .sales-action-modal {
-  background: var(--figma-card);
+  background: color-mix(in srgb, var(--figma-card) 96%, transparent);
+  backdrop-filter: blur(18px);
   border: 1px solid var(--figma-line);
   border-radius: 18px;
-  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
   display: grid;
   gap: 18px;
   max-height: min(760px, calc(100vh - 48px));
-  max-width: 820px;
+  max-width: 760px;
   overflow: auto;
   padding: 22px;
-  width: min(100%, 820px);
+  pointer-events: auto;
+  transform-origin: top right;
+  width: min(100%, 760px);
 }
 
 .sales-action-modal > header {
@@ -13610,6 +13613,7 @@ td .module-empty-note {
 
   .sales-modal-backdrop {
     align-items: end;
+    background: transparent;
     padding: 10px;
   }
 
