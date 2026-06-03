@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { CSSProperties, FormEvent, UIEvent } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { CSSProperties, FormEvent, PointerEvent, UIEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
@@ -256,6 +256,8 @@ export function SalesModule({
   const [salesTableScrollTop, setSalesTableScrollTop] = useState(0);
   const [activeSalesAction, setActiveSalesAction] = useState<SalesAction | null>(null);
   const [salesActionStatus, setSalesActionStatus] = useState("");
+  const [salesModalPosition, setSalesModalPosition] = useState<{ x: number; y: number } | null>(null);
+  const salesModalDragOffset = useRef<{ x: number; y: number } | null>(null);
 
   const virtualSales = useMemo(() => {
     const totalRows = filteredSales.length;
@@ -300,16 +302,55 @@ export function SalesModule({
 
   const openSalesAction = (action: SalesAction) => {
     setSalesActionStatus("");
+    setSalesModalPosition(null);
     setActiveSalesAction(action);
   };
 
   const closeSalesAction = () => {
+    setSalesModalPosition(null);
     setActiveSalesAction(null);
   };
 
   const submitSecondarySalesAction = (event: FormEvent<HTMLFormElement>, label: string) => {
     event.preventDefault();
     setSalesActionStatus(`${label} guardado. En el siguiente paso lo conectamos a PostgreSQL para alimentar la IA.`);
+  };
+
+  const startSalesModalDrag = (event: PointerEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button, input, select, textarea, a")) return;
+
+    const modal = event.currentTarget.closest(".sales-action-modal");
+    if (!modal) return;
+
+    const rect = modal.getBoundingClientRect();
+    salesModalDragOffset.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveSalesModal = (event: PointerEvent<HTMLElement>) => {
+    if (!salesModalDragOffset.current) return;
+
+    const modal = event.currentTarget.closest(".sales-action-modal");
+    if (!modal) return;
+
+    const rect = modal.getBoundingClientRect();
+    const margin = 12;
+    const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+    const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+    const nextX = Math.min(Math.max(margin, event.clientX - salesModalDragOffset.current.x), maxX);
+    const nextY = Math.min(Math.max(margin, event.clientY - salesModalDragOffset.current.y), maxY);
+    setSalesModalPosition({ x: nextX, y: nextY });
+  };
+
+  const stopSalesModalDrag = (event: PointerEvent<HTMLElement>) => {
+    salesModalDragOffset.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   };
 
   return (
@@ -560,12 +601,20 @@ export function SalesModule({
         <div className="sales-modal-backdrop" role="presentation" onClick={closeSalesAction}>
           <section
             className="sales-action-modal"
+            data-dragged={salesModalPosition ? "true" : "false"}
             role="dialog"
             aria-modal="true"
             aria-labelledby="sales-action-modal-title"
             onClick={(event) => event.stopPropagation()}
+            style={salesModalPosition ? { left: salesModalPosition.x, position: "fixed", right: "auto", top: salesModalPosition.y } : undefined}
           >
-            <header>
+            <header
+              className="sales-modal-drag-handle"
+              onPointerCancel={stopSalesModalDrag}
+              onPointerDown={startSalesModalDrag}
+              onPointerMove={moveSalesModal}
+              onPointerUp={stopSalesModalDrag}
+            >
               <div className="sales-modal-icon">
                 <activeSalesActionConfig.icon aria-hidden="true" />
               </div>

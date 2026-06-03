@@ -13344,11 +13344,25 @@ td .module-empty-note {
   width: min(100%, 760px);
 }
 
+.sales-action-modal[data-dragged="true"] {
+  margin: 0;
+}
+
 .sales-action-modal > header {
   align-items: start;
   display: grid;
   gap: 14px;
   grid-template-columns: 52px minmax(0, 1fr) 42px;
+}
+
+.sales-modal-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.sales-modal-drag-handle:active {
+  cursor: grabbing;
 }
 
 .sales-modal-icon {
