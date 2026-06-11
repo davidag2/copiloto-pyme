@@ -66,7 +66,7 @@ export async function GET(request: Request) {
   try {
     const cronSecret = process.env.CRON_SECRET;
     if (!cronSecret) {
-      return fail(new Error("CRON_SECRET no está configurado."), 500);
+      return fail(new Error("CRON_SECRET no esta configurado."), 500);
     }
 
     const authHeader = request.headers.get("authorization");
@@ -74,13 +74,38 @@ export async function GET(request: Request) {
       return fail(new Error("No autorizado."), 401);
     }
 
-    const result = await sendAdminDailyStatusEmail();
-    const tecnotitanBrief = await triggerTecnotitanDailyBrief();
+    const [adminStatusResult, tecnotitanBriefResult] = await Promise.allSettled([
+      sendAdminDailyStatusEmail(),
+      triggerTecnotitanDailyBrief()
+    ]);
+
+    const adminDailyStatus =
+      adminStatusResult.status === "fulfilled"
+        ? {
+            status: adminStatusResult.value.status,
+            messageId: adminStatusResult.value.messageId
+          }
+        : {
+            status: "error",
+            error: adminStatusResult.reason instanceof Error ? adminStatusResult.reason.message : String(adminStatusResult.reason)
+          };
+
+    const tecnotitanBrief =
+      tecnotitanBriefResult.status === "fulfilled"
+        ? tecnotitanBriefResult.value
+        : {
+            status: "error",
+            detail:
+              tecnotitanBriefResult.reason instanceof Error
+                ? tecnotitanBriefResult.reason.message
+                : String(tecnotitanBriefResult.reason)
+          };
 
     return ok({
-      message: result.status === "sent" ? "Reporte diario enviado." : "Reporte diario procesado con estado pendiente.",
-      status: result.status,
-      messageId: result.messageId,
+      message: "Cron diario procesado.",
+      status: adminDailyStatus.status,
+      messageId: "messageId" in adminDailyStatus ? adminDailyStatus.messageId : undefined,
+      adminDailyStatus,
       tecnotitanBrief
     });
   } catch (error) {
