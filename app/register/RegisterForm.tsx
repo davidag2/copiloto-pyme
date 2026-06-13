@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { currentLegalAcceptance, legalDocumentsList } from "@/lib/legal";
 import { commercialPlans, type CommercialPlan, type PlanId } from "@/lib/plans";
+import { createWaitlistTurn, createWaitlistUrl } from "@/lib/waitlist";
 
 type RegisterFormProps = {
   selectedPlan: CommercialPlan;
@@ -95,11 +96,12 @@ export function RegisterForm({ selectedPlan }: RegisterFormProps) {
     window.localStorage.setItem("copiloto-pyme-session", JSON.stringify(data.session));
     window.localStorage.setItem("copiloto-pyme-subscription", JSON.stringify(data.subscription));
     window.localStorage.setItem("copiloto-pyme-onboarding", JSON.stringify(data.onboarding));
+    window.localStorage.setItem("copiloto-pyme-waitlist-turn", createWaitlistTurn(data.company.id));
 
     setStatus("success");
-    setMessage("Cuenta creada. Te llevamos al onboarding para preparar tu primer resumen.");
+    setMessage("Cuenta creada. Te llevamos a la lista temporal de acceso.");
     window.setTimeout(() => {
-      window.location.href = "/onboarding";
+      window.location.href = createWaitlistUrl(data.company.id);
     }, 800);
   }
 

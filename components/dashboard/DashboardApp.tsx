@@ -46,6 +46,7 @@ import { evaluateBasicRules, thresholdsFromRules } from "@/lib/rule-engine";
 import type { CompanyAlertRule } from "@/lib/rule-engine";
 import { planIncludesModule } from "@/lib/plans";
 import { canManageTeam, roleCapabilities, roleLabel } from "@/lib/roles";
+import { createWaitlistTurn, createWaitlistUrl } from "@/lib/waitlist";
 
 function DashboardModuleLoader() {
   return (
@@ -1551,7 +1552,11 @@ export default function DashboardApp({ requiresLegalAcceptance = false, captureM
     await loadTeam(result.data.company.id);
     setPaid(false);
     setAuthStatus(`Cuenta creada. Rol: ${roleLabel(result.data.user.role)}.`);
-    setRecommendation("Usuario creado. Ya puedes pagar la suscripcion y continuar el onboarding.");
+    setRecommendation("Usuario creado. Te llevamos a la lista temporal de acceso.");
+    window.localStorage.setItem("copiloto-pyme-waitlist-turn", createWaitlistTurn(result.data.company.id));
+    window.setTimeout(() => {
+      window.location.href = createWaitlistUrl(result.data.company.id);
+    }, 800);
   }
 
   async function login(event: FormEvent<HTMLFormElement>) {
