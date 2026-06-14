@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { createWaitlistTurn } from "@/lib/waitlist";
 
 type SummaryRow = {
   activeSubscriptions: string;
@@ -13,6 +14,7 @@ type SummaryRow = {
   sentInvoices: string;
   trialSubscriptions: string;
   users: string;
+  waitlistCompanies: string;
 };
 
 type SalesRow = {
@@ -47,6 +49,15 @@ type CriticalAlertRow = {
   level: string;
   text: string;
   title: string;
+};
+
+type WaitlistRow = {
+  companyId: string;
+  companyName: string;
+  createdAt: string;
+  ownerEmail: string | null;
+  ownerName: string | null;
+  plan: string | null;
 };
 
 function toNumber(value: unknown) {
@@ -112,7 +123,7 @@ export async function sendAdminDailyStatusEmail() {
 }
 
 async function getAdminDailyStatus() {
-  const [summary, sales, activity, companies, criticalAlerts] = await Promise.all([
+  const [summary, sales, activity, companies, criticalAlerts, waitlist] = await Promise.all([
     query<SummaryRow>(
       `SELECT COUNT(*) FILTER (WHERE companies.deleted_at IS NULL)::text AS companies,
               COUNT(*) FILTER (WHERE companies.deleted_at IS NULL AND companies.access_blocked_at IS NOT NULL)::text AS "blockedCompanies",
@@ -124,14 +135,16 @@ async function getAdminDailyStatus() {
               COUNT(DISTINCT siigo_invoices.id) FILTER (WHERE siigo_invoices.status IN ('sent', 'accepted'))::text AS "sentInvoices",
               COUNT(DISTINCT siigo_invoices.id) FILTER (WHERE siigo_invoices.status IN ('failed', 'rejected'))::text AS "invoiceFailures",
               COUNT(DISTINCT alerts.id) FILTER (WHERE alerts.status = 'open')::text AS "openAlerts",
-              COUNT(DISTINCT support_cases.id) FILTER (WHERE support_cases.status IN ('open', 'in_progress'))::text AS "openSupport"
+              COUNT(DISTINCT support_cases.id) FILTER (WHERE support_cases.status IN ('open', 'in_progress'))::text AS "openSupport",
+              COUNT(DISTINCT companies.id) FILTER (WHERE onboarding_progress.status = 'waitlist' AND companies.deleted_at IS NULL)::text AS "waitlistCompanies"
        FROM companies
        LEFT JOIN users ON users.company_id = companies.id
        LEFT JOIN subscriptions ON subscriptions.company_id = companies.id
        LEFT JOIN payment_transactions ON payment_transactions.company_id = companies.id
        LEFT JOIN siigo_invoices ON siigo_invoices.company_id = companies.id
        LEFT JOIN alerts ON alerts.company_id = companies.id
-       LEFT JOIN support_cases ON support_cases.company_id = companies.id`
+       LEFT JOIN support_cases ON support_cases.company_id = companies.id
+       LEFT JOIN onboarding_progress ON onboarding_progress.company_id = companies.id`
     ),
     query<SalesRow>(
       `SELECT COALESCE(SUM(total) FILTER (WHERE status <> 'anulada' AND sale_date = CURRENT_DATE), 0)::text AS "salesToday",
@@ -177,10 +190,26 @@ async function getAdminDailyStatus() {
               alerts.created_at AS "createdAt"
        FROM alerts
        JOIN companies ON companies.id = alerts.company_id
-       WHERE alerts.status = 'open'
-       ORDER BY CASE alerts.level WHEN 'danger' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END,
-                alerts.created_at DESC
+      WHERE alerts.status = 'open'
+      ORDER BY CASE alerts.level WHEN 'danger' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END,
+               alerts.created_at DESC
        LIMIT 8`
+    ),
+    query<WaitlistRow>(
+      `SELECT companies.id AS "companyId",
+              companies.name AS "companyName",
+              companies.plan,
+              companies.created_at AS "createdAt",
+              owner.name AS "ownerName",
+              owner.email AS "ownerEmail"
+       FROM companies
+       JOIN onboarding_progress ON onboarding_progress.company_id = companies.id
+       LEFT JOIN users owner ON owner.company_id = companies.id
+         AND owner.role = 'propietario'
+       WHERE companies.deleted_at IS NULL
+         AND onboarding_progress.status = 'waitlist'
+       ORDER BY companies.created_at DESC
+       LIMIT 12`
     )
   ]);
 
@@ -210,8 +239,10 @@ async function getAdminDailyStatus() {
       pendingPayments: toNumber(summary.rows[0]?.pendingPayments),
       sentInvoices: toNumber(summary.rows[0]?.sentInvoices),
       trialSubscriptions: toNumber(summary.rows[0]?.trialSubscriptions),
+      waitlistCompanies: toNumber(summary.rows[0]?.waitlistCompanies),
       users: toNumber(summary.rows[0]?.users)
-    }
+    },
+    waitlist: waitlist.rows
   };
 }
 
@@ -230,6 +261,10 @@ function renderAdminDailyStatus(report: Awaited<ReturnType<typeof getAdminDailyS
     ? report.criticalAlerts.map((alert, index) => `${index + 1}. ${cleanStatusText(alert.companyName)} - ${alert.level.toUpperCase()} - ${cleanStatusText(alert.title)}: ${cleanStatusText(alert.text)} (${dateLabel(alert.createdAt)})`).join("\n")
     : "No hay alertas abiertas cr\u00EDticas o pendientes.";
 
+  const waitlistLines = report.waitlist.length
+    ? report.waitlist.map((item, index) => `${index + 1}. ${cleanStatusText(item.ownerName || "Sin propietario")} - ${cleanStatusText(item.companyName)} - Plan ${String(item.plan || "go").toUpperCase()} - Turno ${createWaitlistTurn(item.companyId)} - Email: ${item.ownerEmail || "sin email"} - Registro: ${dateLabel(item.createdAt)}`).join("\n")
+    : "No hay personas en waitlist.";
+
   return `Status diario de Copiloto Pyme
 Fecha: ${todayLabel()}
 
@@ -237,6 +272,7 @@ Resumen SaaS
 - Empresas activas: ${report.summary.companies}
 - Usuarios activos: ${report.summary.users}
 - Empresas bloqueadas: ${report.summary.blockedCompanies}
+- Personas en waitlist: ${report.summary.waitlistCompanies}
 - Suscripciones en prueba: ${report.summary.trialSubscriptions}
 - Suscripciones activas: ${report.summary.activeSubscriptions}
 - Pagos pendientes: ${report.summary.pendingPayments}
@@ -260,6 +296,9 @@ Actividad de hoy
 
 Empresas que requieren seguimiento
 ${companyLines}
+
+Personas en waitlist
+${waitlistLines}
 
 Alertas importantes
 ${alertLines}

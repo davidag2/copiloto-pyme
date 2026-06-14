@@ -6694,6 +6694,11 @@ select:focus-visible {
   color: var(--brand-blue);
 }
 
+.admin-client-list span[data-status="Waitlist"] {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4f46e5;
+}
+
 .admin-client-list span[data-status="Cancelado"],
 .admin-client-list span[data-status="Sin suscripción"],
 .admin-client-list span[data-status="disabled"] {

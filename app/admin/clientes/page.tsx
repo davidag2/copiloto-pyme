@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, Mail, MapPin, ShieldCheck, Trash2, Users } from "lucide-react";
+import { Building2, CalendarDays, Clock3, Mail, MapPin, ShieldCheck, Trash2, Users } from "lucide-react";
 import { AdminNextStep, AdminShell } from "@/components/admin/AdminShell";
 import { AdminRestoreClientButton } from "@/components/admin/AdminRestoreClientButton";
 import { getAdminClients } from "@/lib/admin-clients";
@@ -6,7 +6,7 @@ import { requireAdminPageSession } from "@/lib/admin-page";
 
 export default async function AdminClientsPage() {
   const adminSession = await requireAdminPageSession("/admin/clientes");
-  const { clients, deletedClients, summary } = await getAdminClients();
+  const { clients, deletedClients, summary, waitlistClients } = await getAdminClients();
 
   return (
     <AdminShell
@@ -18,8 +18,34 @@ export default async function AdminClientsPage() {
       <section className="admin-kpi-grid" aria-label="Resumen de clientes">
         <article><small>Empresas registradas</small><strong>{summary.total}</strong><span>{summary.users} usuario(s) creados</span></article>
         <article><small>Pruebas gratis</small><strong>{summary.trial}</strong><span>Primer mes incluido</span></article>
+        <article><small>Waitlist</small><strong>{summary.waitlist}</strong><span>Esperando activación</span></article>
         <article><small>Clientes activos</small><strong>{summary.active}</strong><span>Con suscripción vigente</span></article>
-        <article><small>Borrados</small><strong>{summary.deleted}</strong><span>Restaurables desde papelera</span></article>
+      </section>
+
+      <section className="admin-table-card">
+        <header>
+          <div>
+            <span><Clock3 size={18} /> Lista de espera</span>
+            <h2>Personas en waitlist</h2>
+          </div>
+          <a href="/admin/clientes">Actualizar</a>
+        </header>
+        <div className="admin-client-list">
+          {waitlistClients.length ? waitlistClients.map((client) => (
+            <article key={`${client.id}-waitlist`}>
+              <i><Clock3 size={18} /></i>
+              <div>
+                <strong>{client.ownerName || client.name}</strong>
+                <small><Building2 size={14} /> {client.name} - {client.planLabel} - Turno {client.waitlistTurn}</small>
+                <small><Mail size={14} /> {client.ownerEmail || "Sin email principal"}</small>
+              </div>
+              <span data-status="Waitlist">Waitlist</span>
+              <a href={`/admin/clientes/${client.id}`}>Ver ficha</a>
+            </article>
+          )) : (
+            <p className="admin-empty-note">No hay personas en waitlist.</p>
+          )}
+        </div>
       </section>
 
       <section className="admin-table-card">
@@ -36,10 +62,12 @@ export default async function AdminClientsPage() {
               <i><Building2 size={18} /></i>
               <div>
                 <strong>{client.name}</strong>
-                <small><MapPin size={14} /> {client.country} · {client.businessType} · {client.planLabel}</small>
+                <small><MapPin size={14} /> {client.country} - {client.businessType} - {client.planLabel}</small>
                 <small><Mail size={14} /> {client.ownerEmail || "Sin email principal"}</small>
               </div>
-              <span data-status={client.statusLabel}>{client.statusLabel}</span>
+              <span data-status={client.accessStage === "Waitlist" ? "Waitlist" : client.statusLabel}>
+                {client.accessStage === "Waitlist" ? "Waitlist" : client.statusLabel}
+              </span>
               <a href={`/admin/clientes/${client.id}`}>Ver ficha</a>
             </article>
           )) : (
@@ -62,7 +90,7 @@ export default async function AdminClientsPage() {
               <i><Trash2 size={18} /></i>
               <div>
                 <strong>{client.name}</strong>
-                <small>Eliminado: {client.deletedLabel} · {client.deletionReason || "Sin motivo"}</small>
+                <small>Eliminado: {client.deletedLabel} - {client.deletionReason || "Sin motivo"}</small>
                 <small><Mail size={14} /> {client.ownerEmail || "Sin email principal"}</small>
               </div>
               <span data-status="Cancelado">Borrado</span>
@@ -80,8 +108,8 @@ export default async function AdminClientsPage() {
             <ShieldCheck size={24} />
             <div>
               <h2>{client.name}</h2>
-              <p>{client.ownerName || "Sin propietario registrado"} · {client.usersCount} usuario(s)</p>
-              <p><CalendarDays size={14} /> Alta: {client.createdLabel} · Renovación/prueba: {client.renewalLabel}</p>
+              <p>{client.ownerName || "Sin propietario registrado"} - {client.usersCount} usuario(s)</p>
+              <p><CalendarDays size={14} /> Alta: {client.createdLabel} - Renovación/prueba: {client.renewalLabel}</p>
               <p><Users size={14} /> Último acceso: {client.lastLoginLabel}</p>
             </div>
           </article>

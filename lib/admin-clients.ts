@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { createWaitlistTurn } from "@/lib/waitlist";
 
 function toNumber(value: unknown) {
   const parsed = Number(value || 0);
@@ -43,12 +44,21 @@ type ClientRow = {
   currentPeriodEnd: string | null;
   ownerName: string | null;
   ownerEmail: string | null;
+  onboardingStatus: string | null;
+  onboardingStep: string | null;
   usersCount: string;
   lastLoginAt: string | null;
   paidAmount: string;
   pendingAmount: string;
   invoiceErrors: string;
 };
+
+function toAccessStage(onboardingStatus: string | null | undefined) {
+  if (onboardingStatus === "waitlist") return "Waitlist";
+  if (onboardingStatus === "completed") return "Onboarding completo";
+  if (onboardingStatus === "in_progress") return "Onboarding";
+  return "Pendiente";
+}
 
 function mapClient(client: ClientRow) {
   return {
@@ -62,6 +72,8 @@ function mapClient(client: ClientRow) {
     planLabel: toPlanLabel(client.plan),
     renewalLabel: toDateLabel(client.currentPeriodEnd || client.trialEndsAt),
     statusLabel: toStatusLabel(client.subscriptionStatus, client.accessBlockedAt),
+    accessStage: toAccessStage(client.onboardingStatus),
+    waitlistTurn: createWaitlistTurn(client.id),
     usersCount: toNumber(client.usersCount)
   };
 }
@@ -74,6 +86,7 @@ export async function getAdminClients() {
       trial: string;
       active: string;
       pastDue: string;
+      waitlist: string;
       users: string;
     }>(
       `SELECT COUNT(DISTINCT companies.id) FILTER (WHERE companies.deleted_at IS NULL)::text AS total,
@@ -81,10 +94,12 @@ export async function getAdminClients() {
               COUNT(DISTINCT companies.id) FILTER (WHERE companies.deleted_at IS NULL AND subscriptions.status = 'trial')::text AS trial,
               COUNT(DISTINCT companies.id) FILTER (WHERE companies.deleted_at IS NULL AND subscriptions.status = 'active')::text AS active,
               COUNT(DISTINCT companies.id) FILTER (WHERE companies.deleted_at IS NULL AND subscriptions.status = 'past_due')::text AS "pastDue",
+              COUNT(DISTINCT companies.id) FILTER (WHERE companies.deleted_at IS NULL AND onboarding_progress.status = 'waitlist')::text AS waitlist,
               COUNT(DISTINCT users.id) FILTER (WHERE companies.deleted_at IS NULL)::text AS users
        FROM companies
        LEFT JOIN subscriptions ON subscriptions.company_id = companies.id
          AND subscriptions.status IN ('trial', 'active', 'past_due')
+       LEFT JOIN onboarding_progress ON onboarding_progress.company_id = companies.id
        LEFT JOIN users ON users.company_id = companies.id`
     ),
     query<ClientRow>(clientQuery("companies.deleted_at IS NULL", 50)),
@@ -94,12 +109,14 @@ export async function getAdminClients() {
   return {
     clients: clients.rows.map(mapClient),
     deletedClients: deletedClients.rows.map(mapClient),
+    waitlistClients: clients.rows.map(mapClient).filter((client) => client.onboardingStatus === "waitlist"),
     summary: {
       active: toNumber(summary.rows[0]?.active),
       deleted: toNumber(summary.rows[0]?.deleted),
       pastDue: toNumber(summary.rows[0]?.pastDue),
       total: toNumber(summary.rows[0]?.total),
       trial: toNumber(summary.rows[0]?.trial),
+      waitlist: toNumber(summary.rows[0]?.waitlist),
       users: toNumber(summary.rows[0]?.users)
     }
   };
@@ -140,6 +157,8 @@ function clientQuery(whereClause: string, limit: number) {
                 subscriptions.current_period_end AS "currentPeriodEnd",
                 owner.name AS "ownerName",
                 owner.email AS "ownerEmail",
+                onboarding_progress.status AS "onboardingStatus",
+                onboarding_progress.current_step AS "onboardingStep",
                 COALESCE(user_stats.users_count, '0') AS "usersCount",
                 user_stats.last_login_at AS "lastLoginAt",
                 COALESCE(payment_stats.paid_amount, '0') AS "paidAmount",
@@ -150,6 +169,7 @@ function clientQuery(whereClause: string, limit: number) {
            AND subscriptions.status IN ('trial', 'active', 'past_due', 'canceled')
          LEFT JOIN users owner ON owner.company_id = companies.id
            AND owner.role = 'propietario'
+         LEFT JOIN onboarding_progress ON onboarding_progress.company_id = companies.id
          LEFT JOIN user_stats ON user_stats.company_id = companies.id
          LEFT JOIN payment_stats ON payment_stats.company_id = companies.id
          LEFT JOIN invoice_stats ON invoice_stats.company_id = companies.id

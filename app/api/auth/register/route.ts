@@ -167,7 +167,7 @@ export async function POST(request: Request) {
 
       const onboarding = await client.query(
         `INSERT INTO onboarding_progress (company_id, status, current_step)
-         VALUES ($1, 'pending', 'connect_data')
+         VALUES ($1, 'waitlist', 'access_queue')
          RETURNING id, company_id AS "companyId", status, current_step AS "currentStep", completed_steps AS "completedSteps", created_at AS "createdAt"`,
         [companyId]
       );
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
             startsAt: trialStartsAt.toISOString(),
             endsAt: trialEndsAt.toISOString()
           },
-          nextStep: "/onboarding"
+          nextStep: "/waitlist"
         }
       };
     });

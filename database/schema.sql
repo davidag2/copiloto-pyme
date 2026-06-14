@@ -283,6 +283,11 @@ CREATE TABLE IF NOT EXISTS onboarding_progress (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE onboarding_progress DROP CONSTRAINT IF EXISTS onboarding_progress_status_check;
+ALTER TABLE onboarding_progress
+  ADD CONSTRAINT onboarding_progress_status_check
+  CHECK (status IN ('waitlist', 'pending', 'in_progress', 'completed'));
+
 UPDATE users SET role = CASE role
   WHEN 'dueno' THEN 'propietario'
   WHEN 'owner' THEN 'propietario'
