@@ -80,6 +80,11 @@ export function LoginForm() {
         return;
       }
 
+      if (data.clientDashboardAccess?.allowed) {
+        window.location.href = nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard";
+        return;
+      }
+
       window.location.href = nextPath && nextPath.startsWith("/") ? nextPath : data.onboarding?.status === "completed" ? "/dashboard" : "/onboarding";
     }, 600);
   }
