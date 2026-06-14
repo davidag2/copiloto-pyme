@@ -1,5 +1,6 @@
 import { fail, ok, requiredString } from "@/lib/api";
 import { createPlainToken, hashToken, normalizeEmail, verifyPassword } from "@/lib/auth";
+import { getClientDashboardAccess } from "@/lib/client-dashboard-access";
 import { query } from "@/lib/db";
 import { setSessionCookie } from "@/lib/session";
 
@@ -123,7 +124,8 @@ export async function POST(request: Request) {
         expiresAt: session.rows[0].expiresAt
       },
       subscription: subscription.rows[0] || null,
-      onboarding: onboarding.rows[0] || null
+      onboarding: onboarding.rows[0] || null,
+      clientDashboardAccess: getClientDashboardAccess(account.email, account.companyId)
     };
     const response = ok(responseData);
     setSessionCookie(response, token, session.rows[0].expiresAt);

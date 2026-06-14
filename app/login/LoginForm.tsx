@@ -30,6 +30,11 @@ type LoginResponse = {
   };
   subscription: unknown;
   onboarding: { status?: string } | null;
+  clientDashboardAccess?: {
+    allowed: boolean;
+    locked: boolean;
+    redirectTo: string;
+  };
 };
 
 export function LoginForm() {
@@ -70,6 +75,11 @@ export function LoginForm() {
     setMessage("Sesión iniciada. Abriendo tu espacio...");
     window.setTimeout(() => {
       const nextPath = searchParams.get("next");
+      if (data.clientDashboardAccess?.locked && !data.clientDashboardAccess.allowed) {
+        window.location.href = data.clientDashboardAccess.redirectTo || "/waitlist";
+        return;
+      }
+
       window.location.href = nextPath && nextPath.startsWith("/") ? nextPath : data.onboarding?.status === "completed" ? "/dashboard" : "/onboarding";
     }, 600);
   }
