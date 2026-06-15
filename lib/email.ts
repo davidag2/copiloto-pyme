@@ -184,3 +184,16 @@ Primeros pasos recomendados:
 
 Tu mes gratis estará activo hasta el ${trialLabel}.`;
 }
+export function waitlistWelcomeEmailBody({ companyName, ownerName, planName, waitlistTurn }: { companyName: string; ownerName: string; planName: string; waitlistTurn: string }) {
+  return `Hola ${ownerName},
+
+Bienvenido a la lista de espera de Copiloto Pyme.
+
+La empresa ${companyName} quedo registrada en el plan ${planName.toUpperCase()}.
+
+Tu turno es: ${waitlistTurn}.
+
+Te avisaremos por este mismo medio cuando puedas empezar a usar tu dashboard y reclamar tu mes gratis.
+
+Gracias por sumarte temprano a Copiloto Pyme. Estamos preparando una experiencia mas estable, clara y util para que puedas administrar tu PYME con IA desde el primer dia.`;
+}

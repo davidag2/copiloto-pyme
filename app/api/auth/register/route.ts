@@ -1,11 +1,12 @@
 import { fail, ok, optionalNumber, requiredString } from "@/lib/api";
 import { createPlainToken, hashPassword, hashToken, normalizeEmail, requirePassword } from "@/lib/auth";
 import { transaction } from "@/lib/db";
-import { sendEmail, welcomeEmailBody } from "@/lib/email";
+import { sendEmail, waitlistWelcomeEmailBody } from "@/lib/email";
 import { currentLegalAcceptance, legalDocumentsList } from "@/lib/legal";
 import { getPlanById, getTrialEndsAt } from "@/lib/plans";
 import { normalizeRole } from "@/lib/roles";
 import { setSessionCookie } from "@/lib/session";
+import { createWaitlistTurn } from "@/lib/waitlist";
 
 const defaultRules = [
   ["sales", 70, "below"],
@@ -209,21 +210,24 @@ export async function POST(request: Request) {
       };
     });
 
+    const waitlistTurn = createWaitlistTurn(result.company.id);
+
     await sendEmail({
-      body: welcomeEmailBody({
+      body: waitlistWelcomeEmailBody({
         companyName: result.company.name,
         ownerName: result.user.name,
         planName: result.subscription.planId,
-        trialEndsAt: result.subscription.trialEndsAt
+        waitlistTurn
       }),
       companyId: result.company.id,
       metadata: {
         source: "auth_register",
-        userId: result.user.id
+        userId: result.user.id,
+        waitlistTurn
       },
-      preheader: "Bienvenido a Copiloto Pyme. Tu mes gratis ya está activo.",
-      subject: "Bienvenido a Copiloto Pyme",
-      templateKey: "welcome",
+      preheader: `Bienvenido a la lista de espera. Tu turno es ${waitlistTurn}.`,
+      subject: "Bienvenido a la lista de espera de Copiloto Pyme",
+      templateKey: "waitlist_welcome",
       to: result.user.email
     });
 
